@@ -10,17 +10,17 @@ const SubscriptionSchema = mongoose.Schema({
         required: true,
     },
 
-    planName={
+    planName:{
         type:String,
         required: true,
     },
     
-    razorPayPlanId = {
+    razorPayPlanId : {
         type: String,
         default: null,
     },
 
-    razorPaySubscriptionId = {
+    razorPaySubscriptionId : {
         type: String,
         default: null,
     },
@@ -61,4 +61,4 @@ const SubscriptionSchema = mongoose.Schema({
   }
 );
 
-export default mongoose.model("Subscription", SubscriptionSchema);
+export default mongoose.models.Subscription || mongoose.model("Subscription", SubscriptionSchema);

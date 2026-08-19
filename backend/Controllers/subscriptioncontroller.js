@@ -1,8 +1,8 @@
-const razorpay = require("../config/razorpay");
-const PLANS = require("../config/plans");
-const Subscription = require("../models/subscription");
+import Razorpay from "razorpay";
+import User from "../models/user.js";
+import Subscription from "../models/Subscription.js";
 
-const createSubscription = async (req, res) => {
+export const createSubscription = async (req, res) => {
     try {
         const { plan } = req.body;
 
