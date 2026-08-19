@@ -1,11 +1,13 @@
 "use client";
 
 import { Search } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Plans from "../Plans";
+import Link from "next/link";
 
 const suggestions = [
     {
@@ -35,6 +37,9 @@ const suggestions = [
 ];
 
 export default function RightSidebar() {
+
+    const [showPlans, setShowPlans] = useState(false);
+
     return (
         <div className="w-full p-4 space-y-4">
             {/* Search */}
@@ -58,8 +63,10 @@ export default function RightSidebar() {
                         receive a share of revenue.
                     </p>
 
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full">
-                        Subscribe
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full" asChild>
+                        <Link href="/plans">
+                            Subscribe
+                        </Link>
                     </Button>
                 </CardContent>
             </Card>

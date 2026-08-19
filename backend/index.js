@@ -4,14 +4,14 @@ import mongoose from "mongoose"
 import dotenv from "dotenv"
 import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
+import Subscription from "./models/subscription.js"
+import subscriptionRoutes from "./routes/subscriptionRoutes.js"
 
 dotenv.config()
 const app = express()
 app.use(cors())
 app.use(express.json(
 ))
-
-const subscriptionRoutes = require("./routes/subscriptionRoutes");
 
 app.get("/", (req, res) => {
     res.send("twiller running good")
