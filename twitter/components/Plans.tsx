@@ -1,8 +1,137 @@
+"use client";
+
 import React from 'react'
-import { Check, Crown, Medal, Star, ShieldCheck, Minus, Badge, LoaderPinwheel, LoaderCircle, RefreshCcw, HelpCircle, BadgeHelp, Lock } from "lucide-react";
+import { Check, Crown, Medal, Star, ShieldCheck, Minus, Badge, LoaderPinwheel, LoaderCircle, RefreshCcw, HelpCircle, BadgeHelp, Lock, LockIcon } from "lucide-react";
+import { Button } from "./ui/button";
+import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from "@/context/AuthContext";
+
 
 
 const Plans = () => {
+    
+     const { user } = useAuth();
+     
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+
+            script.onload = () => {
+                resolve(true);
+            };
+
+            script.onerror = () => {
+                resolve(false);
+            };
+
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleSubscribe = async (plan: string): Promise<void> => {
+        console.log(plan);
+
+        if (!user?.email) {
+            toast.error("Please log in to subscribe");
+            return;
+        }
+
+        try {
+            const isLoaded = await loadRazorpay();
+
+            if (!isLoaded) {
+                toast.error("Razorpay SDK failed to load");
+                return;
+            }
+
+            const stored = localStorage.getItem("twitter-user");
+            const email = stored ? JSON.parse(stored).email : null;
+
+            if (!email) {
+                toast.error("Please log in to subscribe");
+                return;
+            }
+
+            const response = await fetch("http://localhost:5000/api/subscriptions/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify({
+                    plan,
+                    email,
+                })
+            })
+
+            const data = await response.json();
+
+            if (!data.success) {
+                toast.error(data.message);
+                return;
+            }
+
+            const options = {
+                key: data.key,
+                subscription_id: data.subscriptionId,
+
+                name: "Twitter Clone",
+
+                description: `${data.plan.name} Subscription`,
+
+                handler: async (
+                    response: RazorpayPaymentResponse
+                ): Promise<void> => {
+                    try {
+                        const verifyResponse = await fetch(
+                            "http://localhost:5000/api/subscriptions/verify",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+
+                                body: JSON.stringify({
+                                    razorpay_payment_id:
+                                        response.razorpay_payment_id,
+
+                                    razorpay_subscription_id:
+                                        response.razorpay_subscription_id,
+
+                                    razorpay_signature:
+                                        response.razorpay_signature,
+                                }),
+                            }
+                        );
+
+                        const verifyData = await verifyResponse.json();
+
+                        if (verifyData.success) {
+                            toast.success(verifyData.message);
+                        } else {
+                            toast.error(verifyData.message);
+                        }
+                    } catch (error) {
+                        console.error(
+                            "Verification Error:",
+                            error
+                        );
+                    }
+                },
+            };
+
+            const razorpay = new window.Razorpay(options);
+            razorpay.open();
+
+        }
+        catch (error) {
+            console.error(error);
+            toast.error("Something went wrong");
+        }
+    }
 
     const plans = [
         {
@@ -88,8 +217,29 @@ const Plans = () => {
         },
     ];
 
+    const bottomSection = [
+        {
+            badge: ShieldCheck,
+            title: "Secure Payments",
+            desccription: "100% Safe and Secure",
+        }, {
+            badge: RefreshCcw,
+            title: "Cancel Anytime",
+            desccription: "Change or cancel your plan anytime you want",
+        }, {
+            badge: BadgeHelp,
+            title: "Permium Support",
+            desccription: "Our support team is here for you 24/7",
+        }, {
+            badge: LockIcon,
+            title: "Your Data is Safe",
+            desccription: "We never sell your data. Privacy is our priority",
+        }
+
+    ];
+
     return (
-        <div className="min-h-screen bg-[#14243f]">
+        <div className="min-h-screen bg-[#14243f] p-2">
             <div className="flex flex-col items-center text-center justify-center p-2">
                 <h1 className="text-2xl font-bold md:text-4xl sm:text-3xl text-white font-mono">Level up your Twitter experience</h1>
                 <p className="text-l text-gray-400 font-mono mt-5">Pick a plan that's fits your vibe. More tweets. more reach, more impact.</p>
@@ -143,35 +293,27 @@ const Plans = () => {
                                 ))}
                             </ul>
 
-                            <button
-                                className={`mt-6 w-full rounded-lg py-2.5 text-sm font-semibold transition ${plan.button}`}
+                            <Button
+                                className={`mt-6 w-full rounded-lg py-2.5 text-sm font-semibold transition ${plan.button}`} onClick={() => handleSubscribe(`${plan.id}`)}
                             >
                                 {plan.cta}
-                            </button>
+                            </Button>
                         </div>
                     );
                 })}
             </div>
-            <div className="flex flex-row gap-5 items-center text-center justify-center p-2 h-[180px] border-2 rounded-3xl mt-10 ml-10 mr-10">
-                <div className="flex flex-col items-center">
-                    <ShieldCheck className="text-purple-500 h-10 w-10" />
-                    <h4 className="text-white mt-2 font-bold">Secure Payments</h4>
-                    <span className="text-gray-400 font-light">100% Safe and Secure.</span>
-                </div>
-                <div className="flex flex-col items-center">
-                    <RefreshCcw className="text-purple-500 h-10 w-10" />
-                    <h4 className="text-white mt-2 font-bold">Cancel Anytime</h4>
-                    <span className="text-gray-400 font-light">Change or cancel your plan anytime you want.</span>
-                </div>
-                <div className="flex flex-col items-center">
-                    <BadgeHelp className="text-purple-500 h-10 w-10" />
-                    <h4 className="text-white mt-2 font-bold">Permium Support</h4>
-                    <span className="text-gray-400 font-light">Our support team is here for you 24/7.</span>
-                </div>
-                <div className="flex flex-col items-center">
-                    <Lock className="text-purple-500 h-10 w-10" />
-                    <h4 className="text-white mt-2 font-bold">Your Data is Safe</h4>
-                    <span className="text-gray-400 font-light">We never sell your data. Privacy is our priority.</span>
+            <div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 border-2 border-gray-700 shadow-2xl rounded-3xl h-full p-2">
+                    {bottomSection.map((feature) => {
+                        const Icon = feature.badge;
+                        return (
+                            <div className="flex flex-col items-center border-r-2 border-gray-600 p-2" key={feature.title}>
+                                <Icon className="h-8 w-8 text-purple-800" />
+                                <h4 className="text-white text-lg font-mono">{feature.title}</h4>
+                                <span className="text-sm text-gray-600 ">{feature.desccription}</span>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
 

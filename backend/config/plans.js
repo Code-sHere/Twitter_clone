@@ -20,6 +20,4 @@ const PLANS = {
         razorpayPlanId : process.env.RAZORPAY_GOLD_PLAN_ID,
     },
 };
-
-
-module.exports = PLANS;
+export default PLANS;

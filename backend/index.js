@@ -1,13 +1,12 @@
+import "./env.js";
 import express from "express"
 import cors from "cors"
 import mongoose from "mongoose"
-import dotenv from "dotenv"
 import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
-import Subscription from "./models/subscription.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
 
-dotenv.config()
+
 const app = express()
 app.use(cors())
 app.use(express.json(
@@ -47,7 +46,7 @@ app.post('/register', async (req, res) => {
 })
 
 //loggedinUser
-app.post('/loggedin', async (req, res) => {
+app.get('/loggedinuser', async (req, res) => {
     try {
         const { email } = req.query
 
@@ -55,7 +54,7 @@ app.post('/loggedin', async (req, res) => {
             return res.status(400).send({ error: "email required" });
         }
         const user = await User.findOne({ email: email });
-        return res.status(200).send(newUser);
+        return res.status(200).send(user);
     } catch (error) {
         return res.status(400).send({ error: error.message });
     }
@@ -69,7 +68,7 @@ app.patch("/userupdate/:email", async (req, res) => {
         const updated = await User.findOneAndUpdate(
             { email },
             { $set: req.body },
-            { new: true, upsert }
+            { new: true, upsert: true }
         );
         return res.status(200).send(updated);
     } catch (error) {
@@ -132,3 +131,12 @@ app.post("/retweet/:tweetid", async (req, res)=>{
 
 //subscription api
 app.use("/api/subscriptions", subscriptionRoutes);
+
+
+console.log(
+    "Razorpay Key:",
+    process.env.RAZORPAY_API_KEY
+);
+app.listen(5000, () => {
+    console.log("Server running on port 5000");
+});
