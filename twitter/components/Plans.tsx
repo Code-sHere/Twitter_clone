@@ -9,9 +9,9 @@ import { useAuth } from "@/context/AuthContext";
 
 
 const Plans = () => {
-    
-     const { user } = useAuth();
-     
+
+    const { user } = useAuth();
+
     const loadRazorpay = () => {
         return new Promise((resolve) => {
             const script = document.createElement("script");
@@ -80,7 +80,13 @@ const Plans = () => {
                 name: "Twitter Clone",
 
                 description: `${data.plan.name} Subscription`,
-
+                prefill: {
+                    email: data.user?.email || user?.email,
+                   contact: "8595232967",
+                },
+                theme: {
+                    color: "#1DA1F2",
+                },
                 handler: async (
                     response: RazorpayPaymentResponse
                 ): Promise<void> => {
@@ -109,6 +115,8 @@ const Plans = () => {
 
                         const verifyData = await verifyResponse.json();
 
+                        console.log("Verify Data:", verifyData);
+
                         if (verifyData.success) {
                             toast.success(verifyData.message);
                         } else {
@@ -124,6 +132,19 @@ const Plans = () => {
             };
 
             const razorpay = new window.Razorpay(options);
+
+            razorpay.on("payment.failed", function (response: any) {
+                console.error("RAZORPAY PAYMENT FAILED:", response);
+
+                console.log("Error Code:", response.error?.code);
+                console.log("Description:", response.error?.description);
+                console.log("Reason:", response.error?.reason);
+                console.log("Metadata:", response.error?.metadata);
+
+                toast.error(
+                    response.error.description || "Payment failed"
+                );
+            });
             razorpay.open();
 
         }

@@ -12,9 +12,6 @@ export const createSubscription = async (req, res) => {
     try {
         const { plan, email } = req.body;
 
-        console.log("Plan:", plan);
-        console.log("Email:", email);
-
         // Check plan
         const selectedPlan = PLANS[plan];
 
@@ -48,17 +45,18 @@ export const createSubscription = async (req, res) => {
         // Create Razorpay subscription
         const razorpaySubscription =
             await razorpayInstance.subscriptions.create({
-                plan_id: selectedPlan.razorpayPlanId,
+                plan_id: selectedPlan.razorPayPlanId,
                 total_count: 12,
                 customer_notify: 1,
             });
+
 
         // Save subscription in MongoDB
         const subscription = await Subscription.create({
             UserId: user._id,
             plan: plan,
             planName: selectedPlan.name,
-            razorPayPlanId: selectedPlan.razorpayPlanId,
+            razorPayPlanId: selectedPlan.razorPayPlanId,
             razorPaySubscriptionId: razorpaySubscription.id,
             amount: selectedPlan.amount,
             tweetLimit: selectedPlan.tweetLimit,
@@ -77,9 +75,13 @@ export const createSubscription = async (req, res) => {
             plan: {
                 name: selectedPlan.name,
                 amount: selectedPlan.amount,
+                currency: "INR",
                 tweetLimit: selectedPlan.tweetLimit,
             },
-
+            user: {
+                email: user.email,
+                name: user.name || "",
+            },
             subscription,
         });
 
