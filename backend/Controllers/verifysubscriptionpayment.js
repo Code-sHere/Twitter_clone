@@ -22,7 +22,7 @@ export const verifySubscriptionPayment = async (req, res) =>{
                 });
             }
 
-        const generateSignature = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET_KEY).update(`${razorpay_payment_id}|${razorpay_subscription_id}`).digest("hex");
+        const generateSignature = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET_KEY).update(razorpay_payment_id + "|" + razorpay_subscription_id).digest("hex");
 
         if(generateSignature !== razorpay_signature){
             return res.status(400).send({success: false, message: "Payment verification failed"});
@@ -32,6 +32,7 @@ export const verifySubscriptionPayment = async (req, res) =>{
             razorPaySubscriptionId: razorpay_subscription_id,
         }, {
             status: "active",
+            razorPayPlanId: razorpay_payment_id,
         },
         {
             new: true,
