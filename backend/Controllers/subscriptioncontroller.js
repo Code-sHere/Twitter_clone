@@ -8,8 +8,27 @@ const razorpayInstance = new Razorpay({
     key_secret: process.env.RAZORPAY_SECRET_KEY,
 });
 
+
 export const createSubscription = async (req, res) => {
     try {
+
+        // const now = new Date();
+
+        // const indiaTime = new Date(
+        //     now.toLocaleString("en-US", {
+        //         timeZone: "Asia/Kolkata",
+        //     })
+        // );
+
+        // const hour = indiaTime.getHours();
+
+        // if (hour !== 10) {
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: "Subscription can only be created at 10:00 AM IST and 11:00 AM IST",
+        //     })
+        // }
+
         const { plan, email } = req.body;
 
         // Check plan
@@ -54,6 +73,7 @@ export const createSubscription = async (req, res) => {
         // Save subscription in MongoDB
         const subscription = await Subscription.create({
             UserId: user._id,
+            email: email,
             plan: plan,
             planName: selectedPlan.name,
             razorPayPlanId: selectedPlan.razorPayPlanId,
@@ -75,7 +95,7 @@ export const createSubscription = async (req, res) => {
             plan: {
                 name: selectedPlan.name,
                 amount: selectedPlan.amount,
-                currency: "INR",
+                currency: selectedPlan.currency,
                 tweetLimit: selectedPlan.tweetLimit,
             },
             user: {

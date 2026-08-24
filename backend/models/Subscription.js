@@ -10,6 +10,11 @@ const SubscriptionSchema = mongoose.Schema({
         required: true,
     },
 
+    email :{
+        type: String,
+        required: true,
+    },
+
     planName:{
         type:String,
         required: true,
@@ -23,6 +28,11 @@ const SubscriptionSchema = mongoose.Schema({
     razorPaySubscriptionId : {
         type: String,
         default: null,
+    },
+
+    razorPayPaymentId :{
+      type: String,
+      default: null,
     },
 
     amount: {

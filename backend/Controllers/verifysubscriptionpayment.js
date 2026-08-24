@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import Subscription from "../models/Subscription.js";
+import { sendPaymentEmail } from "./emailsender.js";
+import User from "../models/user.js";
 
 export const verifySubscriptionPayment = async (req, res) =>{
     try{
@@ -22,7 +24,7 @@ export const verifySubscriptionPayment = async (req, res) =>{
                 });
             }
 
-        const generateSignature = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET_KEY).update(razorpay_payment_id + "|" + razorpay_subscription_id).digest("hex");
+        const generateSignature = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET_KEY).update(`${razorpay_payment_id}|${ razorpay_subscription_id}`).digest("hex");
 
         if(generateSignature !== razorpay_signature){
             return res.status(400).send({success: false, message: "Payment verification failed"});
@@ -32,13 +34,29 @@ export const verifySubscriptionPayment = async (req, res) =>{
             razorPaySubscriptionId: razorpay_subscription_id,
         }, {
             status: "active",
-            razorPayPlanId: razorpay_payment_id,
+            razorPayPaymentId: razorpay_payment_id,
         },
         {
             new: true,
         });
 
-        return res.status(200).send({success: true, message: "Payment verified successfully", subscription});
+        if(!subscription){
+            return res.status(400).send({success: false, message: "Payment verification failed"});
+        }
+
+        const user = await User.findById(subscription.userId);
+
+        await sendPaymentEmail({
+            email: subscription.email,
+            name: subscription.name,
+            planName: subscription.planName,
+            amount: subscription.amount,
+            paymentId: subscription.razorPayPaymentId,
+            subscriptionId: subscription.razorPaySubscriptionId,
+        })
+
+         return res.status(200).send({success: true, message: "Payment verified successfully", subscription});
+
     }catch(error){
         console.log(error);
         return res.status(400).send({success: false, message: "Payment verification failed"});
