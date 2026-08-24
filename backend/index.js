@@ -5,6 +5,7 @@ import mongoose from "mongoose"
 import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
+import { createTweet } from "./Controllers/createTweet.js"
 
 
 const app = express()
@@ -77,22 +78,20 @@ app.patch("/userupdate/:email", async (req, res) => {
 })
 
 //tweet api
-app.post("/post", async (req, res) => {
-    try {
-        const tweet = new Tweet(req.body);
-        await tweet.save();
-        return res.status(201).send(tweet);
-    } catch (error) {
-        return res.status(400).send({ error: error.message });
-    }
-});
+app.post("/post", createTweet);
 
 app.get("/post", async (req, res) => {
     try {
-        const tweet = await Tweet.find().sort({ timestamp: -1 }).populate("author");
-        return res.status(200).send(tweet);
+        const tweets = await Tweet.find()
+            .sort({ timestamp: -1 })
+            .populate("author");
+
+        return res.status(200).send(tweets);
+
     } catch (error) {
-        return res.status(400).send({ error: error.message });
+        return res.status(400).send({
+            error: error.message
+        });
     }
 })
 
@@ -128,6 +127,7 @@ app.post("/retweet/:tweetid", async (req, res)=>{
         return res.status(400).send({error: error.message});
     }
 })
+
 
 //subscription api
 app.use("/api/subscriptions", subscriptionRoutes);

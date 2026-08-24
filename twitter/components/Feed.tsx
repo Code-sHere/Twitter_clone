@@ -165,7 +165,8 @@ const Feed = () => {
                 ) : (
                     tweets.map((tweet) => (
                         <TweetCard
-                            key={tweet.id || (tweet as any)._id}
+                            className="border-b border-gray-800"
+                            key={tweet.id}
                             tweet={tweet}
                         />
                     ))

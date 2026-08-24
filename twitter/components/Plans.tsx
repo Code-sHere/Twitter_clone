@@ -1,10 +1,11 @@
 "use client";
 
 import React from 'react'
-import { Check, Crown, Medal, Star, ShieldCheck, Minus, Badge, LoaderPinwheel, LoaderCircle, RefreshCcw, HelpCircle, BadgeHelp, Lock, LockIcon } from "lucide-react";
+import { Check, Crown, Medal, ShieldCheck, ShieldLockIcon, StarIcon, RefreshCcwDotIcon, Send, XIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from "@/context/AuthContext";
+import { FaBolt, FaTwitter } from "react-icons/fa";
 
 
 
@@ -160,7 +161,7 @@ const Plans = () => {
             name: "FREE",
             tagline: "For getting started",
             price: 0,
-            icon: Star,
+            icon: Send,
             accent: "text-slate-300",
             iconBg: "bg-slate-700/40",
             border: "border-slate-700",
@@ -176,7 +177,7 @@ const Plans = () => {
             name: "BRONZE",
             tagline: "More tweets, more power",
             price: 100,
-            icon: Star,
+            icon: FaTwitter,
             accent: "text-orange-400",
             iconBg: "bg-orange-500/15",
             border: "border-orange-700/40",
@@ -197,7 +198,7 @@ const Plans = () => {
             name: "SILVER",
             tagline: "More tweets, more reach",
             price: 300,
-            icon: Medal,
+            icon: FaBolt,
             accent: "text-sky-400",
             iconBg: "bg-sky-500/15",
             border: "border-sky-500",
@@ -244,15 +245,15 @@ const Plans = () => {
             title: "Secure Payments",
             desccription: "100% Safe and Secure",
         }, {
-            badge: RefreshCcw,
+            badge: RefreshCcwDotIcon,
             title: "Cancel Anytime",
             desccription: "Change or cancel your plan anytime you want",
         }, {
-            badge: BadgeHelp,
+            badge: StarIcon,
             title: "Permium Support",
             desccription: "Our support team is here for you 24/7",
         }, {
-            badge: LockIcon,
+            badge: ShieldLockIcon,
             title: "Your Data is Safe",
             desccription: "We never sell your data. Privacy is our priority",
         }
