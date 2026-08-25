@@ -49,6 +49,11 @@ const SubscriptionSchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
+    
+    lastResetDate: {
+      type: Date,
+      default: null,
+    },
 
     status: {
       type: String,
