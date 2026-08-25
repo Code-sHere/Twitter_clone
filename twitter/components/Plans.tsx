@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react'
-import { Check, Crown, Medal, ShieldCheck, ShieldLockIcon, StarIcon, RefreshCcwDotIcon, Send, XIcon } from "lucide-react";
+import { Check, Crown, Medal, ShieldCheck, ShieldLockIcon, StarIcon, RefreshCcwDotIcon, Send, XIcon, Zap } from "lucide-react";
 import { Button } from "./ui/button";
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from "@/context/AuthContext";
@@ -83,7 +83,7 @@ const Plans = () => {
                 description: `${data.plan.name} Subscription`,
                 prefill: {
                     email: data.user?.email || user?.email,
-                   contact: "8595232967",
+                    contact: "8595232967",
                 },
                 theme: {
                     color: "#1DA1F2",
@@ -163,8 +163,9 @@ const Plans = () => {
             price: 0,
             icon: Send,
             accent: "text-slate-300",
-            iconBg: "bg-slate-700/40",
-            border: "border-slate-700",
+            iconBg: "drop-shadow-[0_0_5px_#3b82f6]",
+            border: "border-slate-700/40",
+            bordershaow: "drop-shadow-[0_0_5px_#3b82f6]",
             button: "bg-slate-700 hover:bg-slate-600 text-slate-200",
             check: "bg-slate-600 text-white",
             nameColor: "text-white",
@@ -179,8 +180,9 @@ const Plans = () => {
             price: 100,
             icon: FaTwitter,
             accent: "text-orange-400",
-            iconBg: "bg-orange-500/15",
+            iconBg: "drop-shadow-[0_0_5px_#ea580c]",
             border: "border-orange-700/40",
+            bordershaow: "drop-shadow-[0_0_5px_#ea580c]",
             button: "bg-orange-600 hover:bg-orange-500 text-white",
             check: "bg-orange-500 text-white",
             nameColor: "text-orange-400",
@@ -198,13 +200,14 @@ const Plans = () => {
             name: "SILVER",
             tagline: "More tweets, more reach",
             price: 300,
-            icon: FaBolt,
-            accent: "text-sky-400",
-            iconBg: "bg-sky-500/15",
-            border: "border-sky-500",
-            button: "bg-sky-500 hover:bg-sky-400 text-white",
-            check: "bg-sky-500 text-white",
-            nameColor: "text-white",
+            icon: Zap,
+            accent: "text-purple-400",
+            iconBg: "drop-shadow-[0_0_5px_#a855f7]",
+            border: "border-purple-500",
+            bordershaow: "drop-shadow-[0_0_5px_#a855f7]",
+            button: "bg-purple-500 hover:bg-purple-400 text-white",
+            check: "bg-purple-500 text-white",
+            nameColor: "text-purple-400",
             popular: true,
             cta: "Upgrade Now",
             features: [
@@ -222,8 +225,9 @@ const Plans = () => {
             price: 1000,
             icon: Crown,
             accent: "text-yellow-400",
-            iconBg: "bg-yellow-500/15",
+            iconBg: "drop-shadow-[0_0_5px_#f59e0b]",
             border: "border-yellow-700/40",
+            bordershaow: "drop-shadow-[0_0_5px_#f59e0b]",
             button: "bg-yellow-500 hover:bg-yellow-400 text-black",
             check: "bg-yellow-500 text-black",
             nameColor: "text-yellow-400",
@@ -243,58 +247,73 @@ const Plans = () => {
         {
             badge: ShieldCheck,
             title: "Secure Payments",
+            bg: "text-sky-600",
             desccription: "100% Safe and Secure",
         }, {
             badge: RefreshCcwDotIcon,
             title: "Cancel Anytime",
+            bg: "text-green-600",
             desccription: "Change or cancel your plan anytime you want",
         }, {
             badge: StarIcon,
             title: "Permium Support",
+            bg: "text-purple-600",
             desccription: "Our support team is here for you 24/7",
         }, {
             badge: ShieldLockIcon,
             title: "Your Data is Safe",
+            bg: "text-yellow-600",
             desccription: "We never sell your data. Privacy is our priority",
         }
 
     ];
 
     return (
-        <div className="min-h-screen bg-[#14243f] p-2">
+        <div className="min-h-screen bg-[#030817] py-16 text-center">
             <div className="flex flex-col items-center text-center justify-center p-2">
-                <h1 className="text-2xl font-bold md:text-4xl sm:text-3xl text-white font-mono">Level up your Twitter experience</h1>
+                <h1 className="text-2xl font-bold md:text-4xl sm:text-3xl text-white font-mono shadow-2xl drop-shadow-white/20">Level up your </h1>
+                <h1 className="text-3xl font-bold md:text-5xl sm:text-4xl text-sky-500 font-mono">Twitter experience
+                    
+                </h1>
+                <span className="absolute right-7 top-20 text-xl text-blue-500 drop-shadow-[0_0_8px_#3b82f6]">
+                    ✦
+                </span>
+
+                <span className="absolute right-13 text-sm text-blue-400 drop-shadow-[0_0_6px_#3b82f6]">
+                    ✦
+                </span>
                 <p className="text-l text-gray-400 font-mono mt-5">Pick a plan that's fits your vibe. More tweets. more reach, more impact.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 p-5 ">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-7 p-5 mx-8">
                 {plans.map((plan) => {
                     const Icon = plan.icon;
                     return (
                         <div
                             key={plan.id}
-                            className={`relative flex flex-col rounded-2xl border ${plan.border} bg-[#0b1424] p-5 shadow-xl transition-transform duration-200 hover:-translate-y-1 w-full  min-w-[350px] ${plan.popular ? "ring-1 ring-sky-500/60 shadow-sky-500/10" : ""
-                                } h-[450px]`}
+                            className={`relative flex flex-col rounded-2xl border ${plan.border} ${plan.bordershaow} bg-[#0b1424] p-5 transition-transform duration-200 hover:-translate-y-1 w-full min-w-[300px] ${plan.popular ? "ring-1 ring-purple-800/60 shadow-blue-800/30" : ""
+                                } h-[450px] `}
                         >
                             {plan.popular && (
-                                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-sky-500 px-3 py-1 text-[10px] font-bold tracking-wide text-white shadow-md">
+                                <span className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-purple-500 px-6 py-1 text-[12px] font-bold tracking-wide text-white shadow-xl shadow-blue-500/20 `}>
                                     POPULAR
                                 </span>
                             )}
 
-                            <div className="flex items-start justify-between">
-                                <div>
+                            <div className={`flex  flex-col items-center justify-center`}>
+                                <div className={`flex mt-2 h-10 w-10 items-center justify-center rounded-full `}>
+                                    <Icon className={`h-10 w-10 ${plan.accent} shadow-2xl ${plan.iconBg}`} />
+                                </div>
+                                <div className="mt-4 flex ">
                                     <h3 className={`text-lg font-extrabold tracking-wide ${plan.nameColor}`}>
                                         {plan.name}
                                     </h3>
-                                    <p className="mt-1 text-xs text-slate-400">{plan.tagline}</p>
-                                </div>
-                                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${plan.iconBg}`}>
-                                    <Icon className={`h-5 w-5 ${plan.accent}`} />
+                                    <span className='text-white px-2 text-3xl'> / </span>
+                                    <p className="mt-1 text-s text-slate-400"> {plan.tagline}</p>
                                 </div>
                             </div>
 
-                            <div className="mt-5 flex items-baseline gap-1">
-                                <span className="text-3xl font-extrabold text-white">
+                            <div className="mt-5 flex items-baseline gap-1 mx-5">
+                                <span className="text-3xl font-mono text-white">
                                     ₹{(plan.price)}
                                 </span>
                                 <span className="text-xs text-slate-500">
@@ -316,7 +335,7 @@ const Plans = () => {
                             </ul>
 
                             <Button
-                                className={`mt-6 w-full rounded-lg py-2.5 text-sm font-semibold transition ${plan.button}`} onClick={() => handleSubscribe(`${plan.id}`)}
+                                className={`mt-6 w-full rounded-full py-3 text-sm font-semibold h-12 transition ${plan.button}`} onClick={() => handleSubscribe(`${plan.id}`)}
                             >
                                 {plan.cta}
                             </Button>
@@ -325,12 +344,12 @@ const Plans = () => {
                 })}
             </div>
             <div>
-                <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 border-2 border-gray-700 shadow-2xl rounded-3xl h-full p-2">
+                <div className="grid grid-cols-1 lg:grid-cols-4 sm:grid-cols-2 shadow-2xl rounded-3xl h-full p-2">
                     {bottomSection.map((feature) => {
                         const Icon = feature.badge;
                         return (
-                            <div className="flex flex-col items-center border-r-2 border-gray-600 p-2" key={feature.title}>
-                                <Icon className="h-8 w-8 text-purple-800" />
+                            <div className="flex flex-col items-center border-gray-600 p-2" key={feature.title}>
+                                <Icon className={`h-8 w-8 ${feature.bg}`} />
                                 <h4 className="text-white text-lg font-mono">{feature.title}</h4>
                                 <span className="text-sm text-gray-600 ">{feature.desccription}</span>
                             </div>

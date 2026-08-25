@@ -1,5 +1,4 @@
 import React from "react";
-import { useAuth } from "@/context/AuthContext";
 import {
     Home,
     Search,
@@ -8,23 +7,10 @@ import {
     Bookmark,
     User,
     MoreHorizontal,
-    Settings,
-    LogOut,
 } from "lucide-react";
-import TwitterLogo from "../Twitterlogo";
 import { Button } from "../ui/button";
-import {
-    DropdownMenuTrigger,
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Sidebar = ({ currentPage, onNavigate }: any) => {
-    const { user, logout } = useAuth();
-
     const navigation = [
         {
             name: "Home",
@@ -79,12 +65,13 @@ const Sidebar = ({ currentPage, onNavigate }: any) => {
                 bg-black
                 border-gray-800
                 w-full
-                h-16
+                h-14
+                sm:h-16
                 fixed
                 bottom-0
                 left-0
                 right-0
-                z-50
+                z-40
 
                 md:relative
                 md:bottom-auto
@@ -95,15 +82,13 @@ const Sidebar = ({ currentPage, onNavigate }: any) => {
                 md:border-t-0
                 md:border-r
                 md:z-auto
+
+                border-t
+                md:border-t-0
             "
         >
-            {/* Logo */}
-            <div className="hidden md:block p-4 shrink-0">
-                <TwitterLogo size="lg" className="text-white" />
-            </div>
-
             {/* Navigation */}
-            <nav className="flex-1 px-1 md:px-3 overflow-x-auto md:overflow-visible no-scrollbar">
+            <nav className="flex-1 px-1 md:px-3 md:pt-3 overflow-x-auto md:overflow-visible no-scrollbar">
                 <ul
                     className="
                         flex
@@ -142,7 +127,8 @@ const Sidebar = ({ currentPage, onNavigate }: any) => {
                                     text-white
                                     text-xl
 
-                                    py-2
+                                    py-1.5
+                                    sm:py-2
                                     md:py-3
                                     px-1
                                     md:px-4
@@ -162,8 +148,10 @@ const Sidebar = ({ currentPage, onNavigate }: any) => {
                                 <div className="relative shrink-0">
                                     <item.icon
                                         className="
-                                            h-6
-                                            w-6
+                                            h-5
+                                            w-5
+                                            sm:h-6
+                                            sm:w-6
                                             md:h-7
                                             md:w-7
                                             md:mr-4
@@ -246,87 +234,6 @@ const Sidebar = ({ currentPage, onNavigate }: any) => {
                     </Button>
                 </div>
             </nav>
-
-            {/* User / Settings */}
-            {user && (
-                <div
-                    className="
-                        hidden
-                        md:block
-                        mt-auto
-                        p-3
-                        border-t
-                        border-gray-800
-                        bg-black
-                        shrink-0
-                    "
-                >
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                className="
-                                    w-full
-                                    justify-start
-                                    p-3
-                                    rounded-full
-                                    hover:bg-gray-900
-                                "
-                            >
-                                <Avatar className="h-10 w-10 mr-3 shrink-0">
-                                    <AvatarImage
-                                        src={user.avatar}
-                                        alt={user.displayName}
-                                    />
-
-                                    <AvatarFallback>
-                                        {user.displayName[0]}
-                                    </AvatarFallback>
-                                </Avatar>
-
-                                <div className="flex-1 text-left min-w-0">
-                                    <div className="text-white font-semibold truncate">
-                                        {user.displayName}
-                                    </div>
-
-                                    <div className="text-gray-400 text-sm truncate">
-                                        @{user.username}
-                                    </div>
-                                </div>
-
-                                <MoreHorizontal className="h-5 w-5 text-gray-400 shrink-0" />
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent
-                            align="end"
-                            side="top"
-                            sideOffset={8}
-                            className="
-                                w-56
-                                bg-black
-                                border-gray-800
-                                text-white
-                            "
-                        >
-                            <DropdownMenuItem className="text-white hover:bg-gray-900">
-                                <Settings className="mr-2 h-4 w-4" />
-                                Settings
-                            </DropdownMenuItem>
-
-                            <DropdownMenuSeparator className="bg-gray-800" />
-
-                            <DropdownMenuItem
-                                className="text-white hover:bg-gray-900"
-                                onClick={logout}
-                            >
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Log out @{user.username}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            )}
         </div>
     );
 };
