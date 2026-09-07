@@ -6,6 +6,7 @@ import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
 import { createTweet } from "./Controllers/createTweet.js"
+import forgetPassword from "./Controllers/forgetpassword.js"
 
 
 const app = express()
@@ -13,23 +14,15 @@ app.use(cors())
 app.use(express.json(
 ))
 
-app.get("/", (req, res) => {
-    res.send("twiller running good")
-})
+
 
 const port = process.env.PORT || 5000
 const url = process.env.MONGODB_URL
 
-mongoose.connect(url).then(() => {
-    console.log("connected to db");
-    app.listen(port, () => {
-        console.log(`listening on port ${port}`);
-    });
-})
-    .catch((error) => {
-        console.log(error.message);
-    })
 
+app.get("/", (req, res) => {
+    res.send("twiller running good")
+})
 
 // Register 
 app.post('/register', async (req, res) => {
@@ -97,34 +90,34 @@ app.get("/post", async (req, res) => {
 
 //Like tweet
 
-app.post("/like/:tweetid", async (req, res)=>{
-    try{
-        const {userId} = req.body;
+app.post("/like/:tweetid", async (req, res) => {
+    try {
+        const { userId } = req.body;
         const tweet = await Tweet.findById(req.params.tweetid);
-        if(!tweet.likedBy.includes(userId)){
+        if (!tweet.likedBy.includes(userId)) {
             tweet.likes += 1;
             tweet.likedBy.push(userId);
             await tweet.save();
         }
         res.send(tweet);
-    }catch(error){
-        return res.status(400).send({error: error.message});
+    } catch (error) {
+        return res.status(400).send({ error: error.message });
     }
 })
 
 //retweet 
-app.post("/retweet/:tweetid", async (req, res)=>{
-    try{
-        const {userId} = req.body;
+app.post("/retweet/:tweetid", async (req, res) => {
+    try {
+        const { userId } = req.body;
         const tweet = await Tweet.findById(req.params.tweetid);
-        if(!tweet.retweetedBy.includes(userId)){
+        if (!tweet.retweetedBy.includes(userId)) {
             tweet.retweets += 1;
             tweet.retweetedBy.push(userId);
             await tweet.save();
         }
         res.send(tweet);
-    }catch(error){
-        return res.status(400).send({error: error.message});
+    } catch (error) {
+        return res.status(400).send({ error: error.message });
     }
 })
 
@@ -137,6 +130,17 @@ console.log(
     "Razorpay Key:",
     process.env.RAZORPAY_API_KEY
 );
-app.listen(5000, () => {
-    console.log("Server running on port 5000");
-});
+
+// forget password api
+app.post("/forget-password", forgetPassword);
+
+
+mongoose.connect(url).then(() => {
+    console.log("connected to db");
+    app.listen(port, () => {
+        console.log(`listening on port ${port}`);
+    });
+})
+    .catch((error) => {
+        console.log(error.message);
+    })

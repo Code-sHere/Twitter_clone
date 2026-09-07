@@ -8,8 +8,14 @@ const UserSchema = mongoose.Schema({
     bio : {type: String, default:""},
     location:{type: String, default: ""},
     website : {type: String, default: ""},
-    location : {type: String, default: ""},
+    password : {type: String, required: true},
+    lastPasswordResetRequest : {type: Date, default: null},
+    isTemporaryPassword:{
+        type: Boolean,
+        default: false
+    }
 })
+
 
 export default mongoose.model("User", UserSchema);
  

@@ -10,6 +10,8 @@ import { Label } from "./ui/label";
 import Loadingspinner from "./Loading-spinner";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -458,6 +460,19 @@ const AuthModal = ({
                                 "Create account"
                             )}
                         </Button>
+                        {/* forget password */}
+                        <Link 
+                        href="/forget-password"
+                        className=" flex justify-center
+                                    mt-2
+                                    text-center             
+                                    text-white
+                                    font-semibold
+                                    rounded-full
+                                    text-base"
+                        >
+                            Forgot Password?
+                        </Link>
                     </form>
 
                     {/* Divider */}
