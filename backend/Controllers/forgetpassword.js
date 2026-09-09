@@ -8,7 +8,7 @@ const forgetPassword = async (req, res) => {
         const { identifier } = req.body;
 
         // check vaid email or phone
-        if (!identifier || identifier.trim()) {
+        if (!identifier || !identifier.trim()) {
             return res.status(400).json({
                 success: false,
                 message: "Email or phone number is required"
@@ -64,9 +64,11 @@ const forgetPassword = async (req, res) => {
 
         //update password 
 
+        console.log("New Password:", newPassword);
+
         user.password = hashedPassword;
 
-        user.lastPassworResetRequest = new Date();
+        user.lastPasswordResetRequest = new Date();
 
         user.isTemporaryPassword = true;
 

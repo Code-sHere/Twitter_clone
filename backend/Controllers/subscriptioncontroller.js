@@ -12,22 +12,22 @@ const razorpayInstance = new Razorpay({
 export const createSubscription = async (req, res) => {
     try {
 
-        // const now = new Date();
+        const now = new Date();
 
-        // const indiaTime = new Date(
-        //     now.toLocaleString("en-US", {
-        //         timeZone: "Asia/Kolkata",
-        //     })
-        // );
+        const indiaTime = new Date(
+            now.toLocaleString("en-US", {
+                timeZone: "Asia/Kolkata",
+            })
+        );
 
-        // const hour = indiaTime.getHours();
+        const hour = indiaTime.getHours();
 
-        // if (hour !== 10) {
-        //     return res.status(403).json({
-        //         success: false,
-        //         message: "Subscription can only be created at 10:00 AM IST and 11:00 AM IST",
-        //     })
-        // }
+        if (hour !== 10) {
+            return res.status(403).json({
+                success: false,
+                message: "Subscription can only be created at 10:00 AM IST and 11:00 AM IST",
+            })
+        }
 
         const { plan, email } = req.body;
 
@@ -89,7 +89,6 @@ export const createSubscription = async (req, res) => {
             message: "Subscription created successfully",
             subscriptionId: razorpaySubscription.id,
 
-            // Frontend expects data.key
             key: process.env.RAZORPAY_API_KEY,
 
             plan: {

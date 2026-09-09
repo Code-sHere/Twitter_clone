@@ -45,12 +45,14 @@ const ForgetPassword = () => {
 
       const data = await response.json();
 
+      console.log("Forget Password Response:", data);
+
       // Handle backend error
       if (!response.ok) {
         setError(
           data.error ||
-            data.message ||
-            "Something went wrong. Please try again."
+          data.message ||
+          "Something went wrong. Please try again."
         );
         return;
       }
@@ -60,7 +62,7 @@ const ForgetPassword = () => {
 
       setMessage(
         data.message ||
-          "Password reset successfully. Please check your email."
+        "Password reset successfully. Please check your email."
       );
     } catch (error) {
       console.error("Forgot password error:", error);

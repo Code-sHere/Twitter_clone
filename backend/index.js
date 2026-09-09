@@ -7,6 +7,7 @@ import Tweet from "./models/tweet.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
 import { createTweet } from "./Controllers/createTweet.js"
 import forgetPassword from "./Controllers/forgetpassword.js"
+import bcrypt from "bcrypt";
 
 
 const app = express()
@@ -27,17 +28,163 @@ app.get("/", (req, res) => {
 // Register 
 app.post('/register', async (req, res) => {
     try {
-        const existingUser = await User.findOne({ email: req.body.email })
-        if (existingUser) {
-            return res.status(200).send(existingUser)
+        const {
+            email,
+            password,
+            username,
+            displayName
+        } = req.body;
+
+        // check if all required fields are provided
+
+        if (
+            !email ||
+            !password ||
+            !username ||
+            !displayName
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
         }
-        const newUser = new User(req.body);
+
+        // cheking existing user
+
+        const existingUser = await User.findOne({
+            $or: [
+                { email: email.toLowerCase() },
+                { username: username }
+            ]
+        });
+
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Email or username already exists"
+            });
+        }
+
+        // Hashing password
+
+        const hashedPassword = await bcrypt.hash(
+            password,
+            12
+        );
+
+        // 4. Create user
+
+        const newUser = new User({
+
+            email: email.toLowerCase(),
+            username,
+            displayName,
+            password: hashedPassword,
+            isTemporaryPassword: false
+        });
+
+
         await newUser.save();
-        return res.status(201).send(newUser);
+
+
+        // 5 Don't send password to frontend
+
+        return res.status(201).json({
+
+            success: true,
+
+            message: "Registration successful",
+
+            user: {
+                _id: newUser._id,
+                username: newUser.username,
+                displayName: newUser.displayName,
+                email: newUser.email,
+                avatar: newUser.avatar,
+                bio: newUser.bio,
+                location: newUser.location,
+                website: newUser.website,
+                isTemporaryPassword:
+                    newUser.isTemporaryPassword
+            }
+        });
+
+
     } catch (error) {
         return res.status(400).send({ error: error.message });
     }
 })
+
+//login
+
+app.post("/login", async (req,res) =>{
+    try {
+        const {
+            identifier,
+            password
+        } = req.body;
+
+        // check if all required fields are provided
+        if(!identifier || !password){
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            })
+        }
+
+        //find user using email or phone
+
+        const value = identifier.trim();
+
+        const user = await User.findOne({
+            $or:[
+                {email: value.toLowerCase()},
+                {phone: value}
+            ]
+
+        })
+
+        //check user exist or not
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        //compare password
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordMatch){
+            return res.status(400).json({
+                success: false,
+                message: "Invalid password"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user: {
+                _id: user._id,
+                username: user.username,
+                displayName: user.displayName,
+                email: user.email,
+                avatar: user.avatar,
+                bio: user.bio,
+                location: user.location,
+                website: user.website,
+                isTemporaryPassword:
+                    user.isTemporaryPassword
+            }
+        })
+
+    }catch(error){
+        return res.status(400).send({ error: error.message });
+    }
+})
+
 
 //loggedinUser
 app.get('/loggedinuser', async (req, res) => {
