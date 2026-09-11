@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import generatePassword from "../utils/passwordGeneration.js";
+import { sendPasswordEmail } from "./newpasswordemail.js";
 
 
 const forgetPassword = async (req, res) => {
@@ -35,8 +36,8 @@ const forgetPassword = async (req, res) => {
         }
 
 
-        if (user.lastPassworResetRequest) {
-            const lastRequest = new Date(user.lastPassworResetRequest);
+        if (user.lastPasswordResetRequest) {
+            const lastRequest = new Date(user.lastPasswordResetRequest);
 
             const now = new Date();
 
@@ -52,8 +53,6 @@ const forgetPassword = async (req, res) => {
                 });
             }
         }
-
-
 
         // generate password
         const newPassword = generatePassword(16);
@@ -73,6 +72,12 @@ const forgetPassword = async (req, res) => {
         user.isTemporaryPassword = true;
 
         await user.save();
+
+        await sendPasswordEmail({
+            email: user.email,
+            name: user.name,
+            newPassword: newPassword
+        })
 
         return res.status(200).json({
             success: true,

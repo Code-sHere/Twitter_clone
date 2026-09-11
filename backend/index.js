@@ -8,7 +8,8 @@ import subscriptionRoutes from "./routes/subscriptionRoutes.js"
 import { createTweet } from "./Controllers/createTweet.js"
 import forgetPassword from "./Controllers/forgetpassword.js"
 import bcrypt from "bcrypt";
-
+import { UAParser } from "ua-parser-js";
+import LoginHistory from "./models/loginHistory.js";
 
 const app = express()
 app.use(cors())
@@ -117,15 +118,33 @@ app.post('/register', async (req, res) => {
 
 //login
 
-app.post("/login", async (req,res) =>{
+app.post("/login", async (req, res) => {
     try {
+
+        const userAgent = req.headers['user-agent'];
+
+        const parser = new UAParser(userAgent);
+        const result = parser.getResult();
+
+        const browser = result.browser.name || "Unknown";
+        const operatingSystem = result.os.name || "Unknown";
+        const deviceType = result.device.type || "Unknown";
+        const ipAddress = req.ip || req.connection.remoteAddress || "Unknown";
+
+        console.log({
+            browser,
+            operatingSystem,
+            deviceType,
+            ipAddress
+        });
+
         const {
             identifier,
             password
         } = req.body;
 
         // check if all required fields are provided
-        if(!identifier || !password){
+        if (!identifier || !password) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
@@ -137,31 +156,85 @@ app.post("/login", async (req,res) =>{
         const value = identifier.trim();
 
         const user = await User.findOne({
-            $or:[
-                {email: value.toLowerCase()},
-                {phone: value}
+            $or: [
+                { email: value.toLowerCase() },
+                { phone: value }
             ]
 
         })
 
         //check user exist or not
-        if(!user){
+        if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             })
         }
 
+
+        // create base logion data
+
+        const loginData = {
+            userId: user._id,
+            browser,
+            operatingSystem,
+            deviceType,
+            ipAddress,
+            timestamp: new Date()
+        }
+
         //compare password
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-        if(!isPasswordMatch){
+        if (!isPasswordMatch) {
+
+            await LoginHistory.create({
+                ...loginData,
+                status: "failed",
+                reason: "Invalid password"
+            });
+
             return res.status(400).json({
                 success: false,
                 message: "Invalid password"
             })
         }
+
+        // mobile time restricatipn for login
+
+        if( deviceType === " mobile"){
+
+            const currentTime = new Date();
+
+            const indianTime = new Intl.DateTimeFormat("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            }).format(currentTime);
+
+            const [hours, minutes] = indianTime.split(":").map(Number);
+
+            const currentMinutes = hours * 60 + minutes;
+
+            const startTime = 10 * 60; // 10:00 AM in minutes
+            const endTime = 13 * 60; // 1:00 PM in minutes
+
+            if(currentMinutes < startTime || currentMinutes > endTime){
+                await LoginHistory.create({
+                    ...loginData,
+                    status: "blocked",
+                    reason: "Login allowed only between 10:00 AM and 1:00 PM for mobile devices"
+                });
+
+                return res.status(403).json({
+                    success: false,
+                    message: "Login allowed only between 10:00 AM and 1:00 PM for mobile devices"
+                });
+            }
+        }
+
 
         return res.status(200).json({
             success: true,
@@ -180,7 +253,7 @@ app.post("/login", async (req,res) =>{
             }
         })
 
-    }catch(error){
+    } catch (error) {
         return res.status(400).send({ error: error.message });
     }
 })
