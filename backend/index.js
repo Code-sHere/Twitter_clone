@@ -9,7 +9,9 @@ import { createTweet } from "./Controllers/createTweet.js"
 import forgetPassword from "./Controllers/forgetpassword.js"
 import bcrypt from "bcrypt";
 import { UAParser } from "ua-parser-js";
+import loginOtp from "./models/loginOtp.js";
 import LoginHistory from "./models/loginHistory.js";
+import crypto from "crypto";
 
 const app = express()
 app.use(cors())
@@ -128,8 +130,8 @@ app.post("/login", async (req, res) => {
 
         const browser = result.browser.name || "Unknown";
         const operatingSystem = result.os.name || "Unknown";
-        const deviceType = result.device.type || "Unknown";
-        const ipAddress = req.ip || req.connection.remoteAddress || "Unknown";
+        const deviceType = result.device.type || "desktop";
+        const ipAddress = req.ip || req.socket.remoteAddress || "Unknown";
 
         console.log({
             browser,
@@ -180,7 +182,7 @@ app.post("/login", async (req, res) => {
             operatingSystem,
             deviceType,
             ipAddress,
-            timestamp: new Date()
+            loginTime: new Date()
         }
 
         //compare password
@@ -203,7 +205,7 @@ app.post("/login", async (req, res) => {
 
         // mobile time restricatipn for login
 
-        if( deviceType === " mobile"){
+        if( deviceType === "mobile"){
 
             const currentTime = new Date();
 
@@ -221,7 +223,7 @@ app.post("/login", async (req, res) => {
             const startTime = 10 * 60; // 10:00 AM in minutes
             const endTime = 13 * 60; // 1:00 PM in minutes
 
-            if(currentMinutes < startTime || currentMinutes > endTime){
+            if(currentMinutes < startTime || currentMinutes >= endTime){
                 await LoginHistory.create({
                     ...loginData,
                     status: "blocked",
@@ -233,6 +235,43 @@ app.post("/login", async (req, res) => {
                     message: "Login allowed only between 10:00 AM and 1:00 PM for mobile devices"
                 });
             }
+        }
+
+        if(browser === "Chrome"){
+
+            const otp = crypto.randomInt(100000, 999999).toString();
+
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+            const loginHistory = await LoginHistory.create({
+                ...loginData,
+                status: "success",
+                reason:"Chrome login required otp"
+            });
+
+            await loginOtp.deleteMany({
+                userId : user._id
+            });
+
+            await loginOtp.create({
+                userId: user._id,
+                otp,
+                expiresAt,
+                loginHistoryId: loginHistory._id
+            });
+            
+            await sendOtp({
+                email: user.email,
+                name: user.displayName,
+                otp
+            });
+
+            return res.status(200).json({
+                success: true,
+                requiresOtp: true,
+                message: "Otp sent to your register email",
+            });
+
         }
 
 
