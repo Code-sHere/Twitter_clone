@@ -27,6 +27,10 @@ const LoginDetailsSchema = mongoose.Schema({
         type: String,
         enum: ["success", "failed"],
         required: true
+    },
+    reason: {
+        type: String,
+        required: true
     }
 });
 

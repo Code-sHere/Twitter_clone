@@ -123,6 +123,14 @@ export const AuthProvider: React.FC<{
         );
       }
 
+
+      if (res.data.requiresOtp) {
+        return {
+          requiresOtp: true,
+          userId: res.data.userId
+        }
+      }
+
       const loggedInUser: User =
         res.data.user;
 
@@ -132,6 +140,12 @@ export const AuthProvider: React.FC<{
         "twitter-user",
         JSON.stringify(loggedInUser)
       );
+
+      return {
+        requiresOtp: false,
+        user: loggedInUser,
+      };
+
     } catch (error: any) {
       console.error(
         "Login Error:",
@@ -140,13 +154,58 @@ export const AuthProvider: React.FC<{
 
       throw new Error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Login failed"
+        error?.message ||
+        "Login failed"
       );
     } finally {
       setIsLoading(false);
     }
   };
+
+  const verifyOtp = async (
+    userId: string,
+    otp: string
+  ) => {
+    try {
+      setIsLoading(true);
+
+      const res = await axiosInstance.post(
+        "/verift-otp",
+        {
+          userId,
+          otp
+        }
+      );
+
+      if (!res.data?.success) {
+        throw new Error(
+          res.data?.message ||
+          "Verification failed"
+        );
+      }
+
+      const loggedInUser: User =
+        res.data.user;
+
+      setUser(loggedInUser);
+
+      localStorage.setItem(
+        "twitter-user",
+        JSON.stringify(loggedInUser)
+      );
+
+      return loggedInUser;
+
+    } catch (error) {
+      console.error(
+        "Login Error:",
+        error
+      );
+    }
+    finally{
+      setIsLoading(false);
+    }
+  }
 
   const signup = async (
     email: string,
@@ -170,7 +229,7 @@ export const AuthProvider: React.FC<{
       if (!res.data?.success) {
         throw new Error(
           res.data?.message ||
-            "Registration failed"
+          "Registration failed"
         );
       }
 
@@ -191,8 +250,8 @@ export const AuthProvider: React.FC<{
 
       throw new Error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Signup failed"
+        error?.message ||
+        "Signup failed"
       );
     } finally {
       setIsLoading(false);
@@ -268,7 +327,7 @@ export const AuthProvider: React.FC<{
         if (!registerRes.data?.success) {
           throw new Error(
             registerRes.data?.message ||
-              "Google registration failed"
+            "Google registration failed"
           );
         }
 
@@ -296,8 +355,8 @@ export const AuthProvider: React.FC<{
 
       alert(
         error?.response?.data?.message ||
-          error?.message ||
-          "Google login failed"
+        error?.message ||
+        "Google login failed"
       );
     } finally {
       setIsLoading(false);
@@ -362,8 +421,8 @@ export const AuthProvider: React.FC<{
 
       throw new Error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Profile update failed"
+        error?.message ||
+        "Profile update failed"
       );
     } finally {
       setIsLoading(false);
@@ -378,6 +437,7 @@ export const AuthProvider: React.FC<{
         signup,
         updateProfile,
         logout,
+        verifyOtp,
         isLoading,
         googlesignin,
       }}

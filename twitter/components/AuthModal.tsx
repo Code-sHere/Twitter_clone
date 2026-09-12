@@ -24,10 +24,14 @@ const AuthModal = ({
     onClose,
     initialMode = "login",
 }: AuthModalProps) => {
-    const { login, signup, isLoading } = useAuth();
+    const { login, signup, verifyOtp , isLoading } = useAuth();
 
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
     const [showPassword, setShowPassword] = useState(false);
+
+    const [otpMode, setOtpMode] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpUserId, setOtpUSerId] = useState("");
 
     const [formData, setFormData] = useState({
         email: "",
@@ -83,6 +87,14 @@ const AuthModal = ({
         try {
             if (mode === "login") {
                 await login(formData.email, formData.password);
+
+                if(result?.requiresOtp){
+                    setOtpMode(true);
+                    setOtpUSerId(result.userId);
+                }
+
+                return;
+
             } else {
                 await signup(
                     formData.email,
@@ -110,6 +122,47 @@ const AuthModal = ({
             });
         }
     };
+
+    const handleOtpSubmit = async (
+        e: React.FormEvent
+    )=>{
+        if(!otp || otp.length !==6){
+            setErrors({
+                general: "Please enter a valid OTP"
+            })
+
+            return;
+
+        }
+
+        if(!otpUserId){
+            setErrors({
+                general: "Something went wrong. Please try again.",
+            });
+
+            return;
+        }
+
+        try{
+            await verifyOtp(otpUserId, otp);
+
+            onClose();
+
+            setFormData({
+                email: "",
+                password: "",
+                username: "",
+                displayName: "",
+            });
+            setErrors({})
+        } catch(error){
+            console.error("Authentication error:", error);
+
+            setErrors({
+                general: "Something went wrong. Please try again.",
+            });
+        }
+    }
 
     const handleInputChange = (field: string, value: string) => {
         setFormData((prev) => ({
@@ -218,7 +271,7 @@ const AuthModal = ({
                     )}
 
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={otpMode ? handleOtpSubmit : handleSubmit}
                         className="space-y-4"
                     >
                         {/* Signup Fields */}
