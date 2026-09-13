@@ -5,9 +5,6 @@ const LoginDetailsSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User", required: true
     },
-    name:{
-        type: String, required: true
-    },
     browser: {
         type: String, required: true
     },
@@ -30,7 +27,7 @@ const LoginDetailsSchema = mongoose.Schema({
     },
     reason: {
         type: String,
-        required: true
+        
     }
 });
 

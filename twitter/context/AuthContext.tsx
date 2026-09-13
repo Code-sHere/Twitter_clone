@@ -36,7 +36,11 @@ interface AuthContextType {
   login: (
     identifier: string,
     password: string
-  ) => Promise<void>;
+  ) => Promise<{
+    requiresOtp: boolean;
+    userId?: string;
+    user?: User;
+  }>;
 
   signup: (
     email: string,
@@ -58,6 +62,11 @@ interface AuthContextType {
   isLoading: boolean;
 
   googlesignin: () => Promise<void>;
+
+  verifyOtp: (
+    userId: string,
+    otp: string
+  ) => Promise<User>;
 }
 
 const AuthContext =
@@ -197,12 +206,15 @@ export const AuthProvider: React.FC<{
       return loggedInUser;
 
     } catch (error) {
-      console.error(
-        "Login Error:",
-        error
+      console.error("OTP Verification Error:", error);
+
+      throw new Error(
+        error?.response?.data?.message ||
+        error?.message ||
+        "OTP verification failed"
       );
     }
-    finally{
+    finally {
       setIsLoading(false);
     }
   }

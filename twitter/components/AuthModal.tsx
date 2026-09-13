@@ -24,14 +24,14 @@ const AuthModal = ({
     onClose,
     initialMode = "login",
 }: AuthModalProps) => {
-    const { login, signup, verifyOtp , isLoading } = useAuth();
+    const { login, signup, verifyOtp, isLoading } = useAuth();
 
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
     const [showPassword, setShowPassword] = useState(false);
 
     const [otpMode, setOtpMode] = useState(false);
     const [otp, setOtp] = useState("");
-    const [otpUserId, setOtpUSerId] = useState("");
+    const [otpUserId, setOtpUserId] = useState("");
 
     const [formData, setFormData] = useState({
         email: "",
@@ -86,14 +86,20 @@ const AuthModal = ({
 
         try {
             if (mode === "login") {
-                await login(formData.email, formData.password);
 
-                if(result?.requiresOtp){
+                const result = await login(formData.email, formData.password);
+
+                console.log(result);
+
+                if (result?.requiresOtp) {
+
+                    console.log("setting otp mode");
+                    
                     setOtpMode(true);
-                    setOtpUSerId(result.userId);
+                    setOtpUserId(result.userId || "");
+                    setErrors({});
+                    return;
                 }
-
-                return;
 
             } else {
                 await signup(
@@ -125,26 +131,30 @@ const AuthModal = ({
 
     const handleOtpSubmit = async (
         e: React.FormEvent
-    )=>{
-        if(!otp || otp.length !==6){
+    ) => {
+
+        e.preventDefault();
+
+        if (!otp || otp.length !== 6) {
             setErrors({
                 general: "Please enter a valid OTP"
             })
-
             return;
-
         }
 
-        if(!otpUserId){
+        if (!otpUserId) {
             setErrors({
-                general: "Something went wrong. Please try again.",
+                general: "Invalid OTP. Please try again.",
             });
-
             return;
         }
 
-        try{
+        try {
             await verifyOtp(otpUserId, otp);
+
+            setOtp("");
+            setOtpUserId("");
+            setOtpMode(false);
 
             onClose();
 
@@ -155,7 +165,7 @@ const AuthModal = ({
                 displayName: "",
             });
             setErrors({})
-        } catch(error){
+        } catch (error) {
             console.error("Authentication error:", error);
 
             setErrors({
@@ -256,9 +266,11 @@ const AuthModal = ({
                         </div>
 
                         <CardTitle className="text-xl sm:text-2xl font-bold text-white">
-                            {mode === "login"
-                                ? "Sign in to X"
-                                : "Create your account"}
+                            {otpMode
+                                ? "Verify your login"
+                                : mode === "login"
+                                    ? "Sign in to X"
+                                    : "Create your account"}
                         </CardTitle>
                     </div>
                 </CardHeader>
@@ -274,33 +286,111 @@ const AuthModal = ({
                         onSubmit={otpMode ? handleOtpSubmit : handleSubmit}
                         className="space-y-4"
                     >
-                        {/* Signup Fields */}
-                        {mode === "signup" && (
+
+                        {otpMode ? (
                             <>
-                                {/* Display Name */}
                                 <div className="space-y-2">
                                     <Label
-                                        htmlFor="displayName"
+                                        htmlFor="otp"
                                         className="text-white"
                                     >
-                                        Display Name
+                                        Verification Code
                                     </Label>
 
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <Input
+                                        id="otp"
+                                        type="text"
+                                        inputMode="numeric"
+                                        placeholder="Enter 6 digit OTP"
+                                        value={otp}
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                                .replace(/\D/g, "")
+                                                .slice(0, 6);
 
-                                        <Input
-                                            id="displayName"
-                                            type="text"
-                                            placeholder="Your display name"
-                                            value={formData.displayName}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    "displayName",
-                                                    e.target.value
-                                                )
+                                            setOtp(value);
+
+                                            if (errors.general) {
+                                                setErrors((prev) => ({
+                                                    ...prev,
+                                                    general: "",
+                                                }));
                                             }
-                                            className="
+                                        }}
+                                        maxLength={6}
+                                        className="
+                    h-11
+                    bg-transparent
+                    border-gray-600
+                    text-white
+                    placeholder-gray-400
+                    focus:border-blue-500
+                    text-center
+                    tracking-[0.4em]
+                    text-lg
+                "
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <p className="text-sm text-gray-400 text-center">
+                                    We sent a 6-digit verification code
+                                    to your registered email.
+                                </p>
+
+                                <Button
+                                    type="submit"
+                                    className="
+                w-full
+                h-11
+                sm:h-12
+                bg-blue-500
+                hover:bg-blue-600
+                text-white
+                font-semibold
+                rounded-full
+            "
+                                    disabled={isLoading || otp.length !== 6}
+                                >
+                                    {isLoading ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loadingspinner size="sm" />
+                                            <span>Verifying...</span>
+                                        </div>
+                                    ) : (
+                                        "Verify OTP"
+                                    )}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                {/* Signup Fields */}
+                                {mode === "signup" && (
+                                    <>
+                                        {/* Display Name */}
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="displayName"
+                                                className="text-white"
+                                            >
+                                                Display Name
+                                            </Label>
+
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+
+                                                <Input
+                                                    id="displayName"
+                                                    type="text"
+                                                    placeholder="Your display name"
+                                                    value={formData.displayName}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            "displayName",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="
                                                 h-11
                                                 pl-10
                                                 bg-transparent
@@ -309,43 +399,43 @@ const AuthModal = ({
                                                 placeholder-gray-400
                                                 focus:border-blue-500
                                             "
-                                            disabled={isLoading}
-                                        />
-                                    </div>
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
 
-                                    {errors.displayName && (
-                                        <p className="text-red-400 text-xs sm:text-sm">
-                                            {errors.displayName}
-                                        </p>
-                                    )}
-                                </div>
+                                            {errors.displayName && (
+                                                <p className="text-red-400 text-xs sm:text-sm">
+                                                    {errors.displayName}
+                                                </p>
+                                            )}
+                                        </div>
 
-                                {/* Username */}
-                                <div className="space-y-2">
-                                    <Label
-                                        htmlFor="username"
-                                        className="text-white"
-                                    >
-                                        Username
-                                    </Label>
+                                        {/* Username */}
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="username"
+                                                className="text-white"
+                                            >
+                                                Username
+                                            </Label>
 
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                            @
-                                        </span>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                                    @
+                                                </span>
 
-                                        <Input
-                                            id="username"
-                                            type="text"
-                                            placeholder="username"
-                                            value={formData.username}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    "username",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="
+                                                <Input
+                                                    id="username"
+                                                    type="text"
+                                                    placeholder="username"
+                                                    value={formData.username}
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            "username",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="
                                                 h-11
                                                 pl-8
                                                 bg-transparent
@@ -354,43 +444,43 @@ const AuthModal = ({
                                                 placeholder-gray-400
                                                 focus:border-blue-500
                                             "
-                                            disabled={isLoading}
-                                        />
-                                    </div>
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
 
-                                    {errors.username && (
-                                        <p className="text-red-400 text-xs sm:text-sm">
-                                            {errors.username}
-                                        </p>
-                                    )}
-                                </div>
-                            </>
-                        )}
+                                            {errors.username && (
+                                                <p className="text-red-400 text-xs sm:text-sm">
+                                                    {errors.username}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
 
-                        {/* Email */}
-                        <div className="space-y-2">
-                            <Label
-                                htmlFor="email"
-                                className="text-white"
-                            >
-                                Email
-                            </Label>
+                                {/* Email */}
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="email"
+                                        className="text-white"
+                                    >
+                                        Email
+                                    </Label>
 
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
 
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={formData.email}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "email",
-                                            e.target.value
-                                        )
-                                    }
-                                    className="
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="Enter your email"
+                                            value={formData.email}
+                                            onChange={(e) =>
+                                                handleInputChange(
+                                                    "email",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="
                                         h-11
                                         pl-10
                                         bg-transparent
@@ -399,45 +489,45 @@ const AuthModal = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                    disabled={isLoading}
-                                />
-                            </div>
+                                            disabled={isLoading}
+                                        />
+                                    </div>
 
-                            {errors.email && (
-                                <p className="text-red-400 text-xs sm:text-sm">
-                                    {errors.email}
-                                </p>
-                            )}
-                        </div>
+                                    {errors.email && (
+                                        <p className="text-red-400 text-xs sm:text-sm">
+                                            {errors.email}
+                                        </p>
+                                    )}
+                                </div>
 
-                        {/* Password */}
-                        <div className="space-y-2">
-                            <Label
-                                htmlFor="password"
-                                className="text-white"
-                            >
-                                Password
-                            </Label>
+                                {/* Password */}
+                                <div className="space-y-2">
+                                    <Label
+                                        htmlFor="password"
+                                        className="text-white"
+                                    >
+                                        Password
+                                    </Label>
 
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
 
-                                <Input
-                                    id="password"
-                                    type={
-                                        showPassword
-                                            ? "text"
-                                            : "password"
-                                    }
-                                    placeholder="Enter your password"
-                                    value={formData.password}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "password",
-                                            e.target.value
-                                        )
-                                    }
-                                    className="
+                                        <Input
+                                            id="password"
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            placeholder="Enter your password"
+                                            value={formData.password}
+                                            onChange={(e) =>
+                                                handleInputChange(
+                                                    "password",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="
                                         h-11
                                         pl-10
                                         pr-10
@@ -447,14 +537,14 @@ const AuthModal = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                    disabled={isLoading}
-                                />
+                                            disabled={isLoading}
+                                        />
 
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="
                                         absolute
                                         right-1
                                         top-1/2
@@ -462,29 +552,29 @@ const AuthModal = ({
                                         text-gray-400
                                         hover:text-white
                                     "
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-4 w-4" />
-                                    ) : (
-                                        <Eye className="h-4 w-4" />
+                                            onClick={() =>
+                                                setShowPassword(!showPassword)
+                                            }
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </div>
+
+                                    {errors.password && (
+                                        <p className="text-red-400 text-xs sm:text-sm">
+                                            {errors.password}
+                                        </p>
                                     )}
-                                </Button>
-                            </div>
+                                </div>
 
-                            {errors.password && (
-                                <p className="text-red-400 text-xs sm:text-sm">
-                                    {errors.password}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Submit */}
-                        <Button
-                            type="submit"
-                            className="
+                                {/* Submit */}
+                                <Button
+                                    type="submit"
+                                    className="
                                 w-full
                                 h-11
                                 sm:h-12
@@ -495,45 +585,50 @@ const AuthModal = ({
                                 rounded-full
                                 text-base
                             "
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <div className="flex items-center gap-2">
-                                    <Loadingspinner size="sm" />
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loadingspinner size="sm" />
 
-                                    <span>
-                                        {mode === "login"
-                                            ? "Signing in..."
-                                            : "Creating account..."}
-                                    </span>
-                                </div>
-                            ) : mode === "login" ? (
-                                "Sign in"
-                            ) : (
-                                "Create account"
-                            )}
-                        </Button>
-                        {/* forget password */}
-                        <Link 
-                        href="/forget-password"
-                        className=" flex justify-center
+                                            <span>
+                                                {mode === "login"
+                                                    ? "Signing in..."
+                                                    : "Creating account..."}
+                                            </span>
+                                        </div>
+                                    ) : mode === "login" ? (
+                                        "Sign in"
+                                    ) : (
+                                        "Create account"
+                                    )}
+                                </Button>
+                                {/* forget password */}
+                                <Link
+                                    href="/forget-password"
+                                    className=" flex justify-center
                                     mt-2
                                     text-center             
                                     text-white
                                     font-semibold
                                     rounded-full
                                     text-base"
-                        >
-                            Forgot Password?
-                        </Link>
+                                >
+                                    Forgot Password?
+                                </Link>
+                            </>
+                        )}
+
                     </form>
 
-                    {/* Divider */}
-                    <div className="relative my-6">
-                        <Separator className="bg-gray-700" />
+                    {!otpMode && (
+                        <>
+                            {/* Divider */}
+                            <div className="relative my-6">
+                                <Separator className="bg-gray-700" />
 
-                        <span
-                            className="
+                                <span
+                                    className="
                                 absolute
                                 left-1/2
                                 top-1/2
@@ -544,42 +639,44 @@ const AuthModal = ({
                                 text-gray-400
                                 text-xs
                             "
-                        >
-                            OR
-                        </span>
-                    </div>
+                                >
+                                    OR
+                                </span>
+                            </div>
 
-                    {/* Switch */}
-                    <div className="text-center">
-                        <p className="text-sm sm:text-base text-gray-400">
-                            {mode === "login"
-                                ? "Don't have an account?"
-                                : "Already have an account?"}
+                            {/* Switch */}
+                            <div className="text-center">
+                                <p className="text-sm sm:text-base text-gray-400">
+                                    {mode === "login"
+                                        ? "Don't have an account?"
+                                        : "Already have an account?"}
 
-                            <Button
-                                type="button"
-                                variant="link"
-                                className="
+                                    <Button
+                                        type="button"
+                                        variant="link"
+                                        className="
                                     text-blue-400
                                     hover:text-blue-300
                                     font-semibold
                                     pl-1
                                 "
-                                onClick={switchMode}
-                                disabled={isLoading}
-                            >
-                                {mode === "login"
-                                    ? "Sign up"
-                                    : "Sign in"}
-                            </Button>
-                        </p>
-                    </div>
+                                        onClick={switchMode}
+                                        disabled={isLoading}
+                                    >
+                                        {mode === "login"
+                                            ? "Sign up"
+                                            : "Sign in"}
+                                    </Button>
+                                </p>
+                            </div>
 
-                    {mode === "signup" && (
-                        <div className="text-center text-xs text-gray-400 mt-5 leading-relaxed">
-                            By signing up, you agree to our Terms of Service
-                            and Privacy Policy, including Cookie Use.
-                        </div>
+                            {mode === "signup" && (
+                                <div className="text-center text-xs text-gray-400 mt-5 leading-relaxed">
+                                    By signing up, you agree to our Terms of Service
+                                    and Privacy Policy, including Cookie Use.
+                                </div>
+                            )}
+                        </>
                     )}
                 </CardContent>
             </Card>

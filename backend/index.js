@@ -9,9 +9,10 @@ import { createTweet } from "./Controllers/createTweet.js"
 import forgetPassword from "./Controllers/forgetpassword.js"
 import bcrypt from "bcrypt";
 import { UAParser } from "ua-parser-js";
-import loginOtp from "./models/loginOtp.js";
+import LoginOtp from "./models/loginOtp.js";
 import LoginHistory from "./models/loginHistory.js";
 import crypto from "crypto";
+import {sendOtp} from "./Controllers/optsender.js"
 
 const app = express()
 app.use(cors())
@@ -205,7 +206,7 @@ app.post("/login", async (req, res) => {
 
         // mobile time restricatipn for login
 
-        if( deviceType === "mobile"){
+        if (deviceType === "mobile") {
 
             const currentTime = new Date();
 
@@ -223,7 +224,7 @@ app.post("/login", async (req, res) => {
             const startTime = 10 * 60; // 10:00 AM in minutes
             const endTime = 13 * 60; // 1:00 PM in minutes
 
-            if(currentMinutes < startTime || currentMinutes >= endTime){
+            if (currentMinutes < startTime || currentMinutes >= endTime) {
                 await LoginHistory.create({
                     ...loginData,
                     status: "blocked",
@@ -237,7 +238,7 @@ app.post("/login", async (req, res) => {
             }
         }
 
-        if(browser === "Chrome"){
+        if (browser === "Chrome") {
 
             const otp = crypto.randomInt(100000, 999999).toString();
 
@@ -246,25 +247,25 @@ app.post("/login", async (req, res) => {
             const loginHistory = await LoginHistory.create({
                 ...loginData,
                 status: "success",
-                reason:"Chrome login required otp"
+                reason: "Chrome login required otp"
             });
 
-            await loginOtp.deleteMany({
-                userId : user._id
+            await LoginOtp.deleteMany({
+                userId: user._id
             });
 
-            await loginOtp.create({
+            await LoginOtp.create({
                 userId: user._id,
                 otp,
                 expiresAt,
                 loginHistoryId: loginHistory._id
             });
-            
-            await sendOtp({
-                email: user.email,
-                name: user.displayName,
+
+            await sendOtp(
+                user.email,
+                user.displayName,
                 otp
-            });
+            );
 
             return res.status(200).json({
                 success: true,
@@ -293,10 +294,14 @@ app.post("/login", async (req, res) => {
         })
 
     } catch (error) {
-        return res.status(400).send({ error: error.message });
+        console.error("LOGIN ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 })
-
 
 //loggedinUser
 app.get('/loggedinuser', async (req, res) => {
@@ -392,6 +397,99 @@ console.log(
 
 // forget password api
 app.post("/forget-password", forgetPassword);
+
+app.post("/verift-otp", async (req, res) => {
+    try {
+        const { userId, otp } = req.body;
+
+        if (!userId || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "otp are required"
+            })
+        }
+
+        const otpRecord = await LoginOtp.findOne({
+            userId: userId,
+            otp: otp
+        })
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid otp"
+            })
+        }
+
+        if (otpRecord.expiresAt < new Date()) {
+            await LoginOtp.deleteOne({
+                userId: userId,
+                otp: otp
+            })
+
+            return res.status(400).json({
+                success: false,
+                message: "Otp expired"
+            })
+        }
+
+        if (otpRecord.otp !== otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid otp"
+            })
+        }
+
+        await LoginHistory.findOneAndUpdate(
+            otpRecord.loginHistoryId,
+            {
+                status: "success",
+                reason: "Otp verified"
+            }
+        )
+
+        await LoginOtp.deleteOne({
+            _id: otpRecord._id
+        })
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Otp verified",
+            user: {
+                _id: user._id,
+                username: user.username,
+                displayName: user.displayName,
+                email: user.email,
+                avatar: user.avatar,
+                bio: user.bio,
+                location: user.location,
+                website: user.website,
+                isTemporaryPassword:
+                    user.isTemporaryPassword
+            }
+        });
+
+    } catch (error) {
+        console.error(
+            "OTP verification error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+})
 
 
 mongoose.connect(url).then(() => {
