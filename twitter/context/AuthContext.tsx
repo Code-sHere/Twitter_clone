@@ -90,6 +90,7 @@ export const AuthProvider: React.FC<{
   const [user, setUser] = useState<User | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   useEffect(() => {
     try {
@@ -116,7 +117,7 @@ export const AuthProvider: React.FC<{
     password: string
   ) => {
     try {
-      setIsLoading(true);
+      setIsAuthenticating(true);
 
       const res = await axiosInstance.post(
         "/login",
@@ -167,7 +168,7 @@ export const AuthProvider: React.FC<{
         "Login failed"
       );
     } finally {
-      setIsLoading(false);
+      setIsAuthenticating(false);
     }
   };
 
@@ -176,7 +177,7 @@ export const AuthProvider: React.FC<{
     otp: string
   ) => {
     try {
-      setIsLoading(true);
+      setIsAuthenticating(true);
 
       const res = await axiosInstance.post(
         "/verift-otp",
@@ -215,7 +216,7 @@ export const AuthProvider: React.FC<{
       );
     }
     finally {
-      setIsLoading(false);
+      setIsAuthenticating(false);
     }
   }
 
@@ -226,7 +227,7 @@ export const AuthProvider: React.FC<{
     displayName: string
   ) => {
     try {
-      setIsLoading(true);
+      setIsAuthenticating(true);
 
       const res = await axiosInstance.post(
         "/register",
@@ -266,13 +267,13 @@ export const AuthProvider: React.FC<{
         "Signup failed"
       );
     } finally {
-      setIsLoading(false);
+      setIsAuthenticating(false);
     }
   };
 
   const googlesignin = async () => {
     try {
-      setIsLoading(true);
+      setIsAuthenticating(true);
 
       const provider =
         new GoogleAuthProvider();
@@ -371,7 +372,7 @@ export const AuthProvider: React.FC<{
         "Google login failed"
       );
     } finally {
-      setIsLoading(false);
+      setIsAuthenticating(false);
     }
   };
 
@@ -451,6 +452,7 @@ export const AuthProvider: React.FC<{
         logout,
         verifyOtp,
         isLoading,
+        isAuthenticating,
         googlesignin,
       }}
     >

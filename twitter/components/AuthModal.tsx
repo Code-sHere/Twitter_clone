@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { User, X, Mail, Lock, Eye, EyeOff } from "lucide-react";
@@ -12,20 +12,27 @@ import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
-
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialMode?: "login" | "signup";
 }
 
+
 const AuthModal = ({
     isOpen,
     onClose,
     initialMode = "login",
 }: AuthModalProps) => {
-    const { login, signup, verifyOtp, isLoading } = useAuth();
 
+
+    useEffect(() => {
+        console.log("AuthModal MOUNTED");
+        return () => console.log("AuthModal UNMOUNTED");
+    }, []);
+
+    const { login, signup, verifyOtp, isLoading , isAuthenticating } = useAuth();
+    
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -82,7 +89,7 @@ const AuthModal = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!validateForm() || isLoading) return;
+        if (!validateForm() || isAuthenticating) return;
 
         try {
             if (mode === "login") {
@@ -92,12 +99,11 @@ const AuthModal = ({
                 console.log(result);
 
                 if (result?.requiresOtp) {
-
-                    console.log("setting otp mode");
-                    
+                    console.log("1️⃣ OTP RESULT:", result);
                     setOtpMode(true);
                     setOtpUserId(result.userId || "");
                     setErrors({});
+                    console.log("2️⃣ OTP STATE SET CALLED");
                     return;
                 }
 
@@ -200,6 +206,12 @@ const AuthModal = ({
         });
     };
 
+    console.log("AUTH MODAL RENDER:", {
+        isOpen,
+        otpMode,
+        otpUserId,
+        isLoading,
+    });
     return (
         <div
             className="
@@ -329,7 +341,7 @@ const AuthModal = ({
                     tracking-[0.4em]
                     text-lg
                 "
-                                        disabled={isLoading}
+                                        disabled={isAuthenticating}
                                     />
                                 </div>
 
@@ -350,9 +362,9 @@ const AuthModal = ({
                 font-semibold
                 rounded-full
             "
-                                    disabled={isLoading || otp.length !== 6}
+                                    disabled={isAuthenticating || otp.length !== 6}
                                 >
-                                    {isLoading ? (
+                                    {isAuthenticating ? (
                                         <div className="flex items-center gap-2">
                                             <Loadingspinner size="sm" />
                                             <span>Verifying...</span>
@@ -399,7 +411,7 @@ const AuthModal = ({
                                                 placeholder-gray-400
                                                 focus:border-blue-500
                                             "
-                                                    disabled={isLoading}
+                                                    disabled={isAuthenticating}
                                                 />
                                             </div>
 
@@ -444,7 +456,7 @@ const AuthModal = ({
                                                 placeholder-gray-400
                                                 focus:border-blue-500
                                             "
-                                                    disabled={isLoading}
+                                                    disabled={isAuthenticating}
                                                 />
                                             </div>
 
@@ -489,7 +501,7 @@ const AuthModal = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                            disabled={isLoading}
+                                            disabled={isAuthenticating}
                                         />
                                     </div>
 
@@ -537,7 +549,7 @@ const AuthModal = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                            disabled={isLoading}
+                                            disabled={isAuthenticating}
                                         />
 
                                         <Button
@@ -585,9 +597,9 @@ const AuthModal = ({
                                 rounded-full
                                 text-base
                             "
-                                    disabled={isLoading}
+                                    disabled={isAuthenticating}
                                 >
-                                    {isLoading ? (
+                                    {isAuthenticating ? (
                                         <div className="flex items-center gap-2">
                                             <Loadingspinner size="sm" />
 
@@ -661,7 +673,7 @@ const AuthModal = ({
                                     pl-1
                                 "
                                         onClick={switchMode}
-                                        disabled={isLoading}
+                                        disabled={isAuthenticating}
                                     >
                                         {mode === "login"
                                             ? "Sign up"
