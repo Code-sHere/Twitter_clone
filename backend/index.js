@@ -271,6 +271,7 @@ app.post("/login", async (req, res) => {
                 success: true,
                 requiresOtp: true,
                 message: "Otp sent to your register email",
+                userId: user._id
             });
 
         }
