@@ -13,6 +13,7 @@ import { Button } from "./ui/button";
 import {
     Image as ImageIcon,
     Smile,
+    Music,
     Calendar,
     MapPin,
     BarChart3,
@@ -33,6 +34,7 @@ const TweetComposer = ({
     const [content, setContent] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
+    const [isAudioUrl, setIsAudioUrl] = useState("");
 
     const maxlength = 200;
 
@@ -56,6 +58,7 @@ const TweetComposer = ({
                 author: user?._id,
                 content,
                 image: imageUrl,
+                audio: isAudioUrl
             };
 
             const res = await axiosInstance.post(
@@ -106,6 +109,44 @@ const TweetComposer = ({
             setIsLoading(false);
         }
     };
+
+    const handleAudioUpload = async ( e: React.ChangeEvent<HTMLInputElement>) =>{
+
+        if(!e.target.files || e.target.files.length===0){
+            return;
+        }
+
+        setIsLoading(true);
+
+        const audio = e.target.files[0];
+
+        //100 mb limit
+        const maxSize = 100 * 1024 *1024;
+
+        if(audio.size > maxSize){
+            alert("Audio size limit exceeded");
+            setIsLoading(false);
+            return;
+        }
+
+        //chek audio type 
+        if(!audio.type.startsWith("audio/")){
+            alert("Please select an audio file");
+            setIsLoading(false);
+            return;
+        }
+
+        const formdataaudio = new FormData();
+
+        formdataaudio.set("audio", audio);
+
+        try{
+            const res = await axios.post{
+                
+            }
+        }
+
+    }
 
     const removeImage = () => {
         setImageUrl("");
@@ -223,6 +264,30 @@ const TweetComposer = ({
                                             text-blue-400
                                         "
                                     >
+                                        {/* Image */}
+                                        <label
+                                            htmlFor="tweetAudio"
+                                            className="
+                                                p-2
+                                                rounded-full
+                                                hover:bg-blue-900/20
+                                                cursor-pointer
+                                            "
+                                        >
+                                            <Music className="h-5 w-5" />
+
+                                            <input
+                                                type="file"
+                                                accept="audio/*"
+                                                id="tweetAudio"
+                                                className="hidden"
+                                                onChange={
+                                                    handleAudioUpload
+                                                }
+                                                disabled={isLoading}
+                                            />
+                                        </label>
+
                                         {/* Image */}
                                         <label
                                             htmlFor="tweetImage"
