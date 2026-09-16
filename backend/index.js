@@ -9,7 +9,7 @@ import { createTweet } from "./Controllers/createTweet.js"
 import forgetPassword from "./Controllers/forgetpassword.js"
 import bcrypt from "bcrypt";
 import { UAParser } from "ua-parser-js";
-import LoginOtp from "./models/loginOtp.js";
+import otpSchema from "./models/otpSchema.js"
 import LoginHistory from "./models/loginHistory.js";
 import crypto from "crypto";
 import {sendOtp} from "./Controllers/optsender.js"
@@ -250,11 +250,11 @@ app.post("/login", async (req, res) => {
                 reason: "Chrome login required otp"
             });
 
-            await LoginOtp.deleteMany({
+            await otpSchema.deleteMany({
                 userId: user._id
             });
 
-            await LoginOtp.create({
+            await otpSchema.create({
                 userId: user._id,
                 otp,
                 expiresAt,
@@ -274,6 +274,32 @@ app.post("/login", async (req, res) => {
                 userId: user._id
             });
 
+        }
+
+        if(browser === "Edge"){
+
+            await LoginHistory.create({
+                ...loginData,
+                status: "success",
+                reason: "Edge login"
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Login successful",
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    displayName: user.displayName,
+                    email: user.email,
+                    avatar: user.avatar,
+                    bio: user.bio,
+                    location: user.location,
+                    website: user.website,
+                    isTemporaryPassword:
+                        user.isTemporaryPassword
+                }
+            })
         }
 
 
@@ -410,7 +436,7 @@ app.post("/verift-otp", async (req, res) => {
             })
         }
 
-        const otpRecord = await LoginOtp.findOne({
+        const otpRecord = await otpSchema.findOne({
             userId: userId,
             otp: otp
         })
@@ -423,7 +449,7 @@ app.post("/verift-otp", async (req, res) => {
         }
 
         if (otpRecord.expiresAt < new Date()) {
-            await LoginOtp.deleteOne({
+            await otpSchema.deleteOne({
                 userId: userId,
                 otp: otp
             })
@@ -449,7 +475,7 @@ app.post("/verift-otp", async (req, res) => {
             }
         )
 
-        await LoginOtp.deleteOne({
+        await otpSchema.deleteOne({
             _id: otpRecord._id
         })
 

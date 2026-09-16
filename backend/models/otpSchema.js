@@ -2,7 +2,7 @@
 
 import mongoose from "mongoose";
 
-const loginOtp = new mongoose.Schema({
+const otpSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -14,11 +14,22 @@ const loginOtp = new mongoose.Schema({
         required: true
     },
 
+    puropse: {
+        type: String,
+        enum: ["login", "audioTweet"],
+        default: "login"
+    },
+
     expiresAt: {
         type: Date,
         required: true
     },
 
+    verified: {
+        type: Boolean,
+        default: false
+    },
+    
     loginHistoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "LoginHistory",
@@ -26,4 +37,4 @@ const loginOtp = new mongoose.Schema({
     }
 });
 
-export default mongoose.model("LoginOtp", loginOtp);
+export default mongoose.model("OTP", otpSchema);
