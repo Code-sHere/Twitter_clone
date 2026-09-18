@@ -12,7 +12,10 @@ import { UAParser } from "ua-parser-js";
 import otpSchema from "./models/otpSchema.js"
 import LoginHistory from "./models/loginHistory.js";
 import crypto from "crypto";
+import cloudinary from "./config/cloudinary.js";
+import upload from "./middleware/upload.js";
 import {sendOtp} from "./Controllers/optsender.js"
+import assets from "./models/assets.js";
 
 const app = express()
 app.use(cors())
@@ -364,6 +367,8 @@ app.patch("/userupdate/:email", async (req, res) => {
 //tweet api
 app.post("/post", createTweet);
 
+// get post
+
 app.get("/post", async (req, res) => {
     try {
         const tweets = await Tweet.find()
@@ -377,7 +382,100 @@ app.get("/post", async (req, res) => {
             error: error.message
         });
     }
-})
+});
+
+// upload audio
+
+app.post("/upload-audio", upload.single("audio"), async(req,res) =>{
+    try{
+        if(!req.file){
+            return res.status(400).json({
+                success: false,
+                message: "Audio file is required"
+            })
+        }
+
+        const uploadAudio = cloudinary.uploader.upload_stream({
+            resource_type: "video",
+            folder: "twiller/audio"
+        },(error, result)=>{
+            if(error){
+                console.error("Cloudinart upload error:", error);
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to upload audio file"
+                })
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Audio file uploaded successfully",
+                audioUrl: result.secure_url
+            })
+        })
+
+        uploadAudio.end(req.file.buffer);
+
+    }catch(error){
+        console.error("Audio upload error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to upload audio file"
+        }) 
+    }
+} );
+
+app.get("/assets", async (req, res) => {
+    try {
+        const assetList = await assets.find()
+            .sort({ timestamp: -1 });
+
+        return res.status(200).json(assetList);
+
+    } catch (error) {
+        console.error(
+            "Get Assets Error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch assets",
+            error: error.message,
+        });
+    }
+});
+
+app.get("/assets/:tweetId", async (req, res) => {
+    try {
+        const { tweetId } = req.params;
+
+        const asset = await Assets.findOne({
+            tweetId,
+        });
+
+        if (!asset) {
+            return res.status(404).json({
+                success: false,
+                message: "Assets not found",
+            });
+        }
+
+        return res.status(200).json(asset);
+
+    } catch (error) {
+        console.error(
+            "Get Tweet Asset Error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch tweet assets",
+            error: error.message,
+        });
+    }
+});
 
 //Like tweet
 

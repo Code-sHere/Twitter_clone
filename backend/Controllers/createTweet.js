@@ -1,15 +1,42 @@
 import Tweet from "../models/tweet.js"
 import Subscription from "../models/Subscription.js"
-import User from "../models/user.js"
+import assets from "../models/assets.js"
 
 export const createTweet = async (req, res) => {
     try {
-        const { author, content, image } = req.body;
+        const { author, content, image, audio } = req.body;
 
-        if (!author || !content || !content.trim()) {
+        console.log("re.body", req.body);
+
+        if (!author) {
             return res.status(400).json({
                 success: false,
                 message: "Author and content are required."
+            });
+        }
+
+        const cleanContent =
+            typeof content === "string"
+                ? content.trim()
+                : "";
+
+        const cleanImage =
+            typeof image === "string" &&
+                image.trim().length > 0
+                ? image.trim()
+                : null;
+
+        const cleanAudio =
+            typeof audio === "string" &&
+                audio.trim().length > 0
+                ? audio.trim()
+                : null;
+
+
+        if (!cleanContent && !cleanImage && !cleanAudio) {
+            return res.status(400).json({
+                success: false,
+                message: "Tweet must contain text, image or audio."
             });
         }
 
@@ -47,13 +74,29 @@ export const createTweet = async (req, res) => {
             });
         }
 
+        // save tweet
         const tweet = new Tweet({
             author: subscription.UserId,
-            content: content.trim(),
-            image: image || null,
+            content: content?.trim(),
         });
 
         await tweet.save();
+        console.log("TWEET:", tweet._id);
+
+        // save assets
+        let asset = null;
+        if (cleanImage || cleanAudio) {
+            asset = new assets({
+                author: subscription.UserId,
+                assetsId: tweet._id,
+                image: cleanImage,
+                audio: cleanAudio,
+            })
+
+            await asset.save();
+        }
+
+        console.log("ASSET:", assets);
 
         if (subscription.plan !== "gold") {
             subscription.tweetUsed += 1;
@@ -64,6 +107,7 @@ export const createTweet = async (req, res) => {
             success: true,
             message: "Tweet posted successfully",
             tweet,
+            asset,
             tweetUsed: subscription.plan === "gold" ? null : subscription.tweetUsed,
             tweetLimit: subscription.plan === "gold" ? null : subscription.tweetLimit,
             tweetsRemaining:

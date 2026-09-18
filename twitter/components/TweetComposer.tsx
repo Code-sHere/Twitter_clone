@@ -19,8 +19,8 @@ import {
     BarChart3,
     Globe,
     X,
+    Volume2,
 } from "lucide-react";
-import { Separator } from "./ui/separator";
 import axios from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
@@ -42,12 +42,20 @@ const TweetComposer = ({
     const isOverLimit = characterCount > maxlength;
     const isNearLimit = characterCount > maxlength * 0.8;
 
+    const hasContent = content.trim().length > 0;
+    const hasImage = imageUrl.trim().length > 0;
+    const hasAudio = isAudioUrl.trim().length > 0;
+
+    const canPost = hasContent || hasImage || hasAudio;
+
     if (!user) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("AUDIO URL GOING TO TWEET:", isAudioUrl);
 
-        if (!user || !content.trim() || isOverLimit || isLoading) {
+
+        if (!user || !canPost || isOverLimit || isLoading) {
             return;
         }
 
@@ -61,6 +69,7 @@ const TweetComposer = ({
                 audio: isAudioUrl
             };
 
+            console.log("TWEET DATA:", tweetdata);
             const res = await axiosInstance.post(
                 "/post",
                 tweetdata
@@ -70,8 +79,19 @@ const TweetComposer = ({
 
             setContent("");
             setImageUrl("");
+            setIsAudioUrl("");
         } catch (error) {
-            console.error("Failed to create tweet:", error);
+            if (axios.isAxiosError(error)) {
+                console.error(
+                    "failed to create tweet:",
+                    error.response?.data
+                );
+            } else {
+                console.error(
+                    "failed to create tweet:",
+                    error
+                );
+            }
         } finally {
             setIsLoading(false);
         }
@@ -110,9 +130,9 @@ const TweetComposer = ({
         }
     };
 
-    const handleAudioUpload = async ( e: React.ChangeEvent<HTMLInputElement>) =>{
+    const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
-        if(!e.target.files || e.target.files.length===0){
+        if (!e.target.files || e.target.files.length === 0) {
             return;
         }
 
@@ -121,16 +141,16 @@ const TweetComposer = ({
         const audio = e.target.files[0];
 
         //100 mb limit
-        const maxSize = 100 * 1024 *1024;
+        const maxSize = 100 * 1024 * 1024;
 
-        if(audio.size > maxSize){
+        if (audio.size > maxSize) {
             alert("Audio size limit exceeded");
             setIsLoading(false);
             return;
         }
 
         //chek audio type 
-        if(!audio.type.startsWith("audio/")){
+        if (!audio.type.startsWith("audio/")) {
             alert("Please select an audio file");
             setIsLoading(false);
             return;
@@ -140,16 +160,40 @@ const TweetComposer = ({
 
         formdataaudio.set("audio", audio);
 
-        try{
-            const res = await axios.post{
-                
-            }
+        try {
+            const res = await axios.post("http://localhost:5000/upload-audio",
+                formdataaudio,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                }
+            );
+
+            const uploadedAudio = res.data.audioUrl;
+
+            console.log(
+                "Uploaded Audio URL:",
+                uploadedAudio
+            );
+
+            setIsAudioUrl(uploadedAudio);
+        } catch (error) {
+            console.error("Audio upload failed:", error);
+            alert("Audio upload failed");
+        }
+        finally {
+            setIsLoading(false);
         }
 
     }
 
     const removeImage = () => {
         setImageUrl("");
+    };
+
+    const removeAudio = () => {
+        setIsAudioUrl("");
     };
 
     return (
@@ -206,19 +250,19 @@ const TweetComposer = ({
 
                             {/* Image Preview */}
                             {imageUrl && (
-                                <div className="relative mt-2 mb-3">
+                                <div className="relative mt-2 mb-3 rounded-2xl border border-gray-700 bg-[#16181c] p-2">
                                     <img
                                         src={imageUrl}
                                         alt="Tweet preview"
                                         className="
-                                            w-full
-                                            max-h-[300px]
-                                            sm:max-h-[400px]
-                                            object-cover
-                                            rounded-xl
-                                            border
-                                            border-gray-800
-                                        "
+                w-full
+                max-h-[300px]
+                sm:max-h-[400px]
+                object-cover
+                rounded-xl
+                border
+                border-gray-700
+            "
                                     />
 
                                     <Button
@@ -227,21 +271,93 @@ const TweetComposer = ({
                                         size="icon"
                                         onClick={removeImage}
                                         className="
-                                            absolute
-                                            top-2
-                                            right-2
-                                            h-8
-                                            w-8
-                                            rounded-full
-                                            bg-black/70
-                                            hover:bg-black
-                                            text-white
-                                        "
+                absolute
+                top-3
+                right-3
+                h-8
+                w-8
+                rounded-full
+                bg-black/70
+                hover:bg-red-600
+                text-white
+                transition-colors
+            "
                                     >
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
                             )}
+
+                            {/* Audio Preview */}
+                            {isAudioUrl && (
+                                <div
+                                    className="
+            relative
+            mt-2
+            mb-3
+            rounded-2xl
+            border
+            border-gray-700
+            bg-[#16181c]
+            p-4
+        "
+                                >
+                                    <div className="flex items-center gap-3 pr-8">
+                                        {/* Audio Icon */}
+                                        <div
+                                            className="
+                    flex
+                    h-11
+                    w-11
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-blue-500/15
+                    text-blue-400
+                "
+                                        >
+                                            <Volume2 className="h-5 w-5" />
+                                        </div>
+
+                                        {/* Audio Player */}
+                                        <audio
+                                            controls
+                                            preload="metadata"
+                                            className="h-10 w-full"
+                                        >
+                                            <source
+                                                src={isAudioUrl}
+                                                type="audio/mpeg"
+                                            />
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+
+                                    {/* Remove Audio Button */}
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={removeAudio}
+                                        className="
+                absolute
+                top-3
+                right-3
+                h-8
+                w-8
+                rounded-full
+                bg-black/70
+                text-white
+                hover:bg-red-600
+                transition-colors
+            "
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+
 
                             {/* Bottom Controls */}
                             <div
@@ -461,7 +577,7 @@ const TweetComposer = ({
                                     <Button
                                         type="submit"
                                         disabled={
-                                            !content.trim() ||
+                                            !canPost ||
                                             isOverLimit ||
                                             isLoading
                                         }
