@@ -28,6 +28,7 @@ const TweetCard = ({
     className = "",
 }: TweetCardProps) => {
 
+    console.log("assets in tweet card");
     const { user } = useAuth();
 
     const [tweetstate, setTweetstate] = useState(tweet);
@@ -235,7 +236,7 @@ const TweetCard = ({
                                         preload="metadata"
                                         className="w-full"
                                     >
-                                        <source src={asset.audio} />
+                                        <source src={asset.audio} type="audio/mpeg" />
 
                                         Your browser does not support
                                         the audio element.

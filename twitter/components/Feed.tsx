@@ -31,7 +31,7 @@ interface Tweet {
 interface Asset {
     _id: string;
     author: string;
-    tweetId: string;
+    assetsId: string;
     image?: string | null;
     audio?: string | null;
     timestamp: string;
@@ -225,7 +225,7 @@ const Feed = () => {
                         // Find asset belonging to this tweet
                         const tweetAsset = assets.find(
                             (item) =>
-                                String(item.tweetId) ===
+                                String(item.assetsId) ===
                                 String(tweet._id)
                         );
 

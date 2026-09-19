@@ -36,6 +36,12 @@ const TweetComposer = ({
     const [imageUrl, setImageUrl] = useState("");
     const [isAudioUrl, setIsAudioUrl] = useState("");
 
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+
+    const [showOtp, setShowOtp] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
+
     const maxlength = 200;
 
     const characterCount = content.length;
@@ -130,62 +136,135 @@ const TweetComposer = ({
         }
     };
 
-    const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-
+    const handleAudioUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
         if (!e.target.files || e.target.files.length === 0) {
             return;
         }
 
-        setIsLoading(true);
-
         const audio = e.target.files[0];
 
-        //100 mb limit
+        // 100 MB limit
         const maxSize = 100 * 1024 * 1024;
 
         if (audio.size > maxSize) {
-            alert("Audio size limit exceeded");
-            setIsLoading(false);
+            alert("Audio size limit exceeded. Maximum 100 MB allowed.");
+            e.target.value = "";
             return;
         }
 
-        //chek audio type 
+        // Check audio type
         if (!audio.type.startsWith("audio/")) {
             alert("Please select an audio file");
-            setIsLoading(false);
+            e.target.value = "";
             return;
         }
 
-        const formdataaudio = new FormData();
+        setAudioFile(audio);
 
-        formdataaudio.set("audio", audio);
-
+        // OTP request
         try {
-            const res = await axios.post("http://localhost:5000/upload-audio",
-                formdataaudio,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                }
+            setIsLoading(true);
+
+            const formdataaudio = new FormData();
+
+            formdataaudio.append("audio", audio);
+            formdataaudio.append("userId", user._id);
+            formdataaudio.append("otpVerified", "false");
+
+            const res = await axios.post(
+                "http://localhost:5000/upload-audio",
+                formdataaudio
             );
 
-            const uploadedAudio = res.data.audioUrl;
+            console.log("Audio OTP response:", res.data);
 
-            console.log(
-                "Uploaded Audio URL:",
-                uploadedAudio
-            );
+            if (res.data.requiresOtp) {
+                setShowOtp(true);
 
-            setIsAudioUrl(uploadedAudio);
+                alert(
+                    "OTP has been sent to your registered email."
+                );
+            }
         } catch (error) {
-            console.error("Audio upload failed:", error);
-            alert("Audio upload failed");
-        }
-        finally {
+            console.error("Audio OTP request failed:", error);
+            alert("Failed to send OTP");
+            setAudioFile(null);
+        } finally {
             setIsLoading(false);
         }
+    };
 
+    const verifyAudioOtp = async () => {
+        if (!otp || otp.length !== 6) {
+            alert("Please enter a valid OTP");
+            return;
+        }
+
+        if (!audioFile) {
+            alert("Audio file is required");
+            return;
+        }
+
+        try {
+            setOtpLoading(true);
+
+            const verifyResponse = await axios.post(
+                "http://localhost:5000/verift-otp", {
+                userId: user._id,
+                otp: otp
+            }
+            )
+
+            console.log("otp response", verifyResponse.data);
+
+            if (!verifyResponse.data.success) {
+                alert("Inlavlid otp");
+                return;
+            }
+
+            const formdataaudio = new FormData();
+
+            formdataaudio.append("audio", audioFile);
+            formdataaudio.append("userId", user._id);
+            formdataaudio.append("otpVerified", "true");
+
+            const uploadResponse = await axios.post(
+                "http://localhost:5000/upload-audio",
+                formdataaudio, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+            }
+            )
+
+            console.log("audio upload response", uploadResponse.data);
+
+            if (uploadResponse.data.success) {
+                setIsAudioUrl(uploadResponse.data.audioUrl);
+                setShowOtp(false);
+                setOtp("");
+                alert("Audio uploaded successfully");
+            }
+
+        } catch (error) {
+            console.error(
+                "OTP verification / audio upload failed:",
+                error
+            );
+
+            if (axios.isAxiosError(error)) {
+                alert(
+                    error.response?.data?.message ||
+                    "OTP verification failed"
+                );
+            } else {
+                alert("Something went wrong");
+            }
+        } finally {
+            setOtpLoading(false);
+        }
     }
 
     const removeImage = () => {
@@ -355,6 +434,72 @@ const TweetComposer = ({
                                     >
                                         <X className="h-4 w-4" />
                                     </Button>
+                                </div>
+                            )}
+
+                            {/* Audio OTP Verification */}
+                            {showOtp && (
+                                <div className="mt-4 mb-4 rounded-2xl border border-gray-700 bg-[#16181c] p-4">
+
+                                    <div className="mb-3">
+                                        <h3 className="text-white font-semibold text-base">
+                                            Verify Audio Upload
+                                        </h3>
+
+                                        <p className="text-gray-400 text-sm mt-1">
+                                            Enter the 6-digit OTP sent to your registered email.
+                                        </p>
+                                    </div>
+
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength={6}
+                                        value={otp}
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                                .replace(/\D/g, "")
+                                                .slice(0, 6);
+
+                                            setOtp(value);
+                                        }}
+                                        placeholder="Enter 6-digit OTP"
+                                        className="
+                w-full
+                h-11
+                rounded-xl
+                bg-black
+                border
+                border-gray-700
+                px-4
+                text-white
+                placeholder-gray-500
+                outline-none
+                focus:border-blue-500
+            "
+                                        disabled={otpLoading}
+                                    />
+
+                                    <Button
+                                        type="button"
+                                        onClick={verifyAudioOtp}
+                                        disabled={otpLoading || otp.length !== 6}
+                                        className="
+                w-full
+                mt-3
+                bg-blue-500
+                hover:bg-blue-600
+                disabled:bg-gray-700
+                disabled:text-gray-500
+                text-white
+                font-semibold
+                rounded-xl
+                h-11
+            "
+                                    >
+                                        {otpLoading ? "Verifying..." : "Verify OTP"}
+                                    </Button>
+
                                 </div>
                             )}
 
