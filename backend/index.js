@@ -14,7 +14,7 @@ import LoginHistory from "./models/loginHistory.js";
 import crypto from "crypto";
 import cloudinary from "./config/cloudinary.js";
 import upload from "./middleware/upload.js";
-import {sendOtp} from "./Controllers/optsender.js"
+import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 
 const app = express()
@@ -279,7 +279,7 @@ app.post("/login", async (req, res) => {
 
         }
 
-        if(browser === "Edge"){
+        if (browser === "Edge") {
 
             await LoginHistory.create({
                 ...loginData,
@@ -386,24 +386,110 @@ app.get("/post", async (req, res) => {
 
 // upload audio
 
-app.post("/upload-audio", upload.single("audio"), async(req,res) =>{
-    try{
-        if(!req.file){
+app.post("/upload-audio", upload.single("audio"), async (req, res) => {
+    try {
+
+        const { userId, otpVerified } = req.body;
+
+        if (!userId) {
             return res.status(400).json({
                 success: false,
-                message: "Audio file is required"
+                message: "userId is required"
+            })
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        if (otpVerified !== "true") {
+            const otp = crypto.randomInt(100000, 999999).toString();
+
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+            await otpSchema.deleteMany({
+                userId: user._id,
+                purpose: "audioTweet"
+            })
+
+            await otpSchema.create({
+                userId: user._id,
+                otp,
+                purpose: "audioTweet",
+                expiresAt,
+                verified: false
+            })
+
+            await sendOtp(
+                user.email,
+                user.displayName,
+                otp
+            )
+
+            return res.status(200).json({
+                success: true,
+                requiresOtp: true,
+                message: "Otp sent to your register email",
+                otp
+            })
+        }
+
+        const verifiedOtp = await otpSchema.findOne({
+            userId: user._id,
+            purpose: "audioTweet",
+            verified: true,
+            expiresAt: { $gt: new Date() }
+        })
+
+        if (!verifiedOtp) {
+            return res.status(400).json({
+                success: false,
+                message: "please verify your otp"
+            })
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "audio file is required"
             })
         }
 
         const uploadAudio = cloudinary.uploader.upload_stream({
             resource_type: "video",
             folder: "twiller/audio"
-        },(error, result)=>{
-            if(error){
+        }, (error, result) => {
+            if (error) {
                 console.error("Cloudinart upload error:", error);
                 return res.status(500).json({
                     success: false,
                     message: "Failed to upload audio file"
+                })
+            }
+
+            const indianTime = new Intl.DateTimeFormat("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            }).format(currentTime);
+
+            const [hours, minutes] = indianTime.split(":").map(Number);
+
+            const currentMinutes = hours * 60 + minutes;
+
+            const startTime = 14 * 60; // 2:00 PM in minutes
+            const endTime = 19 * 60; // 7:00 PM in minutes
+
+            if (currentMinutes < startTime || currentMinutes > endTime) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Audio upload allowed only between 2:00 PM and 7:00 PM"
                 })
             }
 
@@ -416,14 +502,14 @@ app.post("/upload-audio", upload.single("audio"), async(req,res) =>{
 
         uploadAudio.end(req.file.buffer);
 
-    }catch(error){
+    } catch (error) {
         console.error("Audio upload error:", error);
         return res.status(500).json({
             success: false,
             message: "Failed to upload audio file"
-        }) 
+        })
     }
-} );
+});
 
 app.get("/assets", async (req, res) => {
     try {
@@ -536,7 +622,7 @@ app.post("/verift-otp", async (req, res) => {
 
         const otpRecord = await otpSchema.findOne({
             userId: userId,
-            otp: otp
+            otp: otp.toString()
         })
 
         if (!otpRecord) {
@@ -558,11 +644,18 @@ app.post("/verift-otp", async (req, res) => {
             })
         }
 
-        if (otpRecord.otp !== otp) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid otp"
-            })
+        //    Audio otp
+
+        if (otpRecord.purpose === "audioTweet") {
+
+            otpRecord.verified = true;
+
+            await otpRecord.save();
+
+            return res.status(200).json({
+                success: true,
+                message: "Audio OTP verified"
+            });
         }
 
         await LoginHistory.findOneAndUpdate(

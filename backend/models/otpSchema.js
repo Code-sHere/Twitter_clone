@@ -14,7 +14,7 @@ const otpSchema = new mongoose.Schema({
         required: true
     },
 
-    puropse: {
+    purpose: {
         type: String,
         enum: ["login", "audioTweet"],
         default: "login"
@@ -33,7 +33,6 @@ const otpSchema = new mongoose.Schema({
     loginHistoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "LoginHistory",
-        required: true
     }
 });
 
