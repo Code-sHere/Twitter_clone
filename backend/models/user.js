@@ -19,6 +19,10 @@ const UserSchema = mongoose.Schema({
     website: { type: String, default: "" },
     password: { type: String, required: true },
     lastPasswordResetRequest: { type: Date, default: null },
+    notificationEnabled : {
+        type: Boolean,
+        default: true
+    },
     isTemporaryPassword: {
         type: Boolean,
         default: false
