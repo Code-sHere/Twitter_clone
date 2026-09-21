@@ -472,6 +472,8 @@ app.post("/upload-audio", upload.single("audio"), async (req, res) => {
                 })
             }
 
+            const currentTime = new Date();
+
             const indianTime = new Intl.DateTimeFormat("en-IN", {
                 timeZone: "Asia/Kolkata",
                 hour: "2-digit",
@@ -709,6 +711,72 @@ app.post("/verift-otp", async (req, res) => {
     }
 })
 
+app.get("/settings/:userId", async (req, res) => {
+    try{
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).select("notificationEnalbed");
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Settings fetched successfully",
+            notificationEnalbed: user.notificationEnalbed
+        })
+
+    }catch(error){
+        console.log("Get notification error", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        })
+    }
+})
+
+app.put("/settings/:userId", async(req, res) => {
+    try{
+
+        const {userId} = req.params;
+        const{notificationEnalbed} = req.body;
+
+        const user = await User.findByIdAndUpdate(userId,{
+            notificationEnalbed: Boolean(notificationEnalbed)
+        },{
+            new: true
+        }
+    ).select("notificationEnalbed");
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Settings updated successfully",
+            notificationEnalbed: user.notificationEnalbed
+        })
+
+    }catch(error){
+        console.log("Update notification error", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        })
+    }
+})
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
