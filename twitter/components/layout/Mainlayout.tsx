@@ -5,6 +5,8 @@ import Loadingspinner from '@/components/Loading-spinner';
 import Sidebar from '@/components/layout/Sidebar';
 import RightSidebar from '@/components/layout/Rightsidebar';
 import ProfilePage from '@/components/ProfilePgae';
+import NotificationSetings from '@/components/NotificationSetings';
+
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
@@ -35,7 +37,13 @@ const Mainlayout = ({ children }: any) => {
         </div>
 
         <main className="flex-1 min-w-0 w-full max-w-2xl flex flex-col px-2 sm:px-4 lg:px-8 border-x border-gray-800 pb-14 sm:pb-16 md:pb-0">
-          {currentPage === "profile" ? <ProfilePage /> : children}
+          {currentPage === "profile" ? (
+            <ProfilePage />
+          ) : currentPage === "notifications" ? (
+            <NotificationSetings />
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>
