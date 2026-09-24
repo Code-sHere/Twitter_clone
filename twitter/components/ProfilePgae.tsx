@@ -15,6 +15,7 @@ import { Card, CardContent } from './ui/card'
 import TweetCard from './TweetCard'
 import EditProfile from './EditProfile'
 import axiosInstance from '@/lib/axiosInstance'
+import NotificationSetings from './NotificationSetings'
 
 interface Tweet {
     id: string
@@ -288,6 +289,11 @@ const ProfilePgae = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="px-4 py-4 border-b border-gray-800">
+
+                <NotificationSetings userId={user._id} />
+
             </div>
 
             {/* Tabs */}

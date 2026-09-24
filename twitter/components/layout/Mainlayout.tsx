@@ -5,12 +5,15 @@ import Loadingspinner from '@/components/Loading-spinner';
 import Sidebar from '@/components/layout/Sidebar';
 import RightSidebar from '@/components/layout/Rightsidebar';
 import ProfilePage from '@/components/ProfilePgae';
-import NotificationSetings from '@/components/NotificationSetings';
+import Notifications from '@/components/Notifications';
+
 
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState("home");
+
+  const userId = user?._id;
 
   if (isLoading) {
     return (
@@ -40,7 +43,7 @@ const Mainlayout = ({ children }: any) => {
           {currentPage === "profile" ? (
             <ProfilePage />
           ) : currentPage === "notifications" ? (
-            <NotificationSetings />
+            <Notifications userId={userId} />
           ) : (
             children
           )}

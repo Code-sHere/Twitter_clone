@@ -16,6 +16,7 @@ import cloudinary from "./config/cloudinary.js";
 import upload from "./middleware/upload.js";
 import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
+import Notification from "./models/notification.js";
 
 const app = express()
 app.use(cors())
@@ -750,7 +751,7 @@ app.put("/settings/:userId", async(req, res) => {
         const user = await User.findByIdAndUpdate(userId,{
             notificationEnalbed: Boolean(notificationEnalbed)
         },{
-            new: true
+            returnDocument: "after"
         }
     ).select("notificationEnalbed");
 
@@ -777,6 +778,46 @@ app.put("/settings/:userId", async(req, res) => {
         })
     }
 })
+app.get("/notifications/:userId", async (req, res) => {
+
+    try {
+
+        const { userId } = req.params;
+
+        const notifications = await Notification.find({
+            userId: userId
+        })
+        .populate({
+            path: "tweetId",
+            populate: {
+                path: "author",
+                select: "username"
+            }
+        })
+        .sort({
+            createdAt: -1
+        });
+
+
+        res.status(200).json({
+            success: true,
+            notifications
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Get notifications error:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to get notifications"
+        });
+    }
+});
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
