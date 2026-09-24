@@ -2,13 +2,15 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios';
 
-const NotificationSetings = ({ userId }) => {
+const NotificationSetings = ({ userId }:{userId: string}) => {
 
     const [enabled, setEnabled] = useState(true);
     const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
+        if (!userId) return;
+
         loadNotificationSettings();
     }, [userId]);
 
@@ -17,7 +19,7 @@ const NotificationSetings = ({ userId }) => {
 
         try {
 
-            const response = await axios.get(`/setting/${userId}`);
+            const response = await axios.get(`http://localhost:5000/settings/${userId}`);
 
             setEnabled(response.data.notificationEnalbed);
 
@@ -39,13 +41,13 @@ const NotificationSetings = ({ userId }) => {
             if (newValue && "Notification" in window && Notification.permission !== "granted") {
                 const permission = await Notification.requestPermission();
 
-                if (permission === "granted") {
-                    alert("Notifications are enabled");
+                if (permission !== "granted") {
+                    alert("Please allow notifications in your browser.");
                     return;
                 }
             }
 
-            await axios.put(`/setting/${userId}`, { notificationEnalbed: newValue });
+            await axios.put(`http://localhost:5000/settings/${userId}`, { notificationEnalbed: newValue });
             setEnabled(newValue);
         } catch (error) {
             console.log("Notification settings error", error);
@@ -88,8 +90,9 @@ const NotificationSetings = ({ userId }) => {
                         w-14
                         h-7
                         rounded-full
-                        transition
+                        transition-colors
                         duration-300
+                        focus:outline-none
                         ${enabled
                                 ? "bg-blue-500"
                                 : "bg-gray-700"
@@ -101,15 +104,16 @@ const NotificationSetings = ({ userId }) => {
                             className={`
                             absolute
                             top-1
+                            left-1
                             w-5
                             h-5
                             rounded-full
                             bg-white
-                            transition
+                            transition-transform
                             duration-300
+                            shadow
                             ${enabled
-                                    ? "left-8"
-                                    : "left-1"
+                                    ? "translate-x-7" : "translate-x-0"
                                 }
                         `}
                         />
