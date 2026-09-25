@@ -85,14 +85,14 @@ export const createTweet = async (req, res) => {
         await tweet.save();
         console.log("TWEET:", tweet._id);
 
-        if(cleanContent){
+        if (cleanContent) {
             const keywords = ["cricket", "science"];
 
             const lowerContent = cleanContent.toLowerCase();
 
             const matchedKeyword = keywords.find(keyword => lowerContent.includes(keyword));
 
-            if(matchedKeyword){
+            if (matchedKeyword) {
                 console.log("KEYWORD MATCHED", matchedKeyword);
 
                 // find users who enables notifications 
@@ -103,21 +103,20 @@ export const createTweet = async (req, res) => {
                 console.log("USERS", users);
 
                 // save notification
-                const notification = new Notification({
-                    userId: users,
+                const notification = users.map(user => ({
+                    userId: user._id,
                     tweetId: tweet._id,
                     type: "keyword",
                     message: `Tweet contains keyword: ${matchedKeyword}`,
                     keyword: matchedKeyword,
                     isRead: false,
-                })
+                }))
 
-                if(notification.length > 0){
+                if (notification.length > 0) {
                     await Notification.insertMany(notification);
 
                     console.log("NOTIFICATION", notification);
                 }
-
 
             }
         }

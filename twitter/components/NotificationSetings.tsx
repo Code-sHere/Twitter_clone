@@ -21,7 +21,7 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
 
             const response = await axios.get(`http://localhost:5000/settings/${userId}`);
 
-            setEnabled(response.data.notificationEnalbed);
+            setEnabled(response.data.notificationEnabled);
 
         } catch (error) {
 
@@ -47,7 +47,7 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
                 }
             }
 
-            await axios.put(`http://localhost:5000/settings/${userId}`, { notificationEnalbed: newValue });
+            await axios.put(`http://localhost:5000/settings/${userId}`, { notificationEnabled: newValue });
             setEnabled(newValue);
         } catch (error) {
             console.log("Notification settings error", error);

@@ -716,7 +716,7 @@ app.get("/settings/:userId", async (req, res) => {
     try{
         const { userId } = req.params;
 
-        const user = await User.findById(userId).select("notificationEnalbed");
+        const user = await User.findById(userId).select("notificationEnabled");
 
         if(!user){
             return res.status(404).json({
@@ -728,7 +728,7 @@ app.get("/settings/:userId", async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Settings fetched successfully",
-            notificationEnalbed: user.notificationEnalbed
+            notificationEnabled: user.notificationEnabled
         })
 
     }catch(error){
@@ -746,14 +746,14 @@ app.put("/settings/:userId", async(req, res) => {
     try{
 
         const {userId} = req.params;
-        const{notificationEnalbed} = req.body;
+        const{notificationEnabled} = req.body;
 
         const user = await User.findByIdAndUpdate(userId,{
-            notificationEnalbed: Boolean(notificationEnalbed)
+            notificationEnabled: Boolean(notificationEnabled)
         },{
             returnDocument: "after"
         }
-    ).select("notificationEnalbed");
+    ).select("notificationEnabled");
 
         if(!user){
             return res.status(404).json({
@@ -765,7 +765,7 @@ app.put("/settings/:userId", async(req, res) => {
         res.status(200).json({
             success: true,
             message: "Settings updated successfully",
-            notificationEnalbed: user.notificationEnalbed
+            notificationEnabled: user.notificationEnabled
         })
 
     }catch(error){
