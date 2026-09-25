@@ -1,0 +1,141 @@
+{
+    "nav": {
+        "home": "होम",
+        "explore": "एक्सप्लोर",
+        "notifications": "सूचनाएँ",
+        "messages": "संदेश",
+        "bookmarks": "बुकमार्क",
+        "logout": "लॉग आउट",
+        "profile": "प्रोफ़ाइल",
+        "more": "अधिक"
+    },
+    "auth": {
+        "login": "लॉगिन",
+        "signup": "साइन अप",
+        "email": "ईमेल",
+        "password": "पासवर्ड",
+        "forgotPassword": "पासवर्ड भूल गए?",
+        "verifyOtp": "OTP सत्यापित करें"
+    },
+    "tweet": {
+        "post": "पोस्ट करें",
+        "reply": "जवाब दें",
+        "like": "पसंद करें",
+        "unlike": "पसंद हटाएँ",
+        "retweet": "रीट्वीट",
+        "comment": "टिप्पणी",
+        "delete": "हटाएँ",
+        "share": "शेयर करें"
+    },
+    "language": {
+        "title": "भाषा",
+        "selectLanguage": "भाषा चुनें",
+        "verifyLanguage": "भाषा परिवर्तन सत्यापित करें",
+        "otpSentMobile": "आपके पंजीकृत मोबाइल नंबर पर OTP भेज दिया गया है।",
+        "otpSentEmail": "आपके पंजीकृत ईमेल पते पर OTP भेज दिया गया है।",
+        "enterOtp": "OTP दर्ज करें",
+        "verify": "सत्यापित करें",
+        "resendOtp": "OTP दोबारा भेजें"
+    },
+    "common": {
+        "save": "सहेजें",
+        "cancel": "रद्द करें",
+        "confirm": "पुष्टि करें",
+        "close": "बंद करें",
+        "loading": "लोड हो रहा है",
+        "error": "त्रुटि",
+        "success": "सफलता"
+    },
+    "plans": {
+        "title": "अपने Twitter अनुभव को बेहतर बनाएं",
+        "subtitle": "अपने लिए सही प्लान चुनें। अधिक ट्वीट, अधिक पहुँच, अधिक प्रभाव।",
+        "free": {
+            "name": "फ्री",
+            "description": "शुरुआत करने के लिए",
+            "price": "₹0",
+            "period": "माह",
+            "features": {
+                "tweets": "प्रति माह 1 ट्वीट",
+                "profile": "बेसिक प्रोफ़ाइल",
+                "support": "मानक सहायता"
+            },
+            "button": "वर्तमान प्लान"
+        },
+        "bronze": {
+            "name": "ब्रॉन्ज़",
+            "description": "अधिक ट्वीट, अधिक शक्ति",
+            "price": "₹100",
+            "period": "माह",
+            "features": {
+                "tweets": "प्रति माह 3 ट्वीट",
+                "profile": "बेसिक प्रोफ़ाइल",
+                "support": "मानक सहायता",
+                "analytics": "एनालिटिक्स तक पहुँच"
+            },
+            "button": "अभी अपग्रेड करें"
+        },
+        "silver": {
+            "name": "सिल्वर",
+            "description": "अधिक ट्वीट, अधिक पहुँच",
+            "badge": "लोकप्रिय",
+            "price": "₹300",
+            "period": "माह",
+            "features": {
+                "tweets": "प्रति माह 5 ट्वीट",
+                "profile": "प्रोफ़ाइल कस्टमाइज़ेशन",
+                "analytics": "एडवांस्ड एनालिटिक्स",
+                "support": "प्राथमिकता सहायता",
+                "earlyAccess": "नई सुविधाओं का शुरुआती एक्सेस"
+            },
+            "button": "अभी अपग्रेड करें"
+        },
+        "gold": {
+            "name": "गोल्ड",
+            "description": "अनलिमिटेड और प्रीमियम",
+            "price": "₹1000",
+            "period": "माह",
+            "features": {
+                "tweets": "अनलिमिटेड ट्वीट",
+                "premium": "सभी प्रीमियम सुविधाएँ",
+                "analytics": "एडवांस्ड एनालिटिक्स",
+                "support": "प्राथमिकता सहायता",
+                "earlyAccess": "नई सुविधाओं का शुरुआती एक्सेस"
+            },
+            "button": "प्रीमियम लें"
+        },
+        "benefits": {
+            "securePayments": {
+                "title": "सुरक्षित भुगतान",
+                "description": "100% सुरक्षित और भरोसेमंद"
+            },
+            "cancelAnytime": {
+                "title": "कभी भी रद्द करें",
+                "description": "जब चाहें अपना प्लान बदलें या रद्द करें"
+            },
+            "premiumSupport": {
+                "title": "प्रीमियम सहायता",
+                "description": "हमारी सपोर्ट टीम 24/7 आपकी सहायता के लिए उपलब्ध है"
+            },
+            "dataSafe": {
+                "title": "आपका डेटा सुरक्षित है",
+                "description": "हम आपका डेटा कभी नहीं बेचते। आपकी गोपनीयता हमारी प्राथमिकता है"
+            }
+        }
+    },
+    "profile": {
+        "editProfile": "प्रोफ़ाइल संपादित करें",
+        "joined": "शामिल हुए",
+        "posts": "पोस्ट",
+        "replies": "जवाब",
+        "highlights": "हाइलाइट्स",
+        "articles": "लेख",
+        "media": "मीडिया",
+        "tweetNotifications": {
+            "title": "ट्वीट सूचनाएँ",
+            "description": "\"cricket\" या \"science\" वाले ट्वीट्स के लिए ब्राउज़र सूचनाएँ प्राप्त करें।",
+            "status": "स्थिति",
+            "enabled": "सक्षम",
+            "disabled": "अक्षम"
+        }
+    }
+}

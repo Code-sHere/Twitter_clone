@@ -1,0 +1,141 @@
+{
+    "nav": {
+        "home": "首页",
+        "explore": "探索",
+        "notifications": "通知",
+        "messages": "消息",
+        "bookmarks": "书签",
+        "logout": "退出登录",
+        "profile": "个人资料",
+        "more": "更多"
+    },
+    "auth": {
+        "login": "登录",
+        "signup": "注册",
+        "email": "电子邮箱",
+        "password": "密码",
+        "forgotPassword": "忘记密码",
+        "verifyOtp": "验证 OTP"
+    },
+    "tweet": {
+        "post": "发布",
+        "reply": "回复",
+        "like": "点赞",
+        "unlike": "取消点赞",
+        "retweet": "转发",
+        "comment": "评论",
+        "delete": "删除",
+        "share": "分享"
+    },
+    "language": {
+        "title": "语言",
+        "selectLanguage": "选择语言",
+        "verifyLanguage": "验证语言更改",
+        "otpSentMobile": "OTP 已发送到您注册的手机号码。",
+        "otpSentEmail": "OTP 已发送到您注册的电子邮箱地址。",
+        "enterOtp": "输入 OTP",
+        "verify": "验证",
+        "resendOtp": "重新发送 OTP"
+    },
+    "common": {
+        "save": "保存",
+        "cancel": "取消",
+        "confirm": "确认",
+        "close": "关闭",
+        "loading": "加载中",
+        "error": "错误",
+        "success": "成功"
+    },
+    "plans": {
+        "title": "提升您的 Twitter 体验",
+        "subtitle": "选择适合您的套餐。更多推文，更多影响力，更多可能。",
+        "free": {
+            "name": "免费",
+            "description": "适合入门",
+            "price": "₹0",
+            "period": "每月",
+            "features": {
+                "tweets": "每月 1 条推文",
+                "profile": "基础个人资料",
+                "support": "标准支持"
+            },
+            "button": "当前套餐"
+        },
+        "bronze": {
+            "name": "青铜",
+            "description": "更多推文，更多功能",
+            "price": "₹100",
+            "period": "每月",
+            "features": {
+                "tweets": "每月 3 条推文",
+                "profile": "基础个人资料",
+                "support": "标准支持",
+                "analytics": "访问数据分析"
+            },
+            "button": "立即升级"
+        },
+        "silver": {
+            "name": "白银",
+            "description": "更多推文，更大影响力",
+            "badge": "热门",
+            "price": "₹300",
+            "period": "每月",
+            "features": {
+                "tweets": "每月 5 条推文",
+                "profile": "个人资料自定义",
+                "analytics": "高级数据分析",
+                "support": "优先支持",
+                "earlyAccess": "抢先体验新功能"
+            },
+            "button": "立即升级"
+        },
+        "gold": {
+            "name": "黄金",
+            "description": "无限制与高级功能",
+            "price": "₹1000",
+            "period": "每月",
+            "features": {
+                "tweets": "无限推文",
+                "premium": "所有高级功能",
+                "analytics": "高级数据分析",
+                "support": "优先支持",
+                "earlyAccess": "抢先体验新功能"
+            },
+            "button": "升级 Premium"
+        },
+        "benefits": {
+            "securePayments": {
+                "title": "安全支付",
+                "description": "100% 安全可靠"
+            },
+            "cancelAnytime": {
+                "title": "随时取消",
+                "description": "随时修改或取消您的套餐"
+            },
+            "premiumSupport": {
+                "title": "高级支持",
+                "description": "我们的支持团队全天候为您服务"
+            },
+            "dataSafe": {
+                "title": "您的数据安全",
+                "description": "我们绝不会出售您的数据。隐私是我们的首要任务"
+            }
+        }
+    },
+    "profile": {
+        "editProfile": "编辑个人资料",
+        "joined": "加入于",
+        "posts": "帖子",
+        "replies": "回复",
+        "highlights": "精选",
+        "articles": "文章",
+        "media": "媒体",
+        "tweetNotifications": {
+            "title": "推文通知",
+            "description": "当推文包含“cricket”或“science”时接收浏览器通知。",
+            "status": "状态",
+            "enabled": "已启用",
+            "disabled": "已禁用"
+        }
+    }
+}
