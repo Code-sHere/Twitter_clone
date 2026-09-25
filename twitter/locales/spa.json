@@ -1,0 +1,153 @@
+{
+    "nav": {
+        "home": "Inicio",
+        "explore": "Explorar",
+        "notifications": "Notificaciones",
+        "messages": "Mensajes",
+        "bookmarks": "Marcadores",
+        "logout": "Cerrar sesión",
+        "profile": "Perfil",
+        "more": "Más"
+    },
+
+    "auth": {
+        "login": "Iniciar sesión",
+        "signup": "Registrarse",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "verifyOtp": "Verificar OTP"
+    },
+
+    "tweet": {
+        "post": "Publicar",
+        "reply": "Responder",
+        "like": "Me gusta",
+        "unlike": "Ya no me gusta",
+        "retweet": "Republicar",
+        "comment": "Comentar",
+        "delete": "Eliminar",
+        "share": "Compartir"
+    },
+
+    "language": {
+        "title": "Idioma",
+        "selectLanguage": "Seleccionar idioma",
+        "verifyLanguage": "Verificar cambio de idioma",
+        "otpSentMobile": "Se ha enviado un OTP a tu número de móvil registrado.",
+        "otpSentEmail": "Se ha enviado un OTP a tu correo electrónico registrado.",
+        "enterOtp": "Introducir OTP",
+        "verify": "Verificar",
+        "resendOtp": "Reenviar OTP"
+    },
+
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "close": "Cerrar",
+        "loading": "Cargando",
+        "error": "Error",
+        "success": "Éxito"
+    },
+
+    "plans": {
+        "title": "Mejora tu experiencia en Twitter",
+        "subtitle": "Elige un plan que se adapte a ti. Más tweets, más alcance, más impacto.",
+
+        "free": {
+            "name": "GRATIS",
+            "description": "Para empezar",
+            "price": "₹0",
+            "period": "mes",
+            "features": {
+                "tweets": "1 tweet al mes",
+                "profile": "Perfil básico",
+                "support": "Soporte estándar"
+            },
+            "button": "Plan actual"
+        },
+
+        "bronze": {
+            "name": "BRONCE",
+            "description": "Más tweets, más potencia",
+            "price": "₹100",
+            "period": "mes",
+            "features": {
+                "tweets": "3 tweets al mes",
+                "profile": "Perfil básico",
+                "support": "Soporte estándar",
+                "analytics": "Acceso a análisis"
+            },
+            "button": "Actualizar ahora"
+        },
+
+        "silver": {
+            "name": "PLATA",
+            "description": "Más tweets, más alcance",
+            "badge": "POPULAR",
+            "price": "₹300",
+            "period": "mes",
+            "features": {
+                "tweets": "5 tweets al mes",
+                "profile": "Personalización del perfil",
+                "analytics": "Análisis avanzado",
+                "support": "Soporte prioritario",
+                "earlyAccess": "Acceso anticipado a nuevas funciones"
+            },
+            "button": "Actualizar ahora"
+        },
+
+        "gold": {
+            "name": "ORO",
+            "description": "Ilimitado y premium",
+            "price": "₹1000",
+            "period": "mes",
+            "features": {
+                "tweets": "Tweets ilimitados",
+                "premium": "Todas las funciones premium",
+                "analytics": "Análisis avanzado",
+                "support": "Soporte prioritario",
+                "earlyAccess": "Acceso anticipado a nuevas funciones"
+            },
+            "button": "Pasar a Premium"
+        },
+
+        "benefits": {
+            "securePayments": {
+                "title": "Pagos seguros",
+                "description": "100 % seguro y protegido"
+            },
+            "cancelAnytime": {
+                "title": "Cancela cuando quieras",
+                "description": "Cambia o cancela tu plan cuando quieras"
+            },
+            "premiumSupport": {
+                "title": "Soporte Premium",
+                "description": "Nuestro equipo de soporte está disponible para ti las 24 horas, los 7 días de la semana"
+            },
+            "dataSafe": {
+                "title": "Tus datos están seguros",
+                "description": "Nunca vendemos tus datos. Tu privacidad es nuestra prioridad"
+            }
+        }
+    },
+
+    "profile": {
+        "editProfile": "Editar perfil",
+        "joined": "Se unió",
+        "posts": "Publicaciones",
+        "replies": "Respuestas",
+        "highlights": "Destacados",
+        "articles": "Artículos",
+        "media": "Multimedia",
+
+        "tweetNotifications": {
+            "title": "Notificaciones de tweets",
+            "description": "Recibe notificaciones del navegador de tweets que contengan \"cricket\" o \"science\".",
+            "status": "Estado",
+            "enabled": "Activadas",
+            "disabled": "Desactivadas"
+        }
+    }
+}

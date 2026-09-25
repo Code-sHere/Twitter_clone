@@ -1,0 +1,141 @@
+{
+    "nav": {
+        "home": "Home",
+        "explore": "Explore",
+        "notifications": "Notifications",
+        "messages": "Messages",
+        "bookmarks": "Bookmarks",
+        "logout": "Logout",
+        "profile": "Profile",
+        "more": "More"
+    },
+    "auth": {
+        "login": "Login",
+        "signup": "Signup",
+        "email": "Email",
+        "password": "Password",
+        "forgotPassword": "Forgot Password",
+        "verifyOtp": "Verify OTP"
+    },
+    "tweet": {
+        "post": "Post",
+        "reply": "Reply",
+        "like": "Like",
+        "unlike": "Unlike",
+        "retweet": "Retweet",
+        "comment": "Comment",
+        "delete": "Delete",
+        "share": "Share"
+    },
+    "language": {
+        "title": "Language",
+        "selectLanguage": "Select Language",
+        "verifyLanguage": "Verify Language Change",
+        "otpSentMobile": "OTP has been sent to your registered mobile number.",
+        "otpSentEmail": "OTP has been sent to your registered email address.",
+        "enterOtp": "Enter OTP",
+        "verify": "Verify",
+        "resendOtp": "Resend OTP"
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "close": "Close",
+        "loading": "Loading",
+        "error": "Error",
+        "success": "Success"
+    },
+    "plans": {
+        "title": "Level up your Twitter experience",
+        "subtitle": "Pick a plan that's fits your vibe. More tweets. more reach, more impact.",
+        "free": {
+            "name": "FREE",
+            "description": "For getting started",
+            "price": "₹0",
+            "period": "month",
+            "features": {
+                "tweets": "1 Tweet per month",
+                "profile": "Basic profile",
+                "support": "Standard support"
+            },
+            "button": "Current Plan"
+        },
+        "bronze": {
+            "name": "BRONZE",
+            "description": "More tweets, more power",
+            "price": "₹100",
+            "period": "month",
+            "features": {
+                "tweets": "3 Tweets per month",
+                "profile": "Basic profile",
+                "support": "Standard support",
+                "analytics": "Access to analytics"
+            },
+            "button": "Upgrade Now"
+        },
+        "silver": {
+            "name": "SILVER",
+            "description": "More tweets, more reach",
+            "badge": "POPULAR",
+            "price": "₹300",
+            "period": "month",
+            "features": {
+                "tweets": "5 Tweets per month",
+                "profile": "Profile customization",
+                "analytics": "Advanced analytics",
+                "support": "Priority support",
+                "earlyAccess": "Early access to new features"
+            },
+            "button": "Upgrade Now"
+        },
+        "gold": {
+            "name": "GOLD",
+            "description": "Unlimited & premium",
+            "price": "₹1000",
+            "period": "month",
+            "features": {
+                "tweets": "Unlimited tweets",
+                "premium": "All premium features",
+                "analytics": "Advanced analytics",
+                "support": "Priority support",
+                "earlyAccess": "Early access to new features"
+            },
+            "button": "Go Premium"
+        },
+        "benefits": {
+            "securePayments": {
+                "title": "Secure Payments",
+                "description": "100% Safe and Secure"
+            },
+            "cancelAnytime": {
+                "title": "Cancel Anytime",
+                "description": "Change or cancel your plan anytime you want"
+            },
+            "premiumSupport": {
+                "title": "Premium Support",
+                "description": "Our support team is here for you 24/7"
+            },
+            "dataSafe": {
+                "title": "Your Data is Safe",
+                "description": "We never sell your data. Privacy is our priority"
+            }
+        }
+    },
+    "profile": {
+        "editProfile": "Edit profile",
+        "joined": "Joined",
+        "posts": "Posts",
+        "replies": "Replies",
+        "highlights": "Highlights",
+        "articles": "Articles",
+        "media": "Media",
+        "tweetNotifications": {
+            "title": "Tweet Notifications",
+            "description": "Get browser notifications for tweets containing \"cricket\" or \"science\".",
+            "status": "Status",
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+        }
+    }
+}

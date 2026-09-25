@@ -23,6 +23,11 @@ const UserSchema = mongoose.Schema({
         type: Boolean,
         default: true
     },
+    perferredLanguage :{
+        type: String,
+        enum: ["eng","hin","spa","chi","fre","ptu"],
+        default:"en"
+    },
     isTemporaryPassword: {
         type: Boolean,
         default: false
