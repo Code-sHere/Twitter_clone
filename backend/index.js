@@ -612,6 +612,127 @@ console.log(
 // forget password api
 app.post("/forget-password", forgetPassword);
 
+app.post("/language/request", async (req, res) => {
+    try {
+
+        const { userId, language } = req.body;
+
+        if (!userId || !language) {
+            return res.status(400).json({
+                success: false,
+                message: "userId and langauge are required"
+            })
+        }
+
+        //supported languages 
+        const supporetedLanguages = [
+            "en",
+            "es",
+            "fr",
+            "hi",
+            "pt",
+            "zh"
+        ];
+
+        if (!supporetedLanguages.includes(language)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid langauge"
+            })
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        if (user.language === language) {
+            return res.status(400).json({
+                success: false,
+                message: "User already has this language"
+            })
+        }
+
+        await otpSchema.deleteMany({
+            userId: user._id,
+            purpose: "language"
+        });
+
+        if (language === "fr") {
+            if (!user.email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User email not found"
+                })
+            }
+
+            const otp = crypto.randomInt(100000, 999999).toString();
+
+            await otpSchema.create({
+                userId: user._id,
+                otp,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+                purpose: "language",
+                verified: false
+            });
+
+            await sendOtp(
+                user.email,
+                user.displayName,
+                otp
+            )
+
+            return res.status(200).json({
+                success: true,
+                language,
+                message: "Otp sent successfully"
+            })
+
+        }
+
+        if (!user.phone) {
+            return res.status(400).json({
+                success: false,
+                message: "No registered phone number found"
+            });
+        }
+
+        await otpSchema.create({
+            userId: user._id,
+            purpose: "languageChange",
+            expiresAt: new Date(
+                Date.now() + 10 * 60 * 1000
+            ),
+            verified: false
+        });
+
+        return res.status(200).json({
+            success: true,
+            method: "firebase",
+            language,
+            phone: user.phone,
+            message: "Use Firebase to send OTP"
+        });
+
+
+    } catch (error) {
+        console.error(
+            "Language OTP request error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to request language change",
+            error: error.message
+        });
+    }
+})
+
 app.post("/verift-otp", async (req, res) => {
     try {
         const { userId, otp } = req.body;
@@ -655,10 +776,39 @@ app.post("/verift-otp", async (req, res) => {
 
             await otpRecord.save();
 
+            await otpSchema.deleteOne({
+                _id: otpRecord._id
+            })
+
             return res.status(200).json({
                 success: true,
                 message: "Audio OTP verified"
             });
+        }
+
+        if (otpRecord.purpose === "language") {
+            const user = await User.findById(userId);
+
+            if (!user) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User not found"
+                })
+            }
+
+            user.language = "fr";
+
+            await user.save();
+
+            await otpSchema.deleteOne({
+                _id: otpRecord._id
+            })
+
+            return res.status(200).json({
+                success: true,
+                message: "Language changed successfully",
+                language: user.language
+            })
         }
 
         await LoginHistory.findOneAndUpdate(
@@ -712,13 +862,127 @@ app.post("/verift-otp", async (req, res) => {
     }
 })
 
+app.post("/language/verify-firebase", async (req, res) => {
+    try {
+
+        const {
+            userId,
+            firebaseToken,
+            language
+        } = req.body;
+
+        if (!userId || !firebaseToken || !language) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            })
+        }
+
+        if (language === "fr") {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid langauge"
+            })
+        }
+
+        const supporetedLanguages = [
+            "en",
+            "hi",
+            "es",
+            "pt",
+            "zh",
+            "fr"
+        ]
+
+        if (!supporetedLanguages.includes(language)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid langauge"
+            })
+        }
+
+        // verify firebase token
+        const decodeToken = await admin.auth().verifyIdToken(firebaseToken);
+
+        const firebasePhone = decodeToken.phone_number;
+
+        if (!firebasePhone) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid firebase token"
+            })
+        }
+
+        // find our user
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        if (firebasePhone !== user.phone) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid firebase token"
+            })
+        }
+
+        const otpRecord = await otpSchema.findOne({
+            userId,
+            purpose: "language",
+            expiresAt: {
+                $gt: new Date()
+            },
+            verified: false
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "No valid language verification request found"
+            });
+        }
+
+        user.language = language;
+
+        await user.save();
+
+        await otpSchema.deleteOne({
+            _id: otpRecord._id
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Language changed successfully",
+            language: user.language
+        })
+
+    } catch (error) {
+        console.error(
+            "Firebase language verification error:",
+            error
+        );
+
+        return res.status(401).json({
+            success: false,
+            message:
+                "Firebase phone verification failed"
+        });
+    }
+})
+
 app.get("/settings/:userId", async (req, res) => {
-    try{
+    try {
         const { userId } = req.params;
 
         const user = await User.findById(userId).select("notificationEnabled");
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -731,7 +995,7 @@ app.get("/settings/:userId", async (req, res) => {
             notificationEnabled: user.notificationEnabled
         })
 
-    }catch(error){
+    } catch (error) {
         console.log("Get notification error", error);
 
         res.status(500).json({
@@ -742,20 +1006,20 @@ app.get("/settings/:userId", async (req, res) => {
     }
 })
 
-app.put("/settings/:userId", async(req, res) => {
-    try{
+app.put("/settings/:userId", async (req, res) => {
+    try {
 
-        const {userId} = req.params;
-        const{notificationEnabled} = req.body;
+        const { userId } = req.params;
+        const { notificationEnabled } = req.body;
 
-        const user = await User.findByIdAndUpdate(userId,{
+        const user = await User.findByIdAndUpdate(userId, {
             notificationEnabled: Boolean(notificationEnabled)
-        },{
+        }, {
             returnDocument: "after"
         }
-    ).select("notificationEnabled");
+        ).select("notificationEnabled");
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -768,7 +1032,7 @@ app.put("/settings/:userId", async(req, res) => {
             notificationEnabled: user.notificationEnabled
         })
 
-    }catch(error){
+    } catch (error) {
         console.log("Update notification error", error);
 
         res.status(500).json({
@@ -787,16 +1051,16 @@ app.get("/notifications/:userId", async (req, res) => {
         const notifications = await Notification.find({
             userId: userId
         })
-        .populate({
-            path: "tweetId",
-            populate: {
-                path: "author",
-                select: "username"
-            }
-        })
-        .sort({
-            createdAt: -1
-        });
+            .populate({
+                path: "tweetId",
+                populate: {
+                    path: "author",
+                    select: "username"
+                }
+            })
+            .sort({
+                createdAt: -1
+            });
 
 
         res.status(200).json({
@@ -818,6 +1082,8 @@ app.get("/notifications/:userId", async (req, res) => {
         });
     }
 });
+
+
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");

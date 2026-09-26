@@ -16,7 +16,7 @@ const otpSchema = new mongoose.Schema({
 
     purpose: {
         type: String,
-        enum: ["login", "audioTweet"],
+        enum: ["login", "audioTweet","language"],
         default: "login"
     },
 
