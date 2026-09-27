@@ -6,6 +6,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import RightSidebar from '@/components/layout/Rightsidebar';
 import ProfilePage from '@/components/ProfilePgae';
 import Notifications from '@/components/Notifications';
+import LanguageDropdown from '@/components/LanguageDropdown';
 
 
 
@@ -44,9 +45,9 @@ const Mainlayout = ({ children }: any) => {
             <ProfilePage />
           ) : currentPage === "notifications" ? (
             <Notifications userId={userId} />
-          ) : (
-            children
-          )}
+          ) : currentPage === "more" ?  (
+            <LanguageDropdown userId={userId} />
+          ):(children)}
         </main>
       </div>
     </div>

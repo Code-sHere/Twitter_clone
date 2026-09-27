@@ -219,6 +219,7 @@ export const AuthProvider: React.FC<{
       setIsAuthenticating(false);
     }
   }
+  
 
   const signup = async (
     email: string,
