@@ -1,11 +1,20 @@
-"use client"
-import * as React from "react"
+"use client";
+
+import * as React from "react";
+
 import axios from "axios";
+
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useRef } from "react";
+
+import {
+    useState,
+    useCallback,
+} from "react";
+
 import "@/lib/i18n";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +23,7 @@ import {
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 import {
     Dialog,
@@ -26,157 +35,161 @@ import {
 
 import { Input } from "@/components/ui/input";
 
-import {
-    getAuth,
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
-} from "firebase/auth";
 import { useAuth } from "@/context/AuthContext";
+
+import PhoneEmailButton from "@/components/PhoneVerificationButton";
+
 
 export default function LanguageDropdown() {
 
+
+    // USER
+
+
     const { user } = useAuth();
 
+
+
+    // TRANSLATION
+
+
     const { i18n } = useTranslation();
+
+
+
+    // STATES
+
 
     const [appLanguage, setAppLanguage] = useState(
         i18n.language || "en"
     );
 
-    const [selectedLanguage, setSelectedLanguage] = useState("");
+    const [selectedLanguage, setSelectedLanguage] =
+        useState("");
 
     const [otp, setOtp] = useState("");
 
-    const [optMethod, setOtpMethod] = useState("");
+    const [otpMethod, setOtpMethod] =
+        useState<"email" | "phone" | "">("");
 
-    const [showOtp, setShowOtp] = useState(false);
+    const [showOtp, setShowOtp] =
+        useState(false);
 
-    const [otpLoading, setOtpLoading] = useState(false);
+    const [otpLoading, setOtpLoading] =
+        useState(false);
 
-    const [message, setMessage] = useState("");
-
-    // firebase confirmation result
-    const confirmationResultRef = useRef(null);
-
-    // firebase recpatcha
-
-    const auth = getAuth();
-    const createRecaptcha = () => {
-
-        if (window.recaptchaVerifier) {
-            window.recaptchaVerifier.clear();
-            window.recaptchaVerifier = null;
-        }
+    const [message, setMessage] =
+        useState("");
 
 
-        const verifier = new RecaptchaVerifier(
-            auth,
-            "recaptcha-container",
-            {
-                size: "invisible",
-                callback: () => {
-                    console.log("reCAPTCHA solved");
-                },
-                "expired-callback": () => {
-                    console.log("reCAPTCHA expired");
-                }
-            }
-        );
 
-        window.recaptchaVerifier = verifier;
+    // CHANGE LANGUAGE REQUEST
 
-        return verifier;
 
-    }
+    const handleLanguageChange = async ({
+        language,
+    }: {
+        language: string;
+    }) => {
 
-    // send firebase sms otp
-
-    const sendFirebaseOTP = async (phone: string) => {
-
-        try {
-
-            const appVerifier = createRecaptcha();
-
-            const cleanPhone = phone.replace(/\D/g, "");
-
-            if (cleanPhone.length !== 10) {
-                throw new Error("Phone number must contain exactly 10 digits");
-            }
-
-            const firebasePhone = `+91${cleanPhone}`
-
-            console.log("Original phone:", phone);
-            console.log("Firebase phone:", firebasePhone);
-
-            const confirmationResult = await signInWithPhoneNumber(auth, firebasePhone, appVerifier);
-
-            confirmationResultRef.current = confirmationResult;
-
-            console.log("confirmationResult", confirmationResult);
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "Firebase OTP error:",
-                error
-            );
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
-
-            return false;
-        }
-    };
-
-    const handleLanguageChange = async ({ language }: { language: string }) => {
+        // Already selected language
         if (language === appLanguage) {
             return;
         }
 
+        // User unavailable
         if (!user?._id) {
-            setMessage("User information is not available.");
+
+            setMessage(
+                "User information is not available."
+            );
+
             return;
         }
 
         try {
+
             setOtpLoading(true);
 
             setSelectedLanguage(language);
 
-            console.log("LANGUAGE REQUEST:", {
-                userId: user?._id,
-                language: language
-            });
-            const response = await axios.post("http://localhost:5000/language/request", {
-                userId: user._id,
-                language
-            })
+            setMessage("");
 
-            if (response.data.method === "email") {
+            console.log(
+                "LANGUAGE REQUEST:",
+                {
+                    userId: user._id,
+                    language,
+                }
+            );
+
+
+
+            // ASK BACKEND WHICH OTP METHOD TO USE
+
+
+            const response = await axios.post(
+                "http://localhost:5000/language/request",
+                {
+                    userId: user._id,
+                    language,
+                }
+            );
+
+
+            console.log(
+                "LANGUAGE REQUEST RESPONSE:",
+                response.data
+            );
+
+
+
+            // EMAIL OTP
+
+
+            if (
+                response.data.method === "email"
+            ) {
+
                 setOtpMethod("email");
 
-                setMessage("Otp sent to your email");
+                setMessage(
+                    "OTP sent to your registered email."
+                );
 
                 setShowOtp(true);
-            } else if (
-                response.data.method === "firebase"
-            ) {
-                setOtpMethod("firebase");
 
-                const sent = await sendFirebaseOTP(response.data.phone)
-
-                if (!sent) {
-                    setMessage("Something went wrong");
-                    return;
-                }
-
-                setMessage("Otp sent to your phone number");
-
-                setShowOtp(true);
+                return;
             }
+
+
+
+            // PHONE OTP
+
+
+            if (
+                response.data.method === "phone"
+            ) {
+
+                setOtpMethod("phone");
+
+                setMessage(
+                    "Verify your phone number using Phone.Email."
+                );
+
+                setShowOtp(true);
+
+                return;
+            }
+
+
+
+            // UNKNOWN METHOD
+
+
+            setMessage(
+                "Invalid OTP verification method."
+            );
 
         } catch (error: any) {
 
@@ -184,103 +197,305 @@ export default function LanguageDropdown() {
                 "Language change error:",
                 error
             );
+
             setMessage(
                 error.response?.data?.message ||
                 "Failed to request language change."
             );
-        } finally {
-            setOtpLoading(false);
-        }
-    }
 
-    const verifyOtp = async () => {
+        } finally {
+
+            setOtpLoading(false);
+
+        }
+    };
+
+
+
+    // EMAIL OTP VERIFICATION
+
+
+    const verifyEmailOtp = async () => {
+
         if (!otp || otp.length !== 6) {
-            setMessage("Please enter a valid OTP");
+
+            setMessage(
+                "Please enter a valid 6-digit OTP."
+            );
+
+            return;
+        }
+
+        if (!user?._id) {
+
+            setMessage(
+                "User information is not available."
+            );
+
             return;
         }
 
         try {
+
             setOtpLoading(true);
-            if (optMethod === "email") {
-                const response = await axios.post("http://localhost:5000/verify-otp", {
+
+
+            console.log(
+                "VERIFYING EMAIL OTP:",
+                {
                     userId: user._id,
-                    otp
-                });
-
-                if (response.data.success) {
-                    await il8n.changeLanguage(selectedLanguage);
+                    otp,
                 }
+            );
 
-                setAppLanguage(selectedLanguage);
 
+            const response = await axios.post(
+                "http://localhost:5000/verify-otp",
+                {
+                    userId: user._id,
+                    otp,
+                }
+            );
+
+
+            console.log(
+                "EMAIL OTP RESPONSE:",
+                response.data
+            );
+
+
+            if (response.data.success) {
+
+                // Change i18n language
+                await i18n.changeLanguage(
+                    selectedLanguage
+                );
+
+
+                // Update UI state
+                setAppLanguage(
+                    selectedLanguage
+                );
+
+
+                // Close dialog
                 setShowOtp(false);
 
+                // Clear OTP
                 setOtp("");
 
+                // Clear method
+                setOtpMethod("");
+
+                // Clear message
                 setMessage("");
-            } else if (optMethod === "firebase") {
-                if (!confirmationResultRef.current) {
-                    return;
-                }
 
-                const result =await confirmationResultRef.current.confirm(otp);
+            } else {
 
-                // get firebase ID token
-
-                const idToken = await result.user.getIdToken();
-
-                // save firebase ID token to server
-
-                const response = await axios.post("http://localhost:5000/verify-firebase", {
-                    userId: user._id,
-                    firebaseToken: idToken,
-                    language: selectedLanguage
-                });
-
-                if (response.data.success) {
-                    await il8n.changeLanguage(selectedLanguage);
-                }
-                setAppLanguage(response.data.language);
-
-                setShowOtp(false);
-
-                setOtp("");
-
-                setMessage("");
+                setMessage(
+                    response.data.message ||
+                    "Invalid OTP."
+                );
 
             }
 
         } catch (error: any) {
 
             console.error(
-                "OTP verification error:",
+                "Email OTP verification error:",
                 error
             );
 
             setMessage(
                 error.response?.data?.message ||
-                "Internal server error"
+                "OTP verification failed."
             );
 
         } finally {
-            setOtpLoading(false);
-        }
-    }
 
-    const closeotpDialog = () => {
+            setOtpLoading(false);
+
+        }
+    };
+
+
+
+    // PHONE EMAIL SUCCESS
+
+
+    const handlePhoneEmailSuccess = useCallback(
+        async (userObj: any) => {
+
+            if (!user?._id) {
+
+                setMessage(
+                    "User information is not available."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                setOtpLoading(true);
+
+                setMessage(
+                    "Phone verified. Updating language..."
+                );
+
+
+                console.log(
+                    "PHONE.EMAIL RESULT:",
+                    userObj
+                );
+
+
+
+                // GET USER JSON URL
+
+
+                const userJsonUrl =
+                    userObj?.user_json_url;
+
+
+                if (!userJsonUrl) {
+
+                    throw new Error(
+                        "Phone.Email did not return user_json_url."
+                    );
+
+                }
+
+
+                console.log(
+                    "Phone.Email user_json_url:",
+                    userJsonUrl
+                );
+
+
+
+                // SEND TO BACKEND
+
+
+                const response = await axios.post(
+                    "http://localhost:5000/verify-phone-email",
+                    {
+                        userId: user._id,
+
+                        userJsonUrl,
+
+                        language: selectedLanguage,
+                    }
+                );
+
+
+                console.log(
+                    "PHONE.EMAIL BACKEND RESPONSE:",
+                    response.data
+                );
+
+
+
+                // SUCCESS
+
+
+                if (response.data.success) {
+
+                    await i18n.changeLanguage(
+                        selectedLanguage
+                    );
+
+
+                    setAppLanguage(
+                        response.data.language ||
+                        selectedLanguage
+                    );
+
+
+                    setShowOtp(false);
+
+                    setOtp("");
+
+                    setOtpMethod("");
+
+                    setMessage("");
+
+                } else {
+
+                    setMessage(
+                        response.data.message ||
+                        "Phone verification failed."
+                    );
+
+                }
+
+            } catch (error: any) {
+
+                console.error(
+                    "Phone.Email verification error:",
+                    error
+                );
+
+                setMessage(
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Phone verification failed."
+                );
+
+            } finally {
+
+                setOtpLoading(false);
+
+            }
+
+        },
+        [
+            user?._id,
+            selectedLanguage,
+            i18n,
+        ]
+    );
+
+
+
+    // CLOSE OTP DIALOG
+
+
+    const closeOtpDialog = () => {
+
+        if (otpLoading) {
+            return;
+        }
+
         setShowOtp(false);
+
         setOtp("");
+
         setMessage("");
 
-        confirmationResultRef.current = null;
-    }
+        setOtpMethod("");
+
+        setSelectedLanguage("");
+
+    };
+
+
+
+    // RETURN UI
 
 
     return (
         <>
+
+            {/* LANGUAGE DROPDOWN */}
+
+
             <DropdownMenu>
 
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger
+                    asChild
+                >
 
                     <Button variant="outline">
                         Lang
@@ -289,7 +504,9 @@ export default function LanguageDropdown() {
                 </DropdownMenuTrigger>
 
 
-                <DropdownMenuContent className="w-40">
+                <DropdownMenuContent
+                    className="w-40"
+                >
 
                     <DropdownMenuGroup>
 
@@ -301,32 +518,52 @@ export default function LanguageDropdown() {
                         <DropdownMenuRadioGroup
                             value={appLanguage}
                             onValueChange={(value) => {
-                                handleLanguageChange({ language: value });
-                            }
-                            }
+
+                                handleLanguageChange({
+                                    language: value,
+                                });
+
+                            }}
                         >
 
-                            <DropdownMenuRadioItem value="en">
+                            <DropdownMenuRadioItem
+                                value="en"
+                            >
                                 English
                             </DropdownMenuRadioItem>
 
-                            <DropdownMenuRadioItem value="hi">
+
+                            <DropdownMenuRadioItem
+                                value="hi"
+                            >
                                 Hindi
                             </DropdownMenuRadioItem>
 
-                            <DropdownMenuRadioItem value="fr">
+
+                            <DropdownMenuRadioItem
+                                value="fr"
+                            >
                                 French
                             </DropdownMenuRadioItem>
 
-                            <DropdownMenuRadioItem value="es">
+
+                            <DropdownMenuRadioItem
+                                value="es"
+                            >
                                 Spanish
                             </DropdownMenuRadioItem>
 
-                            <DropdownMenuRadioItem value="pt">
+
+                            <DropdownMenuRadioItem
+                                value="pt"
+                            >
                                 Portuguese
                             </DropdownMenuRadioItem>
 
-                            <DropdownMenuRadioItem value="zh">
+
+                            <DropdownMenuRadioItem
+                                value="zh"
+                            >
                                 Chinese
                             </DropdownMenuRadioItem>
 
@@ -338,11 +575,14 @@ export default function LanguageDropdown() {
 
             </DropdownMenu>
 
-            {/* otp dialog */}
+
+
+            {/* OTP / PHONE DIALOG */}
+
 
             <Dialog
                 open={showOtp}
-                onOpenChange={closeotpDialog}
+                onOpenChange={closeOtpDialog}
             >
 
                 <DialogContent>
@@ -353,6 +593,7 @@ export default function LanguageDropdown() {
                             Verify Language Change
                         </DialogTitle>
 
+
                         <DialogDescription>
                             {message}
                         </DialogDescription>
@@ -360,51 +601,96 @@ export default function LanguageDropdown() {
                     </DialogHeader>
 
 
-                    <div className="space-y-4">
 
-                        <Input
-                            type="text"
-                            placeholder="Enter 6-digit OTP"
-                            value={otp}
-                            maxLength={6}
-                            onChange={(e) =>
-                                setOtp(
-                                    e.target.value.replace(
-                                        /\D/g,
-                                        ""
-                                    )
-                                )
-                            }
-                        />
+                    {/* EMAIL OTP */}
 
 
-                        <Button
-                            className="w-full"
-                            disabled={
-                                otpLoading ||
-                                otp.length !== 6
-                            }
-                            onClick={verifyOtp}
-                        >
+                    {otpMethod === "email" && (
 
-                            {otpLoading
-                                ? "Verifying..."
-                                : "Verify OTP"}
+                        <div className="space-y-4">
 
-                        </Button>
+                            <Input
+                                type="text"
+                                placeholder="Enter 6-digit OTP"
+                                value={otp}
+                                maxLength={6}
+                                onChange={(e) => {
 
-                    </div>
+                                    setOtp(
+                                        e.target.value.replace(
+                                            /\D/g,
+                                            ""
+                                        )
+                                    );
+
+                                }}
+                            />
+
+
+                            <Button
+                                className="w-full"
+                                disabled={
+                                    otpLoading ||
+                                    otp.length !== 6
+                                }
+                                onClick={
+                                    verifyEmailOtp
+                                }
+                            >
+
+                                {otpLoading
+                                    ? "Verifying..."
+                                    : "Verify OTP"
+                                }
+
+                            </Button>
+
+                        </div>
+
+                    )}
+
+
+
+                    {/* PHONE.EMAIL */}
+
+
+                    {otpMethod === "phone" && (
+
+                        <div className="space-y-4">
+
+                            <p className="text-sm text-gray-500 text-center">
+                                Click the button below to
+                                verify your registered
+                                phone number.
+                            </p>
+
+
+                            <div className="flex justify-center">
+
+                                <PhoneEmailButton
+                                    onSuccess={
+                                        handlePhoneEmailSuccess
+                                    }
+                                />
+
+                            </div>
+
+
+                            {otpLoading && (
+
+                                <p className="text-sm text-center">
+                                    Verifying phone...
+                                </p>
+
+                            )}
+
+                        </div>
+
+                    )}
 
                 </DialogContent>
 
             </Dialog>
-
-
-            {/* Firebase invisible reCAPTCHA */}
-
-            <div
-                id="recaptcha-container"
-            />
 
         </>
     );

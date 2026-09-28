@@ -17,6 +17,7 @@ import upload from "./middleware/upload.js";
 import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
+import axios from "axios";
 
 const app = express()
 app.use(cors())
@@ -50,7 +51,7 @@ app.post('/register', async (req, res) => {
             !email ||
             !password ||
             !username ||
-            !displayName||
+            !displayName ||
             !phone
         ) {
             return res.status(400).json({
@@ -708,21 +709,48 @@ app.post("/language/request", async (req, res) => {
             });
         }
 
-        const otp = crypto.randomInt(100000, 999999).toString();
+        const phone = String(user.phone)
+            .replace(/\D/g, "");
+
+        const mobile = phone.startsWith("91")
+            ? phone
+            : `91${phone}`;
+
+        const response = await axios.post(
+            "https://control.msg91.com/api/v5/otp",
+            {},
+            {
+                params: {
+                    template_id: process.env.MSG91_TEMPLATE_ID,
+                    mobile: mobile
+                },
+                headers: {
+                    authkey: process.env.MSG91_AUTH_KEY,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        console.log(
+            "MSG91 SEND OTP RESPONSE:",
+            response.data
+        );
+
 
         await otpSchema.create({
             userId: user._id,
             purpose: "language",
-            otp,
+            otp: "PHONE_EMAIL",
             expiresAt: new Date(
                 Date.now() + 5 * 60 * 1000
             ),
-            verified: false
+            verified: false,
+            loginHistoryId: null
         });
 
         return res.status(200).json({
             success: true,
-            method: "firebase",
+            method: "phone",
             language,
             phone: user.phone,
             message: "Use Firebase to send OTP"
@@ -873,26 +901,24 @@ app.post("/verift-otp", async (req, res) => {
     }
 })
 
-app.post("/language/verify-firebase", async (req, res) => {
+app.post("/verify-phone", async (req, res) => {
     try {
+
+        console.log(
+            "PHONE.EMAIL LANGUAGE VERIFICATION:",
+            req.body
+        );
 
         const {
             userId,
-            firebaseToken,
+            otp,
             language
         } = req.body;
 
-        if (!userId || !firebaseToken || !language) {
+        if (!userId || !otp || !language) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
-            })
-        }
-
-        if (language === "fr") {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid langauge"
             })
         }
 
@@ -905,6 +931,7 @@ app.post("/language/verify-firebase", async (req, res) => {
             "fr"
         ]
 
+
         if (!supporetedLanguages.includes(language)) {
             return res.status(400).json({
                 success: false,
@@ -912,15 +939,11 @@ app.post("/language/verify-firebase", async (req, res) => {
             })
         }
 
-        // verify firebase token
-        const decodeToken = await admin.auth().verifyIdToken(firebaseToken);
-
-        const firebasePhone = decodeToken.phone_number;
-
-        if (!firebasePhone) {
+        // french must use email
+        if (language === "fr") {
             return res.status(400).json({
                 success: false,
-                message: "Invalid firebase token"
+                message: "Invalid langauge"
             })
         }
 
@@ -935,12 +958,42 @@ app.post("/language/verify-firebase", async (req, res) => {
             })
         }
 
-        if (firebasePhone !== user.phone) {
+        if (!user.phone) {
+
             return res.status(400).json({
+
                 success: false,
-                message: "Invalid firebase token"
-            })
+
+                message:
+                    "No registered phone number found"
+
+            });
+
         }
+
+        const phone = String(user.phone).replace(/\D/g, "");
+
+        const mobile = phone.startsWith("91") ? phone : `91${phone}`;
+
+        const response = await axios.post(
+            "https://control.msg91.com/api/v5/otp",
+            {},
+            {
+                params: {
+                    mobile,
+                    otp
+                },
+                headers: {
+                    authkey: process.env.MSG91_AUTH_KEY,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        onsole.log(
+            "MSG91 VERIFY RESPONSE:",
+            response.data
+        )
 
         const otpRecord = await otpSchema.findOne({
             userId,
@@ -975,14 +1028,14 @@ app.post("/language/verify-firebase", async (req, res) => {
 
     } catch (error) {
         console.error(
-            "Firebase language verification error:",
+            "language verification error:",
             error
         );
 
         return res.status(401).json({
             success: false,
             message:
-                "Firebase phone verification failed"
+                " phone verification failed"
         });
     }
 })
