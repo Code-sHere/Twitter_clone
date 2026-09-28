@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import {
+    getAuth,
     RecaptchaVerifier,
     signInWithPhoneNumber,
 } from "firebase/auth";
@@ -58,39 +59,56 @@ export default function LanguageDropdown() {
     const confirmationResultRef = useRef(null);
 
     // firebase recpatcha
+
+    const auth = getAuth();
     const createRecaptcha = () => {
 
         if (window.recaptchaVerifier) {
-            return window.recaptchaVerifier;
+            window.recaptchaVerifier.clear();
+            window.recaptchaVerifier = null;
         }
 
-        window.recaptchaVerifier =
-            new RecaptchaVerifier(
-                auth,
-                "recaptcha-container",
-                {
-                    size: "invisible",
-                    callback: () => {
-                        console.log(
-                            "reCAPTCHA completed"
-                        );
-                    },
-                }
-            );
 
-        return window.recaptchaVerifier;
+        const verifier = new RecaptchaVerifier(
+            auth,
+            "recaptcha-container",
+            {
+                size: "invisible",
+                callback: () => {
+                    console.log("reCAPTCHA solved");
+                },
+                "expired-callback": () => {
+                    console.log("reCAPTCHA expired");
+                }
+            }
+        );
+
+        window.recaptchaVerifier = verifier;
+
+        return verifier;
 
     }
 
     // send firebase sms otp
 
-    const sendFirebaseOTP = async ({ phone }: { phone: string }) => {
+    const sendFirebaseOTP = async (phone: string) => {
 
         try {
 
             const appVerifier = createRecaptcha();
 
-            const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+            const cleanPhone = phone.replace(/\D/g, "");
+
+            if (cleanPhone.length !== 10) {
+                throw new Error("Phone number must contain exactly 10 digits");
+            }
+
+            const firebasePhone = `+91${cleanPhone}`
+
+            console.log("Original phone:", phone);
+            console.log("Firebase phone:", firebasePhone);
+
+            const confirmationResult = await signInWithPhoneNumber(auth, firebasePhone, appVerifier);
 
             confirmationResultRef.current = confirmationResult;
 
@@ -104,6 +122,10 @@ export default function LanguageDropdown() {
                 "Firebase OTP error:",
                 error
             );
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = null;
+            }
 
             return false;
         }
@@ -201,7 +223,7 @@ export default function LanguageDropdown() {
                     return;
                 }
 
-                await confirmationResultRef.current.confirm(otp);
+                const result =await confirmationResultRef.current.confirm(otp);
 
                 // get firebase ID token
 
@@ -278,8 +300,9 @@ export default function LanguageDropdown() {
 
                         <DropdownMenuRadioGroup
                             value={appLanguage}
-                            onValueChange={(value) =>{
-                                handleLanguageChange({ language: value });}
+                            onValueChange={(value) => {
+                                handleLanguageChange({ language: value });
+                            }
                             }
                         >
 
@@ -315,10 +338,7 @@ export default function LanguageDropdown() {
 
             </DropdownMenu>
 
-
-            {/* =================================
-          OTP DIALOG
-          ================================= */}
+            {/* otp dialog */}
 
             <Dialog
                 open={showOtp}

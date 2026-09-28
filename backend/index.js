@@ -40,7 +40,8 @@ app.post('/register', async (req, res) => {
             email,
             password,
             username,
-            displayName
+            displayName,
+            phone
         } = req.body;
 
         // check if all required fields are provided
@@ -49,7 +50,8 @@ app.post('/register', async (req, res) => {
             !email ||
             !password ||
             !username ||
-            !displayName
+            !displayName||
+            !phone
         ) {
             return res.status(400).json({
                 success: false,
@@ -88,6 +90,7 @@ app.post('/register', async (req, res) => {
             username,
             displayName,
             password: hashedPassword,
+            phone,
             isTemporaryPassword: false
         });
 
@@ -110,6 +113,7 @@ app.post('/register', async (req, res) => {
                 email: newUser.email,
                 avatar: newUser.avatar,
                 bio: newUser.bio,
+                phone: newUser.phone,
                 location: newUser.location,
                 website: newUser.website,
                 isTemporaryPassword:
@@ -615,12 +619,23 @@ app.post("/forget-password", forgetPassword);
 app.post("/language/request", async (req, res) => {
     try {
 
+        console.log("language request", req.body);
+
         const { userId, language } = req.body;
 
         if (!userId || !language) {
             return res.status(400).json({
                 success: false,
                 message: "userId and langauge are required"
+            })
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
             })
         }
 
@@ -638,15 +653,6 @@ app.post("/language/request", async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Invalid langauge"
-            })
-        }
-
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: "User not found"
             })
         }
 
@@ -674,10 +680,11 @@ app.post("/language/request", async (req, res) => {
 
             await otpSchema.create({
                 userId: user._id,
-                otp,
+                otp: otp,
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000),
                 purpose: "language",
-                verified: false
+                verified: false,
+                loginHistoryId: null
             });
 
             await sendOtp(
@@ -701,11 +708,14 @@ app.post("/language/request", async (req, res) => {
             });
         }
 
+        const otp = crypto.randomInt(100000, 999999).toString();
+
         await otpSchema.create({
             userId: user._id,
-            purpose: "languageChange",
+            purpose: "language",
+            otp,
             expiresAt: new Date(
-                Date.now() + 10 * 60 * 1000
+                Date.now() + 5 * 60 * 1000
             ),
             verified: false
         });
@@ -841,6 +851,7 @@ app.post("/verift-otp", async (req, res) => {
                 displayName: user.displayName,
                 email: user.email,
                 avatar: user.avatar,
+                phone: user.phone,
                 bio: user.bio,
                 location: user.location,
                 website: user.website,

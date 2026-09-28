@@ -225,7 +225,8 @@ export const AuthProvider: React.FC<{
     email: string,
     password: string,
     username: string,
-    displayName: string
+    displayName: string,
+    phone: string
   ) => {
     try {
       setIsAuthenticating(true);
@@ -237,6 +238,7 @@ export const AuthProvider: React.FC<{
           password,
           username: username.trim(),
           displayName: displayName.trim(),
+          phone,
         }
       );
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { User, X, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { User, X, Mail, Lock, Eye, EyeOff, Phone } from "lucide-react";
 import TwitterLogo from "./Twitterlogo";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -31,8 +31,8 @@ const AuthModal = ({
         return () => console.log("AuthModal UNMOUNTED");
     }, []);
 
-    const { login, signup, verifyOtp, isLoading , isAuthenticating } = useAuth();
-    
+    const { login, signup, verifyOtp, isLoading, isAuthenticating } = useAuth();
+
     const [mode, setMode] = useState<"login" | "signup">(initialMode);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -45,6 +45,7 @@ const AuthModal = ({
         password: "",
         username: "",
         displayName: "",
+        phone: "",
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -112,7 +113,8 @@ const AuthModal = ({
                     formData.email,
                     formData.password,
                     formData.username,
-                    formData.displayName
+                    formData.displayName,
+                    formData.phone
                 );
             }
 
@@ -123,6 +125,7 @@ const AuthModal = ({
                 password: "",
                 username: "",
                 displayName: "",
+                phone: "",
             });
 
             setErrors({});
@@ -169,6 +172,7 @@ const AuthModal = ({
                 password: "",
                 username: "",
                 displayName: "",
+                phone: "",
             });
             setErrors({})
         } catch (error) {
@@ -203,6 +207,7 @@ const AuthModal = ({
             password: "",
             username: "",
             displayName: "",
+            phone: "",
         });
     };
 
@@ -466,8 +471,57 @@ const AuthModal = ({
                                                 </p>
                                             )}
                                         </div>
+
+                                        {/* Phone Number */}
+
+                                        <div className="space-y-2">
+                                            <Label
+                                                htmlFor="phone"
+                                                className="text-white"
+                                            >
+                                                Phone
+                                            </Label>
+
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+
+                                                <Input
+                                                    id="phone"
+                                                    type="tel"
+                                                    inputMode="numeric"
+                                                    placeholder="Your Phone number"
+                                                    value={formData.phone}
+                                                    maxLength={10}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value
+                                                            .replace(/\D/g, "")
+                                                            .slice(0, 10);
+
+                                                        handleInputChange("phone", value);
+                                                    }}
+                                                    className="
+                                                        h-11
+                                                        pl-10
+                                                        bg-transparent
+                                                    border-gray-600
+                                                    text-white
+                                                    placeholder-gray-400
+                                                    focus:border-blue-500
+                                                    "
+                                                    disabled={isAuthenticating}
+                                                />
+                                            </div>
+
+                                            {errors.phone && (
+                                                <p className="text-red-400 text-xs sm:text-sm">
+                                                    {errors.phone}
+                                                </p>
+                                            )}
+                                        </div>
                                     </>
                                 )}
+
+
 
                                 {/* Email */}
                                 <div className="space-y-2">
