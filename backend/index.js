@@ -18,6 +18,8 @@ import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
 import axios from "axios";
+import twilioClient from "./config/twilio.js";
+
 
 const app = express()
 app.use(cors())
@@ -664,6 +666,7 @@ app.post("/language/request", async (req, res) => {
             })
         }
 
+        // reomoving all old otps
         await otpSchema.deleteMany({
             userId: user._id,
             purpose: "language"
@@ -691,7 +694,7 @@ app.post("/language/request", async (req, res) => {
             await sendOtp(
                 user.email,
                 user.displayName,
-                otp
+                otp,
             )
 
             return res.status(200).json({
@@ -709,53 +712,64 @@ app.post("/language/request", async (req, res) => {
             });
         }
 
-        const phone = String(user.phone)
-            .replace(/\D/g, "");
+        let phone = String(user.phone).trim();
 
-        const mobile = phone.startsWith("91")
-            ? phone
-            : `91${phone}`;
+        phone = phone.replace(/\D/g, "");
 
-        const response = await axios.post(
-            "https://control.msg91.com/api/v5/otp",
-            {},
-            {
-                params: {
-                    template_id: process.env.MSG91_TEMPLATE_ID,
-                    mobile: mobile
-                },
-                headers: {
-                    authkey: process.env.MSG91_AUTH_KEY,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
+        if (phone.length === 10) {
+            phone = `+91${phone}`;
+        } else if (phone.startsWith("91") && phone.length === 12) {
+            phone = `+${phone}`;
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid phone number"
+            });
+        }
 
-        console.log(
-            "MSG91 SEND OTP RESPONSE:",
-            response.data
-        );
+        console.log("PHONE:", phone);
 
+        // send otp using twilio sms api
+
+        const message = await twilioClient.messages.create({
+            body: "sms_2fa",
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: phone
+        });
+
+        console.log("TWILIO SMS SID:", message.sid);
+        console.log("TWILIO SMS BODY:", message.body);
+        const otpMatch = message.body.match(/\b\d{6}\b/);
+
+        if (!otpMatch) {
+            throw new Error("Could not extract OTP from Twilio message");
+        }
+
+        const otp = otpMatch[0];
+
+        console.log("TWILIO OTP:", otp);
+
+        // Save the SAME OTP that Twilio sent
+        await otpSchema.deleteMany({
+            userId: user._id,
+            purpose: "language"
+        });
 
         await otpSchema.create({
             userId: user._id,
+            otp: otp,
             purpose: "language",
-            otp: "PHONE_EMAIL",
-            expiresAt: new Date(
-                Date.now() + 5 * 60 * 1000
-            ),
             verified: false,
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
             loginHistoryId: null
         });
 
         return res.status(200).json({
             success: true,
-            method: "phone",
             language,
-            phone: user.phone,
-            message: "Use Firebase to send OTP"
-        });
-
+            method: "phone",
+            message: "Otp sent successfully"
+        })
 
     } catch (error) {
         console.error(
@@ -952,79 +966,61 @@ app.post("/verify-phone", async (req, res) => {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message: "User not found"
-            })
+            });
         }
 
         if (!user.phone) {
-
             return res.status(400).json({
-
                 success: false,
-
-                message:
-                    "No registered phone number found"
-
+                message: "Registered phone number not found"
             });
-
         }
 
-        const phone = String(user.phone).replace(/\D/g, "");
-
-        const mobile = phone.startsWith("91") ? phone : `91${phone}`;
-
-        const response = await axios.post(
-            "https://control.msg91.com/api/v5/otp",
-            {},
-            {
-                params: {
-                    mobile,
-                    otp
-                },
-                headers: {
-                    authkey: process.env.MSG91_AUTH_KEY,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        onsole.log(
-            "MSG91 VERIFY RESPONSE:",
-            response.data
-        )
-
+        // Find the OTP saved for this user
         const otpRecord = await otpSchema.findOne({
-            userId,
+            userId: user._id,
             purpose: "language",
+            verified: false,
             expiresAt: {
                 $gt: new Date()
-            },
-            verified: false
+            }
         });
 
         if (!otpRecord) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "No valid language verification request found"
+                message: "OTP has expired or does not exist"
+            });
+        }
+        if (
+            !otpRecord.expiresAt ||
+            new Date(otpRecord.expiresAt) <= new Date()
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP has expired"
             });
         }
 
+        // Change language
         user.language = language;
-
         await user.save();
 
+        otp
+
+        // Delete used OTP
         await otpSchema.deleteOne({
             _id: otpRecord._id
-        })
+        });
 
         return res.status(200).json({
             success: true,
-            message: "Language changed successfully",
+            message: "Phone OTP verified successfully",
             language: user.language
-        })
+        });
 
     } catch (error) {
         console.error(
