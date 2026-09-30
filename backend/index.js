@@ -17,8 +17,7 @@ import upload from "./middleware/upload.js";
 import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
-import axios from "axios";
-import twilioClient from "./config/twilio.js";
+import { sendSmsOtp } from "./utils/sendSms.js";
 
 
 const app = express()
@@ -712,44 +711,11 @@ app.post("/language/request", async (req, res) => {
             });
         }
 
-        let phone = String(user.phone).trim();
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        phone = phone.replace(/\D/g, "");
-
-        if (phone.length === 10) {
-            phone = `+91${phone}`;
-        } else if (phone.startsWith("91") && phone.length === 12) {
-            phone = `+${phone}`;
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid phone number"
-            });
-        }
-
-        console.log("PHONE:", phone);
-
-        // send otp using twilio sms api
-
-        const message = await twilioClient.messages.create({
-            body: "sms_2fa",
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to: phone
-        });
-
-        console.log("TWILIO SMS SID:", message.sid);
-        console.log("TWILIO SMS BODY:", message.body);
-        const otpMatch = message.body.match(/\b\d{6}\b/);
-
-        if (!otpMatch) {
-            throw new Error("Could not extract OTP from Twilio message");
-        }
-
-        const otp = otpMatch[0];
-
-        console.log("TWILIO OTP:", otp);
-
-        // Save the SAME OTP that Twilio sent
+        console.log("OTP:", otp);
+        
+        // delete the otp 
         await otpSchema.deleteMany({
             userId: user._id,
             purpose: "language"
@@ -763,6 +729,11 @@ app.post("/language/request", async (req, res) => {
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
             loginHistoryId: null
         });
+
+        const phone = `+91${user.phone}`;
+
+        const result = await sendSmsOtp(phone,otp);
+        console.log(result);
 
         return res.status(200).json({
             success: true,
@@ -918,10 +889,7 @@ app.post("/verift-otp", async (req, res) => {
 app.post("/verify-phone", async (req, res) => {
     try {
 
-        console.log(
-            "PHONE.EMAIL LANGUAGE VERIFICATION:",
-            req.body
-        );
+        console.log(req.body);
 
         const {
             userId,
@@ -989,19 +957,12 @@ app.post("/verify-phone", async (req, res) => {
             }
         });
 
+        console.log("OTP SAVED IN DATABASE:", otpRecord);
+
         if (!otpRecord) {
             return res.status(400).json({
                 success: false,
                 message: "OTP has expired or does not exist"
-            });
-        }
-        if (
-            !otpRecord.expiresAt ||
-            new Date(otpRecord.expiresAt) <= new Date()
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired"
             });
         }
 
@@ -1009,12 +970,9 @@ app.post("/verify-phone", async (req, res) => {
         user.language = language;
         await user.save();
 
-        otp
-
-        // Delete used OTP
         await otpSchema.deleteOne({
             _id: otpRecord._id
-        });
+        })
 
         return res.status(200).json({
             success: true,
