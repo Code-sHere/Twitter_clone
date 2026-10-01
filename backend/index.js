@@ -17,7 +17,7 @@ import upload from "./middleware/upload.js";
 import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
-import { sendSmsOtp } from "./utils/sendSms.js";
+import { sendSmsOtp, checkSmsOtp, toE164 } from "./utils/sendSms.js";
 
 
 const app = express()
@@ -545,7 +545,7 @@ app.get("/assets/:tweetId", async (req, res) => {
     try {
         const { tweetId } = req.params;
 
-        const asset = await Assets.findOne({
+        const asset = await assets.findOne({
             tweetId,
         });
 
@@ -620,90 +620,77 @@ app.post("/forget-password", forgetPassword);
 
 app.post("/language/request", async (req, res) => {
     try {
-
-        console.log("language request", req.body);
-
         const { userId, language } = req.body;
 
         if (!userId || !language) {
             return res.status(400).json({
                 success: false,
-                message: "userId and langauge are required"
-            })
+                message: "userId and language are required"
+            });
         }
 
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message: "User not found"
-            })
+            });
         }
 
-        //supported languages 
-        const supporetedLanguages = [
-            "en",
-            "es",
-            "fr",
-            "hi",
-            "pt",
-            "zh"
-        ];
+        const supportedLanguages = ["en", "es", "fr", "hi", "pt", "zh"];
 
-        if (!supporetedLanguages.includes(language)) {
+        if (!supportedLanguages.includes(language)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid langauge"
-            })
+                message: "Invalid language"
+            });
         }
 
         if (user.language === language) {
             return res.status(400).json({
                 success: false,
                 message: "User already has this language"
-            })
+            });
         }
 
-        // reomoving all old otps
+        // remove old language OTPs (email flow only)
         await otpSchema.deleteMany({
             userId: user._id,
             purpose: "language"
         });
 
+        // ---------- FRENCH: email OTP (our own OTP) ----------
         if (language === "fr") {
             if (!user.email) {
                 return res.status(400).json({
                     success: false,
                     message: "User email not found"
-                })
+                });
             }
 
             const otp = crypto.randomInt(100000, 999999).toString();
 
             await otpSchema.create({
                 userId: user._id,
-                otp: otp,
+                otp,
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000),
                 purpose: "language",
                 verified: false,
                 loginHistoryId: null
             });
 
-            await sendOtp(
-                user.email,
-                user.displayName,
-                otp,
-            )
+            await sendOtp(user.email, user.displayName, otp);
 
             return res.status(200).json({
                 success: true,
                 language,
+                method: "email",
                 message: "Otp sent successfully"
-            })
-
+            });
         }
 
+        // ---------- OTHER LANGUAGES: phone OTP via Twilio Verify ----------
         if (!user.phone) {
             return res.status(400).json({
                 success: false,
@@ -711,42 +698,25 @@ app.post("/language/request", async (req, res) => {
             });
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-        console.log("OTP:", otp);
-        
-        // delete the otp 
-        await otpSchema.deleteMany({
-            userId: user._id,
-            purpose: "language"
-        });
-
-        await otpSchema.create({
-            userId: user._id,
-            otp: otp,
-            purpose: "language",
-            verified: false,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-            loginHistoryId: null
-        });
-
-        const phone = `+91${user.phone}`;
-
-        const result = await sendSmsOtp(phone,otp);
-        console.log(result);
+        await sendSmsOtp(toE164(user.phone));
 
         return res.status(200).json({
             success: true,
             language,
             method: "phone",
             message: "Otp sent successfully"
-        })
+        });
 
     } catch (error) {
-        console.error(
-            "Language OTP request error:",
-            error
-        );
+        console.error("Language OTP request error:", error);
+
+        // Twilio rate limit
+        if (error.code === 60203) {
+            return res.status(429).json({
+                success: false,
+                message: "Too many attempts. Please wait a few minutes."
+            });
+        }
 
         return res.status(500).json({
             success: false,
@@ -754,7 +724,7 @@ app.post("/language/request", async (req, res) => {
             error: error.message
         });
     }
-})
+});
 
 app.post("/verift-otp", async (req, res) => {
     try {
@@ -763,45 +733,35 @@ app.post("/verift-otp", async (req, res) => {
         if (!userId || !otp) {
             return res.status(400).json({
                 success: false,
-                message: "otp are required"
-            })
+                message: "userId and otp are required"
+            });
         }
 
         const otpRecord = await otpSchema.findOne({
-            userId: userId,
+            userId,
             otp: otp.toString()
-        })
+        });
 
         if (!otpRecord) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid otp"
-            })
+            });
         }
 
         if (otpRecord.expiresAt < new Date()) {
-            await otpSchema.deleteOne({
-                userId: userId,
-                otp: otp
-            })
-
+            await otpSchema.deleteOne({ _id: otpRecord._id });
             return res.status(400).json({
                 success: false,
                 message: "Otp expired"
-            })
+            });
         }
 
-        //    Audio otp
-
+        // ---- Audio tweet OTP ----
         if (otpRecord.purpose === "audioTweet") {
-
             otpRecord.verified = true;
-
             await otpRecord.save();
-
-            await otpSchema.deleteOne({
-                _id: otpRecord._id
-            })
+            // do NOT delete here: /upload-audio checks verified: true
 
             return res.status(200).json({
                 success: true,
@@ -809,50 +769,45 @@ app.post("/verift-otp", async (req, res) => {
             });
         }
 
+        // ---- Language OTP (French via email) ----
         if (otpRecord.purpose === "language") {
             const user = await User.findById(userId);
 
             if (!user) {
-                return res.status(400).json({
+                return res.status(404).json({
                     success: false,
                     message: "User not found"
-                })
+                });
             }
 
             user.language = "fr";
-
             await user.save();
-
-            await otpSchema.deleteOne({
-                _id: otpRecord._id
-            })
+            await otpSchema.deleteOne({ _id: otpRecord._id });
 
             return res.status(200).json({
                 success: true,
                 message: "Language changed successfully",
                 language: user.language
-            })
+            });
         }
 
-        await LoginHistory.findOneAndUpdate(
-            otpRecord.loginHistoryId,
-            {
+        // ---- Login OTP ----
+        if (otpRecord.loginHistoryId) {
+            await LoginHistory.findByIdAndUpdate(otpRecord.loginHistoryId, {
                 status: "success",
                 reason: "Otp verified"
-            }
-        )
+            });
+        }
 
-        await otpSchema.deleteOne({
-            _id: otpRecord._id
-        })
+        await otpSchema.deleteOne({ _id: otpRecord._id });
 
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
                 message: "User not found"
-            })
+            });
         }
 
         return res.status(200).json({
@@ -868,68 +823,40 @@ app.post("/verift-otp", async (req, res) => {
                 bio: user.bio,
                 location: user.location,
                 website: user.website,
-                isTemporaryPassword:
-                    user.isTemporaryPassword
+                isTemporaryPassword: user.isTemporaryPassword
             }
         });
 
     } catch (error) {
-        console.error(
-            "OTP verification error:",
-            error
-        );
+        console.error("OTP verification error:", error);
 
         return res.status(500).json({
             success: false,
             message: "Internal server error"
         });
     }
-})
+});
 
 app.post("/verify-phone", async (req, res) => {
     try {
-
-        console.log(req.body);
-
-        const {
-            userId,
-            otp,
-            language
-        } = req.body;
+        const { userId, otp, language } = req.body;
 
         if (!userId || !otp || !language) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
-            })
+            });
         }
 
-        const supporetedLanguages = [
-            "en",
-            "hi",
-            "es",
-            "pt",
-            "zh",
-            "fr"
-        ]
+        const supportedLanguages = ["en", "hi", "es", "pt", "zh"];
 
-
-        if (!supporetedLanguages.includes(language)) {
+        // French is verified by email, not phone
+        if (!supportedLanguages.includes(language)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid langauge"
-            })
+                message: "Invalid language"
+            });
         }
-
-        // french must use email
-        if (language === "fr") {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid langauge"
-            })
-        }
-
-        // find our user
 
         const user = await User.findById(userId);
 
@@ -947,32 +874,27 @@ app.post("/verify-phone", async (req, res) => {
             });
         }
 
-        // Find the OTP saved for this user
-        const otpRecord = await otpSchema.findOne({
-            userId: user._id,
-            purpose: "language",
-            verified: false,
-            expiresAt: {
-                $gt: new Date()
-            }
-        });
+        let approved = false;
 
-        console.log("OTP SAVED IN DATABASE:", otpRecord);
-
-        if (!otpRecord) {
+        try {
+            approved = await checkSmsOtp(toE164(user.phone), otp.toString());
+        } catch (err) {
+            console.error("Twilio check error:", err.message);
             return res.status(400).json({
                 success: false,
-                message: "OTP has expired or does not exist"
+                message: "OTP has expired or is invalid"
             });
         }
 
-        // Change language
+        if (!approved) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP"
+            });
+        }
+
         user.language = language;
         await user.save();
-
-        await otpSchema.deleteOne({
-            _id: otpRecord._id
-        })
 
         return res.status(200).json({
             success: true,
@@ -981,18 +903,14 @@ app.post("/verify-phone", async (req, res) => {
         });
 
     } catch (error) {
-        console.error(
-            "language verification error:",
-            error
-        );
+        console.error("Language verification error:", error);
 
-        return res.status(401).json({
+        return res.status(500).json({
             success: false,
-            message:
-                " phone verification failed"
+            message: "Phone verification failed"
         });
     }
-})
+});
 
 app.get("/settings/:userId", async (req, res) => {
     try {

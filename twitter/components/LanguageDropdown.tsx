@@ -335,7 +335,7 @@ export default function LanguageDropdown() {
 
             <Dialog
                 open={showOtp}
-                onOpenChange={closeOtpDialog}
+                onOpenChange={(open) => {if (!open) closeOtpDialog();}}
             >
                 <DialogContent>
                     <DialogHeader>
