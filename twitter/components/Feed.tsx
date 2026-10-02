@@ -7,6 +7,7 @@ import Loadingspinner from "./Loading-spinner";
 import TweetCard from "./TweetCard";
 import TweetComposer from "./TweetComposer";
 import axiosInstance from "@/lib/axiosInstance";
+import { useTranslation } from "react-i18next";
 
 interface Author {
     _id: string;
@@ -48,6 +49,8 @@ const Feed = () => {
     const [tweets, setTweets] = useState<Tweet[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(false);
+
+    const { t } = useTranslation();
 
     const fetchFeed = async () => {
         try {
@@ -103,7 +106,7 @@ const Feed = () => {
 
                     <div className="px-3 sm:px-4 md:px-6 py-3">
                         <h1 className="text-lg sm:text-xl font-bold text-white">
-                            Home
+                            {t("feed.home")}
                         </h1>
                     </div>
 
@@ -142,7 +145,7 @@ const Feed = () => {
                                     data-[state=active]:border-blue-500
                                 "
                             >
-                                For You
+                                {t("feed.forYou")}
                             </TabsTrigger>
 
                             <TabsTrigger
@@ -168,7 +171,7 @@ const Feed = () => {
                                     data-[state=active]:border-blue-500
                                 "
                             >
-                                Following
+                                {t("feed.following")}
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -198,7 +201,7 @@ const Feed = () => {
                                 />
 
                                 <p className="text-sm sm:text-base">
-                                    Loading Tweets
+                                    {t("feed.loadingTweets")}
                                 </p>
 
                             </div>
@@ -212,7 +215,7 @@ const Feed = () => {
                         <CardContent className="py-12 px-4 text-center">
 
                             <p className="text-gray-400 text-sm sm:text-base">
-                                No tweets available.
+                                {t("feed.noTweets")}
                             </p>
 
                         </CardContent>

@@ -2,6 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
+
 
 import {
     Card,
@@ -45,6 +47,9 @@ const EditProfile = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const { t } = useTranslation();
+
 
     const [formData, setFormData] = useState({
         displayName: user?.displayName || "",
@@ -110,7 +115,7 @@ const EditProfile = ({
             console.error(err);
 
             setError({
-                general: "Something went wrong. Please try again.",
+                general: "auth.updateProfileError",
             });
         } finally {
             setIsLoading(false);
@@ -170,7 +175,7 @@ const EditProfile = ({
             console.error("Image upload failed:", err);
 
             setError({
-                general: "Failed to upload image.",
+                general: "auth.imageUploadError",
             });
         } finally {
             setIsLoading(false);
@@ -240,7 +245,7 @@ const EditProfile = ({
                             </Button>
 
                             <CardTitle className="text-base sm:text-xl text-white truncate">
-                                Edit Profile
+                                {t("auth.editProfile")}
                             </CardTitle>
                         </div>
 
@@ -259,7 +264,7 @@ const EditProfile = ({
                                 sm:px-5
                             "
                         >
-                            {isLoading ? "Saving..." : "Save"}
+                            {isLoading ? t("auth.saving") : t("auth.save")}
                         </Button>
                     </div>
                 </CardHeader>
@@ -267,7 +272,7 @@ const EditProfile = ({
                 <CardContent className="p-0">
                     {error.general && (
                         <div className="mx-4 sm:mx-6 mt-4 bg-red-900/20 border border-red-800 rounded-lg p-3 text-red-400 text-sm">
-                            {error.general}
+                            {t(error.general)}
                         </div>
                     )}
 
@@ -425,7 +430,7 @@ const EditProfile = ({
                                     htmlFor="displayName"
                                     className="text-white"
                                 >
-                                    Name
+                                    {t("auth.displayName")}
                                 </Label>
 
                                 <Input
@@ -448,7 +453,7 @@ const EditProfile = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                    placeholder="Your display name"
+                                    placeholder={t("auth.displayNamePlaceholder")}
                                     maxLength={50}
                                     disabled={isLoading}
                                 />
@@ -456,7 +461,7 @@ const EditProfile = ({
                                 <div className="flex justify-between text-xs sm:text-sm">
                                     {error.displayName ? (
                                         <p className="text-red-400">
-                                            {error.displayName}
+                                            {t(error.displayName)}
                                         </p>
                                     ) : (
                                         <span />
@@ -479,7 +484,7 @@ const EditProfile = ({
                                     htmlFor="bio"
                                     className="text-white"
                                 >
-                                    Bio
+                                    {t("auth.bio")}
                                 </Label>
 
                                 <Textarea
@@ -500,7 +505,7 @@ const EditProfile = ({
                                         resize-none
                                         min-h-[100px]
                                     "
-                                    placeholder="Tell the world about yourself"
+                                    placeholder={t("auth.bioPlaceholder")}
                                     maxLength={160}
                                     disabled={isLoading}
                                 />
@@ -508,7 +513,7 @@ const EditProfile = ({
                                 <div className="flex justify-between text-xs sm:text-sm">
                                     {error.bio ? (
                                         <p className="text-red-400">
-                                            {error.bio}
+                                            {t(error.bio)}
                                         </p>
                                     ) : (
                                         <span />
@@ -526,7 +531,7 @@ const EditProfile = ({
                                     htmlFor="location"
                                     className="text-white"
                                 >
-                                    Location
+                                    {t("auth.location")}
                                 </Label>
 
                                 <div className="relative">
@@ -553,7 +558,7 @@ const EditProfile = ({
                                             placeholder-gray-400
                                             focus:border-blue-500
                                         "
-                                        placeholder="Where are you located?"
+                                        placeholder={t("auth.locationPlaceholder")}
                                         maxLength={30}
                                         disabled={isLoading}
                                     />
@@ -562,7 +567,7 @@ const EditProfile = ({
                                 <div className="flex justify-between text-xs sm:text-sm">
                                     {error.location ? (
                                         <p className="text-red-400">
-                                            {error.location}
+                                            {t(error.location)}
                                         </p>
                                     ) : (
                                         <span />
@@ -584,7 +589,7 @@ const EditProfile = ({
                                     htmlFor="website"
                                     className="text-white"
                                 >
-                                    Website
+                                    {t("auth.website")}
                                 </Label>
 
                                 <div className="relative">
@@ -611,7 +616,7 @@ const EditProfile = ({
                                             placeholder-gray-400
                                             focus:border-blue-500
                                         "
-                                        placeholder="Your website URL"
+                                        placeholder={t("auth.websitePlaceholder")}
                                         maxLength={100}
                                         disabled={isLoading}
                                     />
@@ -620,7 +625,7 @@ const EditProfile = ({
                                 <div className="flex justify-between text-xs sm:text-sm">
                                     {error.website ? (
                                         <p className="text-red-400">
-                                            {error.website}
+                                            {t(error.website)}
                                         </p>
                                     ) : (
                                         <span />

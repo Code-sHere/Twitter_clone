@@ -27,6 +27,13 @@
         "delete": "Delete",
         "share": "Share"
     },
+    "feed":{
+        "home": "Home",
+        "forYou": "For You",
+        "following": "Following",
+        "loadingTweets": "Loading Tweets",
+        "noTweets": "No tweets available."
+    },
     "language": {
         "title": "Language",
         "selectLanguage": "Select Language",
@@ -137,5 +144,41 @@
             "enabled": "Enabled",
             "disabled": "Disabled"
         }
+    },
+    "signInTitle": "Sign in to X",
+    "createAccountTitle": "Create your account",
+    "verifyLoginTitle": "Verify your login",
+    "verificationCode": "Verification Code",
+    "enterOtp6": "Enter 6 digit OTP",
+    "otpSentNote": "We sent a 6-digit verification code to your registered email.",
+    "verifying": "Verifying...",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Your display name",
+    "username": "Username",
+    "usernamePlaceholder": "username",
+    "phone": "Phone",
+    "phonePlaceholder": "Your Phone number",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "or": "OR",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "terms": "By signing up, you agree to our Terms of Service and Privacy Policy, including Cookie Use.",
+    "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email",
+        "passwordRequired": "Password is required",
+        "passwordMin": "Password must be at least 6 characters",
+        "usernameRequired": "Username is required",
+        "usernameMin": "Username must be at least 3 characters",
+        "usernameChars": "Username can only contain letters, numbers, and underscores",
+        "displayNameRequired": "Display name is required",
+        "invalidOtp": "Please enter a valid OTP",
+        "otpTryAgain": "Invalid OTP. Please try again.",
+        "generic": "Something went wrong. Please try again."
     }
 }

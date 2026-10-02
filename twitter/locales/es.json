@@ -9,7 +9,6 @@
         "profile": "Perfil",
         "more": "Más"
     },
-
     "auth": {
         "login": "Iniciar sesión",
         "signup": "Registrarse",
@@ -18,7 +17,6 @@
         "forgotPassword": "¿Olvidaste tu contraseña?",
         "verifyOtp": "Verificar OTP"
     },
-
     "tweet": {
         "post": "Publicar",
         "reply": "Responder",
@@ -29,7 +27,13 @@
         "delete": "Eliminar",
         "share": "Compartir"
     },
-
+    "feed": {
+        "home": "Inicio",
+        "forYou": "Para ti",
+        "following": "Siguiendo",
+        "loadingTweets": "Cargando tweets...",
+        "noTweets": "No hay tweets disponibles."  
+    },
     "language": {
         "title": "Idioma",
         "selectLanguage": "Seleccionar idioma",
@@ -40,7 +44,6 @@
         "verify": "Verificar",
         "resendOtp": "Reenviar OTP"
     },
-
     "common": {
         "save": "Guardar",
         "cancel": "Cancelar",
@@ -50,11 +53,9 @@
         "error": "Error",
         "success": "Éxito"
     },
-
     "plans": {
         "title": "Mejora tu experiencia en Twitter",
         "subtitle": "Elige un plan que se adapte a ti. Más tweets, más alcance, más impacto.",
-
         "free": {
             "name": "GRATIS",
             "description": "Para empezar",
@@ -67,7 +68,6 @@
             },
             "button": "Plan actual"
         },
-
         "bronze": {
             "name": "BRONCE",
             "description": "Más tweets, más potencia",
@@ -81,7 +81,6 @@
             },
             "button": "Actualizar ahora"
         },
-
         "silver": {
             "name": "PLATA",
             "description": "Más tweets, más alcance",
@@ -97,7 +96,6 @@
             },
             "button": "Actualizar ahora"
         },
-
         "gold": {
             "name": "ORO",
             "description": "Ilimitado y premium",
@@ -112,7 +110,6 @@
             },
             "button": "Pasar a Premium"
         },
-
         "benefits": {
             "securePayments": {
                 "title": "Pagos seguros",
@@ -132,7 +129,6 @@
             }
         }
     },
-
     "profile": {
         "editProfile": "Editar perfil",
         "joined": "Se unió",
@@ -141,7 +137,6 @@
         "highlights": "Destacados",
         "articles": "Artículos",
         "media": "Multimedia",
-
         "tweetNotifications": {
             "title": "Notificaciones de tweets",
             "description": "Recibe notificaciones del navegador de tweets que contengan \"cricket\" o \"science\".",
@@ -149,5 +144,41 @@
             "enabled": "Activadas",
             "disabled": "Desactivadas"
         }
+    },
+    "signInTitle": "Inicia sesión en X",
+    "createAccountTitle": "Crea tu cuenta",
+    "verifyLoginTitle": "Verifica tu inicio de sesión",
+    "verificationCode": "Código de verificación",
+    "enterOtp6": "Introduce el OTP de 6 dígitos",
+    "otpSentNote": "Hemos enviado un código de verificación de 6 dígitos a tu correo electrónico registrado.",
+    "verifying": "Verificando...",
+    "displayName": "Nombre para mostrar",
+    "displayNamePlaceholder": "Tu nombre para mostrar",
+    "username": "Nombre de usuario",
+    "usernamePlaceholder": "nombre de usuario",
+    "phone": "Teléfono",
+    "phonePlaceholder": "Tu número de teléfono",
+    "emailPlaceholder": "Introduce tu correo electrónico",
+    "passwordPlaceholder": "Introduce tu contraseña",
+    "signingIn": "Iniciando sesión...",
+    "creatingAccount": "Creando cuenta...",
+    "signIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta",
+    "or": "O",
+    "noAccount": "¿No tienes una cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "terms": "Al registrarte, aceptas nuestras Condiciones de servicio y nuestra Política de privacidad, incluido el uso de cookies.",
+    "errors": {
+        "emailRequired": "El correo electrónico es obligatorio",
+        "emailInvalid": "Introduce un correo electrónico válido",
+        "passwordRequired": "La contraseña es obligatoria",
+        "passwordMin": "La contraseña debe tener al menos 6 caracteres",
+        "usernameRequired": "El nombre de usuario es obligatorio",
+        "usernameMin": "El nombre de usuario debe tener al menos 3 caracteres",
+        "usernameChars": "El nombre de usuario solo puede contener letras, números y guiones bajos",
+        "displayNameRequired": "El nombre para mostrar es obligatorio",
+        "invalidOtp": "Introduce un OTP válido",
+        "otpTryAgain": "OTP no válido. Inténtalo de nuevo.",
+        "generic": "Algo salió mal. Inténtalo de nuevo."
     }
 }

@@ -23,44 +23,56 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const API = "http://localhost:5000";
+
+// Language names are shown in their own language on purpose,
+// so a user can always find theirs even if the UI is in another language.
+const LANGUAGES = [
+    { code: "en", label: "English" },
+    { code: "hi", label: "हिन्दी" },
+    { code: "fr", label: "Français" },
+    { code: "es", label: "Español" },
+    { code: "pt", label: "Português" },
+    { code: "zh", label: "中文" },
+];
+
 export default function LanguageDropdown() {
     const { user } = useAuth();
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
 
-    const [appLanguage, setAppLanguage] = useState(
-        i18n.language || "en"
-    );
-
-    const [selectedLanguage, setSelectedLanguage] =
-        useState("");
-
+    const [selectedLanguage, setSelectedLanguage] = useState("");
     const [otp, setOtp] = useState("");
+    const [otpMethod, setOtpMethod] = useState<"email" | "phone" | "">("");
+    const [showOtp, setShowOtp] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [message, setMessage] = useState("");
 
-    const [otpMethod, setOtpMethod] =
-        useState<"email" | "phone" | "">("");
+    // current language comes straight from i18n (no separate state)
+    const appLanguage = i18n.language?.split("-")[0] || "en";
 
-    const [showOtp, setShowOtp] =
-        useState(false);
+    const resetDialog = () => {
+        setShowOtp(false);
+        setOtp("");
+        setOtpMethod("");
+        setSelectedLanguage("");
+        setMessage("");
+    };
 
-    const [otpLoading, setOtpLoading] =
-        useState(false);
-
-    const [message, setMessage] =
-        useState("");
-
-    const handleLanguageChange = async ({
-        language,
-    }: {
-        language: string;
-    }) => {
-        if (language === appLanguage) {
-            return;
+    // change the whole app's language and remember it
+    const applyLanguage = async (lang: string) => {
+        await i18n.changeLanguage(lang);
+        try {
+            localStorage.setItem("lang", lang);
+        } catch {
+            /* storage unavailable, ignore */
         }
+    };
+
+    const handleLanguageChange = async (language: string) => {
+        if (language === appLanguage) return;
 
         if (!user?._id) {
-            setMessage(
-                "User information is not available."
-            );
+            setMessage(t("language.userUnavailable"));
             return;
         }
 
@@ -70,216 +82,90 @@ export default function LanguageDropdown() {
             setMessage("");
             setOtp("");
 
-            const response = await axios.post(
-                "http://localhost:5000/language/request",
-                {
-                    userId: user._id,
-                    language,
-                }
-            );
-
-            console.log(
-                "LANGUAGE REQUEST RESPONSE:",
-                response.data
-            );
+            const response = await axios.post(`${API}/language/request`, {
+                userId: user._id,
+                language,
+            });
 
             if (response.data.method === "email") {
                 setOtpMethod("email");
-
-                setMessage(
-                    "OTP sent to your registered email."
-                );
-
+                setMessage(t("language.otpSentEmail"));
                 setShowOtp(true);
-
                 return;
             }
 
             if (response.data.method === "phone") {
                 setOtpMethod("phone");
-
-                setMessage(
-                    "OTP sent to your registered phone number."
-                );
-
+                setMessage(t("language.otpSentMobile"));
                 setShowOtp(true);
-
                 return;
             }
 
-            setMessage(
-                "Invalid OTP verification method."
-            );
-
+            setMessage(t("language.invalidMethod"));
         } catch (error: any) {
-            console.error(
-                "Language change error:",
-                error
-            );
-
+            console.error("Language change error:", error);
             setMessage(
-                error.response?.data?.message ||
-                "Failed to request language change."
+                error.response?.data?.message || t("language.requestFailed")
             );
-
         } finally {
             setOtpLoading(false);
         }
     };
 
-    const verifyEmailOtp = async () => {
+    const verifyOtp = async () => {
         if (!otp || otp.length !== 6) {
-            setMessage(
-                "Please enter a valid 6-digit OTP."
-            );
+            setMessage(t("language.invalidOtpLength"));
             return;
         }
 
         if (!user?._id) {
-            setMessage(
-                "User information is not available."
-            );
-            return;
-        }
-
-        try {
-            setOtpLoading(true);
-
-            const response = await axios.post(
-                "http://localhost:5000/verift-otp",
-                {
-                    userId: user._id,
-                    otp,
-                }
-            );
-
-            if (response.data.success) {
-                await i18n.changeLanguage(
-                    selectedLanguage
-                );
-
-                setAppLanguage(
-                    selectedLanguage
-                );
-
-                setShowOtp(false);
-                setOtp("");
-                setOtpMethod("");
-                setSelectedLanguage("");
-                setMessage("");
-
-            } else {
-                setMessage(
-                    response.data.message ||
-                    "Invalid OTP."
-                );
-            }
-
-        } catch (error: any) {
-            console.error(
-                "Email OTP verification error:",
-                error
-            );
-
-            setMessage(
-                error.response?.data?.message ||
-                "OTP verification failed."
-            );
-
-        } finally {
-            setOtpLoading(false);
-        }
-    };
-
-    const verifyPhoneOtp = async () => {
-        if (!otp || otp.length !== 6) {
-            setMessage(
-                "Please enter a valid 6-digit OTP."
-            );
-            return;
-        }
-
-        if (!user?._id) {
-            setMessage(
-                "User information is not available."
-            );
+            setMessage(t("language.userUnavailable"));
             return;
         }
 
         if (!selectedLanguage) {
-            setMessage(
-                "Language selection is missing."
-            );
+            setMessage(t("language.missingLanguage"));
             return;
         }
 
         try {
             setOtpLoading(true);
 
-            const response = await axios.post(
-                "http://localhost:5000/verify-phone",
-                {
-                    userId: user._id,
-                    otp,
-                    language: selectedLanguage
-                }
-            );
-
-            console.log(
-                "PHONE OTP RESPONSE:",
-                response.data
-            );
+            const response =
+                otpMethod === "phone"
+                    ? await axios.post(`${API}/verify-phone`, {
+                          userId: user._id,
+                          otp,
+                          language: selectedLanguage,
+                      })
+                    : await axios.post(`${API}/verift-otp`, {
+                          userId: user._id,
+                          otp,
+                      });
 
             if (response.data.success) {
-                await i18n.changeLanguage(
-                    response.data.language ||
-                    selectedLanguage
+                await applyLanguage(
+                    response.data.language || selectedLanguage
                 );
-
-                setAppLanguage(
-                    response.data.language ||
-                    selectedLanguage
-                );
-
-                setShowOtp(false);
-                setOtp("");
-                setOtpMethod("");
-                setSelectedLanguage("");
-                setMessage("");
-
+                resetDialog();
             } else {
                 setMessage(
-                    response.data.message ||
-                    "Invalid OTP."
+                    response.data.message || t("language.verifyFailed")
                 );
             }
-
         } catch (error: any) {
-            console.error(
-                "Phone OTP verification error:",
-                error
-            );
-
+            console.error("OTP verification error:", error);
             setMessage(
-                error.response?.data?.message ||
-                "Phone OTP verification failed."
+                error.response?.data?.message || t("language.verifyFailed")
             );
-
         } finally {
             setOtpLoading(false);
         }
     };
 
     const closeOtpDialog = () => {
-        if (otpLoading) {
-            return;
-        }
-
-        setShowOtp(false);
-        setOtp("");
-        setMessage("");
-        setOtpMethod("");
-        setSelectedLanguage("");
+        if (otpLoading) return;
+        resetDialog();
     };
 
     return (
@@ -294,40 +180,21 @@ export default function LanguageDropdown() {
                 <DropdownMenuContent className="w-40">
                     <DropdownMenuGroup>
                         <DropdownMenuLabel>
-                            Languages
+                            {t("language.title")}
                         </DropdownMenuLabel>
 
                         <DropdownMenuRadioGroup
                             value={appLanguage}
-                            onValueChange={(value) => {
-                                handleLanguageChange({
-                                    language: value,
-                                });
-                            }}
+                            onValueChange={handleLanguageChange}
                         >
-                            <DropdownMenuRadioItem value="en">
-                                English
-                            </DropdownMenuRadioItem>
-
-                            <DropdownMenuRadioItem value="hi">
-                                Hindi
-                            </DropdownMenuRadioItem>
-
-                            <DropdownMenuRadioItem value="fr">
-                                French
-                            </DropdownMenuRadioItem>
-
-                            <DropdownMenuRadioItem value="es">
-                                Spanish
-                            </DropdownMenuRadioItem>
-
-                            <DropdownMenuRadioItem value="pt">
-                                Portuguese
-                            </DropdownMenuRadioItem>
-
-                            <DropdownMenuRadioItem value="zh">
-                                Chinese
-                            </DropdownMenuRadioItem>
+                            {LANGUAGES.map((l) => (
+                                <DropdownMenuRadioItem
+                                    key={l.code}
+                                    value={l.code}
+                                >
+                                    {l.label}
+                                </DropdownMenuRadioItem>
+                            ))}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -335,88 +202,41 @@ export default function LanguageDropdown() {
 
             <Dialog
                 open={showOtp}
-                onOpenChange={(open) => {if (!open) closeOtpDialog();}}
+                onOpenChange={(open) => {
+                    if (!open) closeOtpDialog();
+                }}
             >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            Verify Language Change
+                            {t("language.verifyLanguage")}
                         </DialogTitle>
 
-                        <DialogDescription>
-                            {message}
-                        </DialogDescription>
+                        <DialogDescription>{message}</DialogDescription>
                     </DialogHeader>
 
-                    {otpMethod === "email" && (
-                        <div className="space-y-4">
-                            <Input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="Enter 6-digit OTP"
-                                value={otp}
-                                maxLength={6}
-                                onChange={(e) => {
-                                    setOtp(
-                                        e.target.value.replace(
-                                            /\D/g,
-                                            ""
-                                        )
-                                    );
-                                }}
-                            />
+                    <div className="space-y-4">
+                        <Input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={t("language.enterOtp")}
+                            value={otp}
+                            maxLength={6}
+                            onChange={(e) =>
+                                setOtp(e.target.value.replace(/\D/g, ""))
+                            }
+                        />
 
-                            <Button
-                                className="w-full"
-                                disabled={
-                                    otpLoading ||
-                                    otp.length !== 6
-                                }
-                                onClick={
-                                    verifyEmailOtp
-                                }
-                            >
-                                {otpLoading
-                                    ? "Verifying..."
-                                    : "Verify OTP"}
-                            </Button>
-                        </div>
-                    )}
-
-                    {otpMethod === "phone" && (
-                        <div className="space-y-4">
-                            <Input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="Enter 6-digit OTP"
-                                value={otp}
-                                maxLength={6}
-                                onChange={(e) => {
-                                    setOtp(
-                                        e.target.value.replace(
-                                            /\D/g,
-                                            ""
-                                        )
-                                    );
-                                }}
-                            />
-
-                            <Button
-                                className="w-full"
-                                disabled={
-                                    otpLoading ||
-                                    otp.length !== 6
-                                }
-                                onClick={
-                                    verifyPhoneOtp
-                                }
-                            >
-                                {otpLoading
-                                    ? "Verifying..."
-                                    : "Verify OTP"}
-                            </Button>
-                        </div>
-                    )}
+                        <Button
+                            className="w-full"
+                            disabled={otpLoading || otp.length !== 6}
+                            onClick={verifyOtp}
+                        >
+                            {otpLoading
+                                ? t("common.loading")
+                                : t("language.verify")}
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </>

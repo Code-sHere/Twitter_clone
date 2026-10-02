@@ -27,6 +27,13 @@
         "delete": "हटाएँ",
         "share": "शेयर करें"
     },
+    "feed": {
+        "home": "होम",
+        "forYou": "आपके लिए",
+        "following": "अनुसरण कर रहे हैं",
+        "loadingTweets": "ट्वीट लोड हो रहे हैं...",
+        "noTweets": "कोई ट्वीट उपलब्ध नहीं है।"  
+    },
     "language": {
         "title": "भाषा",
         "selectLanguage": "भाषा चुनें",
@@ -137,5 +144,41 @@
             "enabled": "सक्षम",
             "disabled": "अक्षम"
         }
+    },
+    "signInTitle": "X में साइन इन करें",
+    "createAccountTitle": "अपना अकाउंट बनाएं",
+    "verifyLoginTitle": "अपने लॉगिन को सत्यापित करें",
+    "verificationCode": "सत्यापन कोड",
+    "enterOtp6": "6 अंकों का OTP दर्ज करें",
+    "otpSentNote": "हमने आपके पंजीकृत ईमेल पर 6 अंकों का सत्यापन कोड भेजा है।",
+    "verifying": "सत्यापित किया जा रहा है...",
+    "displayName": "प्रदर्शन नाम",
+    "displayNamePlaceholder": "आपका प्रदर्शन नाम",
+    "username": "यूज़रनेम",
+    "usernamePlaceholder": "यूज़रनेम",
+    "phone": "फ़ोन",
+    "phonePlaceholder": "आपका फ़ोन नंबर",
+    "emailPlaceholder": "अपना ईमेल दर्ज करें",
+    "passwordPlaceholder": "अपना पासवर्ड दर्ज करें",
+    "signingIn": "साइन इन हो रहा है...",
+    "creatingAccount": "अकाउंट बन रहा है...",
+    "signIn": "साइन इन",
+    "createAccount": "अकाउंट बनाएं",
+    "or": "या",
+    "noAccount": "अकाउंट नहीं है?",
+    "haveAccount": "पहले से अकाउंट है?",
+    "terms": "साइन अप करके, आप हमारी सेवा की शर्तों और गोपनीयता नीति (कुकी उपयोग सहित) से सहमत होते हैं।",
+    "errors": {
+        "emailRequired": "ईमेल आवश्यक है",
+        "emailInvalid": "कृपया मान्य ईमेल दर्ज करें",
+        "passwordRequired": "पासवर्ड आवश्यक है",
+        "passwordMin": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
+        "usernameRequired": "यूज़रनेम आवश्यक है",
+        "usernameMin": "यूज़रनेम कम से कम 3 अक्षरों का होना चाहिए",
+        "usernameChars": "यूज़रनेम में केवल अक्षर, अंक और अंडरस्कोर हो सकते हैं",
+        "displayNameRequired": "प्रदर्शन नाम आवश्यक है",
+        "invalidOtp": "कृपया मान्य OTP दर्ज करें",
+        "otpTryAgain": "अमान्य OTP। कृपया पुनः प्रयास करें।",
+        "generic": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
     }
 }

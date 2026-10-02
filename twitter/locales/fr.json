@@ -17,6 +17,13 @@
         "forgotPassword": "Mot de passe oublié",
         "verifyOtp": "Vérifier l’OTP"
     },
+    "feed":{
+        "home": "Accueil",
+        "forYou": "Pour vous",
+        "following": "Abonnements",
+        "loadingTweets": "Chargement des tweets...",
+        "noTweets": "Aucun tweet disponible."
+    },
     "tweet": {
         "post": "Publier",
         "reply": "Répondre",
@@ -137,5 +144,41 @@
             "enabled": "Activées",
             "disabled": "Désactivées"
         }
+    },
+    "signInTitle": "Connectez-vous à X",
+    "createAccountTitle": "Créez votre compte",
+    "verifyLoginTitle": "Vérifiez votre connexion",
+    "verificationCode": "Code de vérification",
+    "enterOtp6": "Saisissez le code OTP à 6 chiffres",
+    "otpSentNote": "Nous avons envoyé un code de vérification à 6 chiffres à votre adresse e-mail enregistrée.",
+    "verifying": "Vérification...",
+    "displayName": "Nom d'affichage",
+    "displayNamePlaceholder": "Votre nom d'affichage",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "nom d'utilisateur",
+    "phone": "Téléphone",
+    "phonePlaceholder": "Votre numéro de téléphone",
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "signingIn": "Connexion...",
+    "creatingAccount": "Création du compte...",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte",
+    "or": "OU",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "terms": "En vous inscrivant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité, y compris l'utilisation des cookies.",
+    "errors": {
+        "emailRequired": "L'e-mail est obligatoire",
+        "emailInvalid": "Veuillez saisir un e-mail valide",
+        "passwordRequired": "Le mot de passe est obligatoire",
+        "passwordMin": "Le mot de passe doit contenir au moins 6 caractères",
+        "usernameRequired": "Le nom d'utilisateur est obligatoire",
+        "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+        "usernameChars": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des tirets bas",
+        "displayNameRequired": "Le nom d'affichage est obligatoire",
+        "invalidOtp": "Veuillez saisir un code OTP valide",
+        "otpTryAgain": "Code OTP invalide. Veuillez réessayer.",
+        "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
 }
