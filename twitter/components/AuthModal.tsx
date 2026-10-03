@@ -132,7 +132,7 @@ const AuthModal = ({
             console.error("Authentication error:", error);
 
             setErrors({
-                general: "auth.errors.generic",
+                general: `${t("auth.errors.generic")}`,
             });
         }
     };
@@ -145,14 +145,14 @@ const AuthModal = ({
 
         if (!otp || otp.length !== 6) {
             setErrors({
-                general: "auth.errors.otpInvalid"
+                general: `${t("auth.errors.otpInvalid")}`,
             })
             return;
         }
 
         if (!otpUserId) {
             setErrors({
-                general: "auth.errors.otpUserIdMissing",
+                general: `${t("auth.errors.otpUserIdMissing")}`,
             });
             return;
         }
@@ -178,7 +178,7 @@ const AuthModal = ({
             console.error("Authentication error:", error);
 
             setErrors({
-                general: "auth.errors.generic",
+                general: `${t("auth.errors.otpVerificationFailed")}`,
             });
         }
     }
@@ -283,10 +283,10 @@ const AuthModal = ({
 
                         <CardTitle className="text-xl sm:text-2xl font-bold text-white">
                             {otpMode
-                                ? ("auth.verifyLoginTitle")
+                                ? (t("auth.verifyLoginTitle"))
                                 : mode === "login"
-                                    ? ("auth.signInTitle")
-                                    : ("auth.createAccountTitle")}
+                                    ? (t("auth.signInTitle"))
+                                    : (t("auth.createAccountTitle"))}
                         </CardTitle>
                     </div>
                 </CardHeader>
@@ -310,14 +310,14 @@ const AuthModal = ({
                                         htmlFor="otp"
                                         className="text-white"
                                     >
-                                        {("auth.verificationCode")}
+                                        {t("auth.verificationCode")}
                                     </Label>
 
                                     <Input
                                         id="otp"
                                         type="text"
                                         inputMode="numeric"
-                                        placeholder={("auth.otpPlaceholder")}
+                                        placeholder={t("auth.otpPlaceholder")}
                                         value={otp}
                                         onChange={(e) => {
                                             const value = e.target.value
@@ -350,7 +350,7 @@ const AuthModal = ({
                                 </div>
 
                                 <p className="text-sm text-gray-400 text-center">
-                                    {("auth.otpSent")}
+                                    {t("auth.otpSent")}
                                 </p>
 
                                 <Button
@@ -373,7 +373,7 @@ const AuthModal = ({
                                             <span>Verifying...</span>
                                         </div>
                                     ) : (
-                                        ("auth.verifyOtp")
+                                        t("auth.verifyOtp")
                                     )}
                                 </Button>
                             </>
@@ -388,7 +388,7 @@ const AuthModal = ({
                                                 htmlFor="displayName"
                                                 className="text-white"
                                             >
-                                                {("auth.displayName")}
+                                                {t("auth.displayName")}
                                             </Label>
 
                                             <div className="relative">
@@ -397,7 +397,7 @@ const AuthModal = ({
                                                 <Input
                                                     id="displayName"
                                                     type="text"
-                                                    placeholder={("auth.displayNamePlaceholder")}
+                                                    placeholder={t("auth.displayNamePlaceholder")}
                                                     value={formData.displayName}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -431,7 +431,7 @@ const AuthModal = ({
                                                 htmlFor="username"
                                                 className="text-white"
                                             >
-                                                {("auth.username")}
+                                                {t("auth.username")}
                                             </Label>
 
                                             <div className="relative">
@@ -442,7 +442,7 @@ const AuthModal = ({
                                                 <Input
                                                     id="username"
                                                     type="text"
-                                                    placeholder={("auth.usernamePlaceholder")}
+                                                    placeholder={t("auth.usernamePlaceholder")}
                                                     value={formData.username}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -477,7 +477,7 @@ const AuthModal = ({
                                                 htmlFor="phone"
                                                 className="text-white"
                                             >
-                                                {("auth.phone")}
+                                                {t("auth.phone")}
                                             </Label>
 
                                             <div className="relative">
@@ -487,7 +487,7 @@ const AuthModal = ({
                                                     id="phone"
                                                     type="tel"
                                                     inputMode="numeric"
-                                                    placeholder={("auth.phonePlaceholder")}
+                                                    placeholder={t("auth.phonePlaceholder")}
                                                     value={formData.phone}
                                                     maxLength={10}
                                                     onChange={(e) => {
@@ -527,7 +527,7 @@ const AuthModal = ({
                                         htmlFor="email"
                                         className="text-white"
                                     >
-                                        {("auth.email")}
+                                        {t("auth.email")}
                                     </Label>
 
                                     <div className="relative">
@@ -536,7 +536,7 @@ const AuthModal = ({
                                         <Input
                                             id="email"
                                             type="email"
-                                            placeholder={("auth.emailPlaceholder")}
+                                            placeholder={t("auth.emailPlaceholder")}
                                             value={formData.email}
                                             onChange={(e) =>
                                                 handleInputChange(
@@ -570,7 +570,7 @@ const AuthModal = ({
                                         htmlFor="password"
                                         className="text-white"
                                     >
-                                        {("auth.password")}
+                                        {t("auth.password")}
                                     </Label>
 
                                     <div className="relative">
@@ -583,7 +583,7 @@ const AuthModal = ({
                                                     ? "text"
                                                     : "password"
                                             }
-                                            placeholder={("auth.passwordPlaceholder")}
+                                            placeholder={t("auth.passwordPlaceholder")}
                                             value={formData.password}
                                             onChange={(e) =>
                                                 handleInputChange(
@@ -657,14 +657,14 @@ const AuthModal = ({
 
                                             <span>
                                                 {mode === "login"
-                                                    ? ("auth.signingIn")
-                                                    : ("auth.creatingAccount")}
+                                                    ? (t("auth.signingIn"))
+                                                    : (t("auth.creatingAccount"))}
                                             </span>
                                         </div>
                                     ) : mode === "login" ? (
-                                        ("auth.signIn")
+                                        (t("auth.signIn"))
                                     ) : (
-                                        ("auth.createAccount")
+                                        (t("auth.createAccount"))
                                     )}
                                 </Button>
                                 {/* forget password */}
@@ -678,7 +678,7 @@ const AuthModal = ({
                                     rounded-full
                                     text-base"
                                 >
-                                    {("auth.forgotPassword")}
+                                    {t("auth.forgotPassword")}
                                 </Link>
                             </>
                         )}
@@ -712,8 +712,8 @@ const AuthModal = ({
                             <div className="text-center">
                                 <p className="text-sm sm:text-base text-gray-400">
                                     {mode === "login"
-                                        ? ("auth.dontHaveAccount")
-                                        : ("auth.alreadyHaveAccount")}
+                                        ? (t("auth.dontHaveAccount"))
+                                        : (t("auth.alreadyHaveAccount"))}
 
                                     <Button
                                         type="button"
@@ -728,8 +728,8 @@ const AuthModal = ({
                                         disabled={isAuthenticating}
                                     >
                                         {mode === "login"
-                                            ? ("auth.signUp")
-                                            : ("auth.signIn")}
+                                            ? (t("auth.signUp"))
+                                            : (t("auth.signIn"))}
                                     </Button>
                                 </p>
                             </div>

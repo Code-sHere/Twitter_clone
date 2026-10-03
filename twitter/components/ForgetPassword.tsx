@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 const ForgetPassword = () => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,13 +122,14 @@ const ForgetPassword = () => {
 
             {/* Heading */}
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Forgot Password?
+              {t("forgetPassword.title")}
             </h1>
 
             {/* Description */}
             <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-400">
               Enter your registered email or phone number and
               we&apos;ll send you a new temporary password.
+              {t("forgetPassword.description")}
             </p>
 
           </div>
@@ -149,7 +152,7 @@ const ForgetPassword = () => {
                   htmlFor="emailOrPhone"
                   className="mb-2 block text-sm font-medium text-slate-200"
                 >
-                  Email or Phone Number
+                  {t("forgetPassword.emailOrPhone")}
                 </label>
 
                 <input
@@ -304,7 +307,7 @@ const ForgetPassword = () => {
               {/* Backend Message */}
               <p className="mt-3 text-sm leading-6 text-slate-400">
                 {message ||
-                  "Your new password has been sent to your registered email."}
+                  t("forgetPassword.successMessage")}
               </p>
 
               {/* Login Button */}
@@ -333,7 +336,7 @@ const ForgetPassword = () => {
                   focus:ring-offset-slate-900
                 "
               >
-                Go to Login
+                {t("forgetPassword.backToLogin")}
               </button>
 
             </div>
@@ -359,7 +362,7 @@ const ForgetPassword = () => {
                   disabled:opacity-50
                 "
               >
-                ← Back to Login
+                ← {t("forgetPassword.backToLogin")}
               </button>
 
             </div>
@@ -372,6 +375,7 @@ const ForgetPassword = () => {
         <p className="mt-5 px-4 text-center text-xs leading-5 text-slate-500">
           For security purposes, password reset requests are
           limited to one request per day.
+          {t("forgetPassword.securityNotice")}
         </p>
 
       </div>

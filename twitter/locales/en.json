@@ -1,184 +1,206 @@
 {
-    "nav": {
-        "home": "Home",
-        "explore": "Explore",
-        "notifications": "Notifications",
-        "messages": "Messages",
-        "bookmarks": "Bookmarks",
-        "logout": "Logout",
-        "profile": "Profile",
-        "more": "More"
-    },
-    "auth": {
-        "login": "Login",
-        "signup": "Signup",
-        "email": "Email",
-        "password": "Password",
-        "forgotPassword": "Forgot Password",
-        "verifyOtp": "Verify OTP"
-    },
-    "tweet": {
-        "post": "Post",
-        "reply": "Reply",
-        "like": "Like",
-        "unlike": "Unlike",
-        "retweet": "Retweet",
-        "comment": "Comment",
-        "delete": "Delete",
-        "share": "Share"
-    },
-    "feed":{
-        "home": "Home",
-        "forYou": "For You",
-        "following": "Following",
-        "loadingTweets": "Loading Tweets",
-        "noTweets": "No tweets available."
-    },
-    "language": {
-        "title": "Language",
-        "selectLanguage": "Select Language",
-        "verifyLanguage": "Verify Language Change",
-        "otpSentMobile": "OTP has been sent to your registered mobile number.",
-        "otpSentEmail": "OTP has been sent to your registered email address.",
-        "enterOtp": "Enter OTP",
-        "verify": "Verify",
-        "resendOtp": "Resend OTP"
-    },
-    "common": {
-        "save": "Save",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "close": "Close",
-        "loading": "Loading",
-        "error": "Error",
-        "success": "Success"
-    },
-    "plans": {
-        "title": "Level up your Twitter experience",
-        "subtitle": "Pick a plan that's fits your vibe. More tweets. more reach, more impact.",
-        "free": {
-            "name": "FREE",
-            "description": "For getting started",
-            "price": "₹0",
-            "period": "month",
-            "features": {
-                "tweets": "1 Tweet per month",
-                "profile": "Basic profile",
-                "support": "Standard support"
-            },
-            "button": "Current Plan"
-        },
-        "bronze": {
-            "name": "BRONZE",
-            "description": "More tweets, more power",
-            "price": "₹100",
-            "period": "month",
-            "features": {
-                "tweets": "3 Tweets per month",
-                "profile": "Basic profile",
-                "support": "Standard support",
-                "analytics": "Access to analytics"
-            },
-            "button": "Upgrade Now"
-        },
-        "silver": {
-            "name": "SILVER",
-            "description": "More tweets, more reach",
-            "badge": "POPULAR",
-            "price": "₹300",
-            "period": "month",
-            "features": {
-                "tweets": "5 Tweets per month",
-                "profile": "Profile customization",
-                "analytics": "Advanced analytics",
-                "support": "Priority support",
-                "earlyAccess": "Early access to new features"
-            },
-            "button": "Upgrade Now"
-        },
-        "gold": {
-            "name": "GOLD",
-            "description": "Unlimited & premium",
-            "price": "₹1000",
-            "period": "month",
-            "features": {
-                "tweets": "Unlimited tweets",
-                "premium": "All premium features",
-                "analytics": "Advanced analytics",
-                "support": "Priority support",
-                "earlyAccess": "Early access to new features"
-            },
-            "button": "Go Premium"
-        },
-        "benefits": {
-            "securePayments": {
-                "title": "Secure Payments",
-                "description": "100% Safe and Secure"
-            },
-            "cancelAnytime": {
-                "title": "Cancel Anytime",
-                "description": "Change or cancel your plan anytime you want"
-            },
-            "premiumSupport": {
-                "title": "Premium Support",
-                "description": "Our support team is here for you 24/7"
-            },
-            "dataSafe": {
-                "title": "Your Data is Safe",
-                "description": "We never sell your data. Privacy is our priority"
-            }
-        }
-    },
-    "profile": {
-        "editProfile": "Edit profile",
-        "joined": "Joined",
-        "posts": "Posts",
-        "replies": "Replies",
-        "highlights": "Highlights",
-        "articles": "Articles",
-        "media": "Media",
-        "tweetNotifications": {
-            "title": "Tweet Notifications",
-            "description": "Get browser notifications for tweets containing \"cricket\" or \"science\".",
-            "status": "Status",
-            "enabled": "Enabled",
-            "disabled": "Disabled"
-        }
-    },
-    "signInTitle": "Sign in to X",
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "bookmarks": "Bookmarks",
+    "logout": "Logout",
+    "profile": "Profile",
+    "more": "More"
+  },
+  "notificationSettings": {
+    "tweetNotifications": "Tweet Notifications",
+    "description": "Get browser notifications for tweets containing \"cricket\" or \"science\"."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications available."
+  },
+  "auth": {
+    "login": "Login",
+    "editProfile": "Edit Profile",
     "createAccountTitle": "Create your account",
-    "verifyLoginTitle": "Verify your login",
-    "verificationCode": "Verification Code",
-    "enterOtp6": "Enter 6 digit OTP",
-    "otpSentNote": "We sent a 6-digit verification code to your registered email.",
-    "verifying": "Verifying...",
+    "signUpTitle": "Sign up for X",
+    "save": "Save",
     "displayName": "Display Name",
-    "displayNamePlaceholder": "Your display name",
-    "username": "Username",
-    "usernamePlaceholder": "username",
+    "bio": "Bio",
+    "location": "Location",
+    "website": "Website",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "email": "Email",
+    "password": "Password",
     "phone": "Phone",
-    "phonePlaceholder": "Your Phone number",
-    "emailPlaceholder": "Enter your email",
-    "passwordPlaceholder": "Enter your password",
-    "signingIn": "Signing in...",
-    "creatingAccount": "Creating account...",
-    "signIn": "Sign in",
-    "createAccount": "Create account",
-    "or": "OR",
-    "noAccount": "Don't have an account?",
-    "haveAccount": "Already have an account?",
-    "terms": "By signing up, you agree to our Terms of Service and Privacy Policy, including Cookie Use.",
-    "errors": {
-        "emailRequired": "Email is required",
-        "emailInvalid": "Please enter a valid email",
-        "passwordRequired": "Password is required",
-        "passwordMin": "Password must be at least 6 characters",
-        "usernameRequired": "Username is required",
-        "usernameMin": "Username must be at least 3 characters",
-        "usernameChars": "Username can only contain letters, numbers, and underscores",
-        "displayNameRequired": "Display name is required",
-        "invalidOtp": "Please enter a valid OTP",
-        "otpTryAgain": "Invalid OTP. Please try again.",
-        "generic": "Something went wrong. Please try again."
+    "createAccount": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "verifyOtp": "Verify OTP",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "tweet": {
+    "post": "Post",
+    "reply": "Reply",
+    "like": "Like",
+    "unlike": "Unlike",
+    "retweet": "Retweet",
+    "comment": "Comment",
+    "delete": "Delete",
+    "share": "Share"
+  },
+  "feed": {
+    "home": "Home",
+    "forYou": "For You",
+    "following": "Following",
+    "loadingTweets": "Loading Tweets...",
+    "noTweets": "No tweets available."
+  },
+  "language": {
+    "title": "Language",
+    "selectLanguage": "Select Language",
+    "verifyLanguage": "Verify Language Change",
+    "otpSentMobile": "OTP has been sent to your registered mobile number.",
+    "otpSentEmail": "OTP has been sent to your registered email address.",
+    "enterOtp": "Enter OTP",
+    "verify": "Verify",
+    "resendOtp": "Resend OTP"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success"
+  },
+  "plans": {
+    "title": "Level up your Twitter experience",
+    "subtitle": "Pick a plan that fits your vibe. More tweets, more reach, more impact.",
+    "free": {
+      "name": "FREE",
+      "description": "For getting started",
+      "price": "₹0",
+      "period": "month",
+      "features": {
+        "tweets": "1 Tweet per month",
+        "profile": "Basic profile",
+        "support": "Standard support"
+      },
+      "button": "Current Plan"
+    },
+    "bronze": {
+      "name": "BRONZE",
+      "description": "More tweets, more power",
+      "price": "₹100",
+      "period": "month",
+      "cta": "Upgrade Now",
+      "features": {
+        "tweets": "3 Tweets per month",
+        "profile": "Basic profile",
+        "support": "Standard support",
+        "analytics": "Access to analytics"
+      },
+      "button": "Upgrade Now"
+    },
+    "silver": {
+      "name": "SILVER",
+      "description": "More tweets, more reach",
+      "badge": "POPULAR",
+      "price": "₹300",
+      "period": "month",
+      "features": {
+        "tweets": "5 Tweets per month",
+        "profile": "Profile customization",
+        "analytics": "Advanced analytics",
+        "support": "Priority support",
+        "earlyAccess": "Early access to new features"
+      },
+      "button": "Upgrade Now"
+    },
+    "gold": {
+      "name": "GOLD",
+      "description": "Unlimited & premium",
+      "price": "₹1000",
+      "period": "month",
+      "features": {
+        "tweets": "Unlimited tweets",
+        "premium": "All premium features",
+        "analytics": "Advanced analytics",
+        "support": "Priority support",
+        "earlyAccess": "Early access to new features"
+      },
+      "button": "Go Premium"
+    },
+    "benefits": {
+      "securePayments": {
+        "title": "Secure Payments",
+        "description": "100% Safe and Secure"
+      },
+      "cancelAnytime": {
+        "title": "Cancel Anytime",
+        "description": "Change or cancel your plan anytime you want"
+      },
+      "premiumSupport": {
+        "title": "Premium Support",
+        "description": "Our support team is here for you 24/7"
+      },
+      "dataSafe": {
+        "title": "Your Data is Safe",
+        "description": "We never sell your data. Privacy is our priority"
+      }
     }
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "joined": "Joined",
+    "posts": "Posts",
+    "replies": "Replies",
+    "highlights": "Highlights",
+    "articles": "Articles",
+    "media": "Media",
+    "tweetNotifications": {
+      "title": "Tweet Notifications",
+      "description": "Get browser notifications for tweets containing \"cricket\" or \"science\".",
+      "status": "Status",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    }
+  },
+  "signInTitle": "Sign in to X",
+  "createAccountTitle": "Create your account",
+  "verifyLoginTitle": "Verify your login",
+  "verificationCode": "Verification Code",
+  "enterOtp6": "Enter 6 digit OTP",
+  "otpSentNote": "We sent a 6-digit verification code to your registered email.",
+  "verifying": "Verifying...",
+  "displayName": "Display Name",
+  "displayNamePlaceholder": "Your display name",
+  "username": "Username",
+  "usernamePlaceholder": "username",
+  "phone": "Phone",
+  "phonePlaceholder": "Your Phone number",
+  "emailPlaceholder": "Enter your email",
+  "passwordPlaceholder": "Enter your password",
+  "signingIn": "Signing in...",
+  "creatingAccount": "Creating account...",
+  "signIn": "Sign in",
+  "createAccount": "Create account",
+  "or": "OR",
+  "noAccount": "Don't have an account?",
+  "haveAccount": "Already have an account?",
+  "terms": "By signing up, you agree to our Terms of Service and Privacy Policy, including Cookie Use.",
+  "errors": {
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 6 characters",
+    "usernameRequired": "Username is required",
+    "usernameMin": "Username must be at least 3 characters",
+    "usernameChars": "Username can only contain letters, numbers, and underscores",
+    "displayNameRequired": "Display name is required",
+    "invalidOtp": "Please enter a valid OTP",
+    "otpTryAgain": "Invalid OTP. Please try again.",
+    "generic": "Something went wrong. Please try again."
+  }
 }

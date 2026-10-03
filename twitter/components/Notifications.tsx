@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+import {useTranslation} from "react-i18next";
+
 interface NotificationItem {
     _id: string;
     message: string;
@@ -25,6 +27,8 @@ const Notifications = ({
 
     const [loading, setLoading] =
         useState(true);
+
+    const { t } = useTranslation();
 
 
     const loadNotifications = async () => {
@@ -77,7 +81,7 @@ const Notifications = ({
             <div className="border-b border-gray-800 p-5">
 
                 <h1 className="text-xl font-bold text-white">
-                    Notifications
+                    {t("notifications.title")}
                 </h1>
 
             </div>
@@ -88,7 +92,7 @@ const Notifications = ({
                 <div className="p-8 text-center">
 
                     <p className="text-gray-400">
-                        No notifications yet.
+                        {t("notifications.noNotifications")}
                     </p>
 
                 </div>

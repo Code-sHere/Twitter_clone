@@ -15,6 +15,7 @@ import {
 
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/lib/axiosInstance";
+import { useTranslation } from "react-i18next";
 
 interface TweetCardProps {
     tweet: any;
@@ -32,6 +33,8 @@ const TweetCard = ({
     const { user } = useAuth();
 
     const [tweetstate, setTweetstate] = useState(tweet);
+
+    const { t } = useTranslation();
 
     const likeTweet = async (tweetid: string) => {
         try {
@@ -61,6 +64,8 @@ const TweetCard = ({
             );
 
             setTweetstate(res.data);
+
+            console.log("Retweet response:", res.data);
 
         } catch (error) {
             console.error("Retweet error:", error);

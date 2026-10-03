@@ -16,6 +16,7 @@ import TweetCard from './TweetCard'
 import EditProfile from './EditProfile'
 import axiosInstance from '@/lib/axiosInstance'
 import NotificationSetings from './NotificationSetings'
+import { useTranslation } from 'react-i18next'
 
 interface Tweet {
     id: string
@@ -107,6 +108,8 @@ const ProfilePgae = () => {
     const [tweets, setTweets] = useState<any>([]);
     const [loading, setLoading] = useState(false);
 
+    const { t } = useTranslation();
+
     const fetchTweets = async () => {
         try {
             setLoading(true);
@@ -145,7 +148,7 @@ const ProfilePgae = () => {
                             {user.displayName}
                         </h1>
                         <p className="text-sm text-gray-400">
-                            {userTweets.length} posts
+                            {t("profile.posts", { count: userTweets.length })}
                         </p>
                     </div>
                 </div>
@@ -235,7 +238,7 @@ const ProfilePgae = () => {
                         className="border-gray-600 text-white bg-gray-950 font-semibold rounded-full px-4 sm:px-6"
                         onClick={() => setShowEditModal(true)}
                     >
-                        Edit profile
+                        {t("profile.editProfile")}
                     </Button>
                 </div>
 

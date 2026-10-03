@@ -9,48 +9,50 @@ import {
     MoreHorizontal,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ currentPage, onNavigate }: any) => {
+    const { t } = useTranslation();
     const navigation = [
         {
-            name: "Home",
+            name: t("nav.home"),
             icon: Home,
             current: currentPage === "home",
             page: "home",
         },
         {
-            name: "Explore",
+            name: t("nav.explore"),
             icon: Search,
             current: currentPage === "explore",
             page: "explore",
         },
         {
-            name: "Notifications",
+            name: t("nav.notifications"),
             icon: Bell,
             current: currentPage === "notifications",
             page: "notifications",
             badge: true,
         },
         {
-            name: "Messages",
+            name: t("nav.messages"),
             icon: Mail,
             current: currentPage === "messages",
             page: "messages",
         },
         {
-            name: "Bookmarks",
+            name: t("nav.bookmarks"),
             icon: Bookmark,
             current: currentPage === "bookmarks",
             page: "bookmarks",
         },
         {
-            name: "Profile",
+            name: t("nav.profile"),
             icon: User,
             current: currentPage === "profile",
             page: "profile",
         },
         {
-            name: "More",
+            name: t("nav.more"),
             icon: MoreHorizontal,
             current: currentPage === "more",
             page: "more",

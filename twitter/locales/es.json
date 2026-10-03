@@ -9,13 +9,34 @@
         "profile": "Perfil",
         "more": "Más"
     },
+    "notificationSettings":{
+        "tweetNotifications": "Notificaciones de tweets",
+        "description": "Recibe notificaciones del navegador de tweets que contengan \"cricket\" o \"science\"."
+    },
+    "notifications":{
+        "title": "Notificaciones",
+        "noNotifications": "No hay notificaciones disponibles."
+    },
     "auth": {
         "login": "Iniciar sesión",
-        "signup": "Registrarse",
+        "editProfile": "Editar perfil",
+        "createAccountTitle": "Crea tu cuenta",
+        "signUpTitle": "Regístrate en X",
+        "save":"Guardar",
+        "displayName": "Nombre para mostrar",
+        "bio":"Biografía",
+        "location":"Ubicación",
+        "website":"Sitio web",
+        "signUp": "Registrarse",
+        "signIn": "Iniciar sesión",
         "email": "Correo electrónico",
         "password": "Contraseña",
+        "phone": "Teléfono",
+        "createAccount": "Crear cuenta",
         "forgotPassword": "¿Olvidaste tu contraseña?",
-        "verifyOtp": "Verificar OTP"
+        "verifyOtp": "Verificar OTP",
+        "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+        "dontHaveAccount": "¿No tienes una cuenta?"
     },
     "tweet": {
         "post": "Publicar",
@@ -73,6 +94,7 @@
             "description": "Más tweets, más potencia",
             "price": "₹100",
             "period": "mes",
+            "cta": "Actualizar ahora",
             "features": {
                 "tweets": "3 tweets al mes",
                 "profile": "Perfil básico",

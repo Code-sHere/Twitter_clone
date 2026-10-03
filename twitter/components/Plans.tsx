@@ -6,12 +6,15 @@ import { Button } from "./ui/button";
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from "@/context/AuthContext";
 import { FaBolt, FaTwitter } from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 
 
 const Plans = () => {
 
     const { user } = useAuth();
+
+    const { t } = useTranslation();
 
     const loadRazorpay = () => {
         return new Promise((resolve) => {
@@ -246,24 +249,24 @@ const Plans = () => {
     const bottomSection = [
         {
             badge: ShieldCheck,
-            title: "Secure Payments",
+            title: t("secure-payments"),
             bg: "text-sky-600",
-            desccription: "100% Safe and Secure",
+            description: t("secure-payments-description"),
         }, {
             badge: RefreshCcwDotIcon,
-            title: "Cancel Anytime",
+            title: t("cancel-anytime"),
             bg: "text-green-600",
-            desccription: "Change or cancel your plan anytime you want",
+            description: t("cancel-anytime-description"),
         }, {
             badge: StarIcon,
-            title: "Permium Support",
+            title: t("premium-support"),
             bg: "text-purple-600",
-            desccription: "Our support team is here for you 24/7",
+            description: t("premium-support-description"),
         }, {
             badge: ShieldLockIcon,
-            title: "Your Data is Safe",
+            title: t("data-privacy"),
             bg: "text-yellow-600",
-            desccription: "We never sell your data. Privacy is our priority",
+            description: t("data-privacy-description"),
         }
 
     ];
@@ -271,7 +274,7 @@ const Plans = () => {
     return (
         <div className="min-h-screen bg-[#030817] py-16 text-center">
             <div className="flex flex-col items-center text-center justify-center p-2">
-                <h1 className="text-2xl font-bold md:text-4xl sm:text-3xl text-white font-mono shadow-2xl drop-shadow-white/20">Level up your </h1>
+                <h1 className="text-2xl font-bold md:text-4xl sm:text-3xl text-white font-mono shadow-2xl drop-shadow-white/20">Level up your Twitter</h1>
                 <h1 className="text-3xl font-bold md:text-5xl sm:text-4xl text-sky-500 font-mono">Twitter experience
                     
                 </h1>
@@ -305,16 +308,16 @@ const Plans = () => {
                                 </div>
                                 <div className="mt-4 flex ">
                                     <h3 className={`text-lg font-extrabold tracking-wide ${plan.nameColor}`}>
-                                        {plan.name}
+                                        {t(plan.name)}
                                     </h3>
                                     <span className='text-white px-2 text-3xl'> / </span>
-                                    <p className="mt-1 text-s text-slate-400"> {plan.tagline}</p>
+                                    <p className="mt-1 text-s text-slate-400"> {t(plan.tagline)}</p>
                                 </div>
                             </div>
 
                             <div className="mt-5 flex items-baseline gap-1 mx-5">
                                 <span className="text-3xl font-mono text-white">
-                                    ₹{(plan.price)}
+                                    ₹{t(plan.price)}
                                 </span>
                                 <span className="text-xs text-slate-500">
                                     /month
@@ -326,18 +329,18 @@ const Plans = () => {
                             <ul className="flex-1 space-y-2.5">
                                 {plan.features.map((feature) => (
                                     <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
-                                        <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${plan.check}`}>
+                                        <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${t(plan.check)}`}>
                                             <Check className="h-2.5 w-2.5" strokeWidth={3} />
                                         </span>
-                                        {feature}
+                                        {t(feature)}
                                     </li>
                                 ))}
                             </ul>
 
                             <Button
-                                className={`mt-6 w-full rounded-full py-3 text-sm font-semibold h-12 transition ${plan.button}`} onClick={() => handleSubscribe(`${plan.id}`)}
+                                className={`mt-6 w-full rounded-full py-3 text-sm font-semibold h-12 transition ${t(plan.button)}`} onClick={() => handleSubscribe(`${plan.id}`)}
                             >
-                                {plan.cta}
+                                {t(plan.cta)}
                             </Button>
                         </div>
                     );
@@ -350,8 +353,8 @@ const Plans = () => {
                         return (
                             <div className="flex flex-col items-center border-gray-600 p-2" key={feature.title}>
                                 <Icon className={`h-8 w-8 ${feature.bg}`} />
-                                <h4 className="text-white text-lg font-mono">{feature.title}</h4>
-                                <span className="text-sm text-gray-600 ">{feature.desccription}</span>
+                                <h4 className="text-white text-lg font-mono">{t(feature.title)}</h4>
+                                <span className="text-sm text-gray-600 ">{t(feature.desccription)}</span>
                             </div>
                         )
                     })}

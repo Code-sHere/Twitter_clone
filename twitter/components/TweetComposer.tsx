@@ -42,6 +42,7 @@ const TweetComposer = ({
     const [otp, setOtp] = useState("");
     const [otpLoading, setOtpLoading] = useState(false);
 
+
     const maxlength = 200;
 
     const characterCount = content.length;

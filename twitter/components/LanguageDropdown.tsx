@@ -71,6 +71,11 @@ export default function LanguageDropdown() {
     const handleLanguageChange = async (language: string) => {
         if (language === appLanguage) return;
 
+        if (language === "en") {
+            await applyLanguage("en");
+            return;
+        }
+
         if (!user?._id) {
             setMessage(t("language.userUnavailable"));
             return;
@@ -103,7 +108,9 @@ export default function LanguageDropdown() {
 
             setMessage(t("language.invalidMethod"));
         } catch (error: any) {
-            console.error("Language change error:", error);
+            console.error("Language change error:", error.response?.data,
+                error.response?.status
+            );
             setMessage(
                 error.response?.data?.message || t("language.requestFailed")
             );

@@ -1,11 +1,14 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const NotificationSetings = ({ userId }:{userId: string}) => {
 
     const [enabled, setEnabled] = useState(true);
     const [loading, setLoading] = useState(false);
+
+    const { t } = useTranslation();
 
 
     useEffect(() => {
@@ -72,7 +75,7 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
                     <div>
 
                         <h3 className="text-white font-semibold">
-                            Tweet Notifications
+                            {t("notificationSettings.tweetNotifications")}
                         </h3>
 
                         <p className="text-sm text-gray-400 mt-1">
