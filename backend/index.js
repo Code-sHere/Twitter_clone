@@ -18,6 +18,8 @@ import { sendOtp } from "./Controllers/optsender.js"
 import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
 import { sendSmsOtp, checkSmsOtp, toE164 } from "./utils/sendSms.js";
+import news from "./routes/news.js";
+import explore from "./routes/explore.js";
 
 
 const app = express()
@@ -1018,6 +1020,10 @@ app.get("/notifications/:userId", async (req, res) => {
         });
     }
 });
+
+app.use("/api/explore", explore);
+
+app.use("/api/news", news);
 
 
 

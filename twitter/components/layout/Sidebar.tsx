@@ -1,243 +1,88 @@
+"use client";
 import React from "react";
 import {
-    Home,
-    Search,
-    Bell,
-    Mail,
-    Bookmark,
-    User,
-    MoreHorizontal,
+  Home, Search, Bell, UserPlus, MessageCircle, Slash,
+  Bookmark, BadgeCheck, User, MoreHorizontal, Feather,
 } from "lucide-react";
-import { Button } from "../ui/button";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = ({ currentPage, onNavigate }: any) => {
-    const { t } = useTranslation();
-    const navigation = [
-        {
-            name: t("nav.home"),
-            icon: Home,
-            current: currentPage === "home",
-            page: "home",
-        },
-        {
-            name: t("nav.explore"),
-            icon: Search,
-            current: currentPage === "explore",
-            page: "explore",
-        },
-        {
-            name: t("nav.notifications"),
-            icon: Bell,
-            current: currentPage === "notifications",
-            page: "notifications",
-            badge: true,
-        },
-        {
-            name: t("nav.messages"),
-            icon: Mail,
-            current: currentPage === "messages",
-            page: "messages",
-        },
-        {
-            name: t("nav.bookmarks"),
-            icon: Bookmark,
-            current: currentPage === "bookmarks",
-            page: "bookmarks",
-        },
-        {
-            name: t("nav.profile"),
-            icon: User,
-            current: currentPage === "profile",
-            page: "profile",
-        },
-        {
-            name: t("nav.more"),
-            icon: MoreHorizontal,
-            current: currentPage === "more",
-            page: "more",
-        },
-    ];
+  const { t } = useTranslation();
+  const { user }: any = useAuth();
 
-    return (
-        <div
-            className="
-                flex
-                flex-col
-                bg-black
-                border-gray-800
-                w-full
-                h-14
-                sm:h-16
-                fixed
-                bottom-0
-                left-0
-                right-0
-                z-40
+  const navigation = [
+    { name: t("nav.home", "Home"), icon: Home, page: "home" },
+    { name: t("nav.explore", "Explore"), icon: Search, page: "explore" },
+    { name: t("nav.notifications", "Notifications"), icon: Bell, page: "notifications", badge: true },
+    { name: t("nav.follow", "Follow"), icon: UserPlus, page: "follow" },
+    { name: t("nav.messages", "Chat"), icon: MessageCircle, page: "messages" },
+    { name: t("nav.grok", "Grok"), icon: Slash, page: "grok" },
+    { name: t("nav.bookmarks", "History"), icon: Bookmark, page: "bookmarks" },
+    { name: t("nav.premium", "Premium"), icon: BadgeCheck, page: "premium" },
+    { name: t("nav.profile", "Profile"), icon: User, page: "profile" },
+    { name: t("nav.more", "More"), icon: MoreHorizontal, page: "more" },
+  ];
 
-                md:relative
-                md:bottom-auto
-                md:left-auto
-                md:right-auto
-                md:h-screen
-                md:w-64
-                md:border-t-0
-                md:border-r
-                md:z-auto
+  const displayName = user?.displayName ?? user?.name ?? "User";
+  const username = user?.username ?? "user";
 
-                border-t
-                md:border-t-0
-            "
-        >
-            {/* Navigation */}
-            <nav className="flex-1 px-1 md:px-3 md:pt-3 overflow-x-auto md:overflow-visible no-scrollbar">
-                <ul
-                    className="
-                        flex
-                        h-full
-                        items-center
-                        justify-between
-                        gap-1
-
-                        md:h-auto
-                        md:block
-                        md:space-y-1
-                    "
-                >
-                    {navigation.map((item) => (
-                        <li
-                            key={item.name}
-                            className="
-                                h-full
-                                flex-1
-
-                                md:h-auto
-                                md:flex-none
-                            "
-                        >
-                            <Button
-                                variant="ghost"
-                                className={`
-                                    w-full
-                                    h-full
-
-                                    md:h-auto
-                                    md:min-h-12
-                                    md:justify-start
-
-                                    justify-center
-                                    text-white
-                                    text-xl
-
-                                    py-1.5
-                                    sm:py-2
-                                    md:py-3
-                                    px-1
-                                    md:px-4
-
-                                    rounded-full
-                                    hover:bg-gray-900
-                                    hover:text-white
-
-                                    ${
-                                        item.current
-                                            ? "font-bold"
-                                            : "font-normal"
-                                    }
-                                `}
-                                onClick={() => onNavigate?.(item.page)}
-                            >
-                                <div className="relative shrink-0">
-                                    <item.icon
-                                        className="
-                                            h-5
-                                            w-5
-                                            sm:h-6
-                                            sm:w-6
-                                            md:h-7
-                                            md:w-7
-                                            md:mr-4
-                                        "
-                                    />
-
-                                    {item.badge && (
-                                        <span
-                                            className="
-                                                absolute
-                                                -top-1
-                                                -right-1
-                                                md:hidden
-                                                bg-blue-500
-                                                text-white
-                                                text-[9px]
-                                                rounded-full
-                                                h-3.5
-                                                w-3.5
-                                                flex
-                                                items-center
-                                                justify-center
-                                            "
-                                        >
-                                            3
-                                        </span>
-                                    )}
-                                </div>
-
-                                <span className="hidden md:inline">
-                                    {item.name}
-                                </span>
-
-                                {item.badge && (
-                                    <span
-                                        className="
-                                            hidden
-                                            md:flex
-                                            ml-2
-                                            bg-blue-500
-                                            text-white
-                                            text-xs
-                                            rounded-full
-                                            h-5
-                                            w-5
-                                            items-center
-                                            justify-center
-                                        "
-                                    >
-                                        3
-                                    </span>
-                                )}
-                            </Button>
-                        </li>
-                    ))}
-                </ul>
-
-                {/* Post button directly below More */}
-                <div
-                    className="
-                        hidden
-                        md:block
-                        mt-2
-                        px-2
-                    "
-                >
-                    <Button
-                        className="
-                            w-full
-                            bg-blue-500
-                            hover:bg-blue-600
-                            text-white
-                            font-bold
-                            py-3
-                            rounded-full
-                            text-lg
-                        "
-                    >
-                        Post
-                    </Button>
-                </div>
-            </nav>
+  return (
+    <div className="flex h-full w-full flex-col justify-between items-center xl:items-stretch px-2 py-2">
+      <div className="flex flex-col items-center xl:items-stretch">
+        {/* Logo */}
+        <div className="flex h-12 w-12 items-center justify-center text-2xl font-bold xl:ml-2">
+          𝕏
         </div>
-    );
+
+        {/* Nav */}
+        <nav className="mt-1">
+          <ul className="flex flex-col items-center gap-1 xl:items-stretch">
+            {navigation.map((item) => {
+              const active = currentPage === item.page;
+              return (
+                <li key={item.page}>
+                  <button
+                    onClick={() => onNavigate?.(item.page)}
+                    aria-label={item.name}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-white transition-colors hover:bg-gray-900 xl:w-auto xl:justify-start xl:gap-5 xl:px-4 ${
+                      active ? "font-bold" : "font-normal"
+                    }`}
+                  >
+                    <span className="relative">
+                      <item.icon className="h-6 w-6" strokeWidth={active ? 2.75 : 2} />
+                      {item.badge && (
+                        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-blue-500" />
+                      )}
+                    </span>
+                    <span className="hidden text-xl xl:inline">{item.name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Post: circle on rail, wide button on xl */}
+        <button className="mt-4 flex h-12 w-12 items-center justify-center self-center rounded-full bg-white text-black hover:bg-gray-200 xl:w-[90%] xl:self-start">
+          <Feather className="h-5 w-5 xl:hidden" />
+          <span className="hidden text-base font-bold xl:inline">Post</span>
+        </button>
+      </div>
+
+      {/* Account block, pinned to the bottom */}
+      <button className="mb-2 flex items-center gap-3 rounded-full p-2 hover:bg-gray-900">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-600 font-semibold">
+          {displayName[0]}
+        </div>
+        <div className="hidden min-w-0 flex-1 text-left xl:block">
+          <p className="truncate text-sm font-bold">{displayName}</p>
+          <p className="truncate text-sm text-gray-500">@{username}</p>
+        </div>
+        <MoreHorizontal className="hidden h-4 w-4 xl:block" />
+      </button>
+    </div>
+  );
 };
 
 export default Sidebar;

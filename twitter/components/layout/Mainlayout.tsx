@@ -19,10 +19,7 @@ const Mainlayout = ({ children }: any) => {
   if (isLoading) {
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-white text-4xl font-bold mb-4"></div>
-          <Loadingspinner />
-        </div>
+        <Loadingspinner />
       </div>
     )
   }
@@ -32,26 +29,39 @@ const Mainlayout = ({ children }: any) => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <RightSidebar />
+  <div className="h-screen w-full overflow-hidden bg-black text-white">
+    <div
+      className="
+        mx-auto grid h-full justify-center
+        grid-cols-[72px_minmax(0,600px)]
+        xl:grid-cols-[275px_minmax(0,600px)_350px]
+      "
+    >
+      {/* LEFT */}
+      <header className="h-full min-w-0">
+        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      </header>
 
-      <div className="flex flex-1 justify-center">
-        <div className="w-16 sm:w-20 md:w-64 shrink-0 border-r border-gray-800">
-          <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-        </div>
+      {/* MIDDLE: the only scroller */}
+      <main className="no-scrollbar h-full min-w-0 overflow-y-auto overflow-x-hidden border-x border-gray-800">
+        {currentPage === "profile" ? (
+          <ProfilePage />
+        ) : currentPage === "notifications" ? (
+          <Notifications userId={userId} />
+        ) : currentPage === "more" ? (
+          <LanguageDropdown userId={userId} />
+        ) : (
+          children
+        )}
+      </main>
 
-        <main className="flex-1 min-w-0 w-full max-w-2xl flex flex-col px-2 sm:px-4 lg:px-8 border-x border-gray-800 pb-14 sm:pb-16 md:pb-0">
-          {currentPage === "profile" ? (
-            <ProfilePage />
-          ) : currentPage === "notifications" ? (
-            <Notifications userId={userId} />
-          ) : currentPage === "more" ?  (
-            <LanguageDropdown userId={userId} />
-          ):(children)}
-        </main>
-      </div>
+      {/* RIGHT: only on xl+ */}
+      <aside className="no-scrollbar hidden h-full min-w-0 overflow-y-auto pl-6 xl:block">
+        <RightSidebar />
+      </aside>
     </div>
-  )
+  </div>
+);
 }
 
 export default Mainlayout

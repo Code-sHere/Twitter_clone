@@ -10,7 +10,10 @@ const TweetSchema = mongoose.Schema({
     likedBy : [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     retweetedBy : [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     timestamp : {type: Date, default: Date.now()},
+    hashtags : {type: [String], default: [], index: true},
 })
+
+TweetSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Tweet", TweetSchema);
  

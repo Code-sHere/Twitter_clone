@@ -76,10 +76,15 @@ export const createTweet = async (req, res) => {
             });
         }
 
+        const extractedHashtags = (text = "") =>{
+            [...new Set((text.match(/#[\p{L}\p{N}_]+/gu) || []).map(tag => tag.slice(1).toLowerCase()))];
+        }
+
         // save tweet
         const tweet = new Tweet({
             author: subscription.UserId,
             content: content?.trim(),
+            hashtags: extractedHashtags(content),
         });
 
         await tweet.save();
