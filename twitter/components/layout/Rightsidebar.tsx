@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React,{useState} from "react";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import NewsCard from '@/components/NewsCard';
@@ -16,7 +16,14 @@ const Card = ({ children }: { children: React.ReactNode }) => (
 
 
 
-export default function RightSidebar() {
+export default function RightSidebar({onSearch} : {onSearch: (query: string) => void}) {
+
+  const [value, setValue] = useState("");
+
+  const submit = () =>{
+    if(value.trim()) onSearch?.(value.trim());
+  }
+
   return (
     <div className="pb-6">
       {/* Search stays at top of the column */}
@@ -26,6 +33,9 @@ export default function RightSidebar() {
           <input
             placeholder="Search"
             className="h-11 w-full rounded-full border border-gray-800 bg-black pl-11 pr-4 text-white placeholder-gray-500 outline-none focus:border-blue-500"
+            value={value}
+            onChange={(e)=>setValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
           />
         </div>
       </div>

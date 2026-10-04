@@ -75,6 +75,7 @@ const Feed = () => {
         fetchFeed();
     }, []);
 
+
     const handleNewTweet = (response: CreatedTweetResponse) => {
         console.log("New Tweet Response:", response);
 

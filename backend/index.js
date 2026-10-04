@@ -1025,6 +1025,8 @@ app.use("/api/explore", explore);
 
 app.use("/api/news", news);
 
+app.use("/api/search", explore);
+
 
 
 mongoose.connect(url).then(() => {

@@ -7,12 +7,20 @@ import RightSidebar from '@/components/layout/Rightsidebar';
 import ProfilePage from '@/components/ProfilePgae';
 import Notifications from '@/components/Notifications';
 import LanguageDropdown from '@/components/LanguageDropdown';
-
+import Explore from '@/components/Explore';
 
 
 const Mainlayout = ({ children }: any) => {
   const { user, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState("home");
+  
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const goSearch = (query: string) => {
+    setSearchQuery(query)
+    setCurrentPage("explore");
+  };
+
 
   const userId = user?._id;
 
@@ -50,14 +58,16 @@ const Mainlayout = ({ children }: any) => {
           <Notifications userId={userId} />
         ) : currentPage === "more" ? (
           <LanguageDropdown userId={userId} />
-        ) : (
+        ) : currentPage === "explore" ? (
+          <Explore initalQuery={searchQuery} />
+        ):(
           children
         )}
       </main>
 
       {/* RIGHT: only on xl+ */}
       <aside className="no-scrollbar hidden h-full min-w-0 overflow-y-auto pl-6 xl:block">
-        <RightSidebar />
+        <RightSidebar onSearch={goSearch}/>
       </aside>
     </div>
   </div>

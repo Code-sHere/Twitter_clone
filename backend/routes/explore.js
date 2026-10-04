@@ -1,6 +1,7 @@
 import express from 'express';
 import Tweet from '../models/tweet.js';
 import User from '../models/user.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -53,18 +54,35 @@ router.get("/tweets", async (req, res) => {
 })
 
 router.get("/search", async (req, res) => {
-  const q = (req.query.q || "").trim();
-  if (!q) return res.json({ users: [], tweets: [] });
-  const rx = new RegExp(escapeRegex(q), "i");
+    try {
+        const q = (req.query.q || "").trim();
+        if (!q) return res.json({ users: [], tweets: [] });
+        const rx = new RegExp(escapeRegex(q), "i");
 
-  const [users, tweets] = await Promise.all([
-    User.find({ $or: [{ displayName: rx }, { username: rx }] })
-      .select(AUTHOR_FIELDS)   // never returns password or email
-      .limit(10),
-    Tweet.find({ content: rx }).sort({ createdAt: -1 }).limit(20)
-      .populate("author", AUTHOR_FIELDS),
-  ]);
-  res.json({ users, tweets });
+        const [users, tweets] = await Promise.all([
+            User.find({ $or: [{ displayName: rx }, { username: rx }] }).select(AUTHOR_FIELDS).limit(10),
+            Tweet.find({ content: rx }).sort({ createdAt: -1 }).limit(20).populate("author", AUTHOR_FIELDS),
+        ]);
+        res.json({ users, tweets });
+    } catch (err) {
+        console.error("search error:", err);
+        res.status(500).json({ message: "Search failed" });
+    }
 });
+
+router.get("/tweet/:id", async(req, res) =>{
+    try{
+        if(!mongoose.isValidObjectId(req.params.id)){
+            return res.status(400).send({ error: "Invalid tweet id" });
+        }
+        const tweet = await Tweet.findById(req.params.id).populate("author", AUTHOR_FIELDS);
+        if(!tweet){
+            return res.status(404).send({ error: "Tweet not found" });
+        }
+        res.json(tweet);
+    }catch(error){
+        return res.status(400).send({ error: error.message });
+    }
+})
 
 export default router;
