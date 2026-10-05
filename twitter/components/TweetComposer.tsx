@@ -19,6 +19,7 @@ import {
     BarChart3,
     Globe,
     X,
+    Sparkles,
     Volume2,
 } from "lucide-react";
 import axios from "axios";
@@ -41,6 +42,8 @@ const TweetComposer = ({
     const [showOtp, setShowOtp] = useState(false);
     const [otp, setOtp] = useState("");
     const [otpLoading, setOtpLoading] = useState(false);
+
+    const [isImproving, setIsImproving] = useState(false);
 
 
     const maxlength = 200;
@@ -82,7 +85,7 @@ const TweetComposer = ({
                 tweetdata
             );
 
-            onTweetPosted(res.data);
+            onTweetPosted({ tweet: res.data.tweet, asset: res.data.asset });
 
             setContent("");
             setImageUrl("");
@@ -265,6 +268,32 @@ const TweetComposer = ({
             }
         } finally {
             setOtpLoading(false);
+        }
+    }
+
+    const handleImprove = async () => {
+        if (!content.trim() || isImproving || isLoading) return;
+
+        try {
+            setIsImproving(true);
+
+            const res = await axiosInstance.post("/ai/improve-tweet", {
+                content,
+            });
+
+            if (res.data?.suggestion) {
+                setContent(res.data.suggestion);
+            }
+
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.message || "AI request failed");
+                console.error("AI request failed:", error);
+            } else {
+                alert("Something went wrong");
+            }
+        } finally {
+            setIsImproving(false);
         }
     }
 
@@ -573,6 +602,19 @@ const TweetComposer = ({
                                                 disabled={isLoading}
                                             />
                                         </label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleImprove}
+                                            disabled={!hasContent || isImproving || isLoading || isOverLimit}
+                                            title="Improve with AI"
+                                            className="p-2 rounded-full hover:bg-blue-900/20"
+                                        >
+                                            <Sparkles
+                                                className={`h-5 w-5 ${isImproving ? "animate-pulse" : ""}`}
+                                            />
+                                        </Button>
 
                                         {/* Poll */}
                                         <Button

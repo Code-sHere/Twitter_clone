@@ -4,6 +4,15 @@ import assets from "../models/assets.js"
 import User from "../models/user.js";
 import Notification from "../models/notification.js";
 
+
+const extractHashtags = (text = "") => [
+    ...new Set(
+        (text.match(/#[\p{L}\p{N}_]+/gu) || []).map((tag) =>
+            tag.slice(1).toLowerCase()
+        )
+    ),
+];
+
 export const createTweet = async (req, res) => {
     try {
         const { author, content, image, audio } = req.body;
@@ -76,19 +85,19 @@ export const createTweet = async (req, res) => {
             });
         }
 
-        const extractedHashtags = (text = "") =>{
-            [...new Set((text.match(/#[\p{L}\p{N}_]+/gu) || []).map(tag => tag.slice(1).toLowerCase()))];
-        }
 
         // save tweet
         const tweet = new Tweet({
             author: subscription.UserId,
-            content: content?.trim(),
-            hashtags: extractedHashtags(content),
+            content: cleanContent,
+            hashtags: extractHashtags(cleanContent),
         });
 
         await tweet.save();
-        console.log("TWEET:", tweet._id);
+
+        await tweet.populate("author", "_id displayName username avatar");
+
+        console.log("TWEET", tweet);
 
         if (cleanContent) {
             const keywords = ["cricket", "science"];
@@ -119,8 +128,6 @@ export const createTweet = async (req, res) => {
 
                 if (notification.length > 0) {
                     await Notification.insertMany(notification);
-
-                    console.log("NOTIFICATION", notification);
                 }
 
             }

@@ -12,11 +12,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@google/genai": "^2.27.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
     "firebase": "^12.19.0",
     "firebase-admin": "^14.5.0",
     "httpsms": "^0.0.4",

@@ -38,15 +38,15 @@ const TweetCard = ({
 
     const likeTweet = async (tweetid: string) => {
         try {
+            const res = await axiosInstance.post(`/like/${tweetid}`, {
+                userId: user?._id,
+            });
 
-            const res = await axiosInstance.post(
-                `/like/${tweetid}`,
-                {
-                    userId: user?._id,
-                }
-            );
-
-            setTweetstate(res.data);
+            setTweetstate((prev: any) => ({
+                ...prev,
+                ...res.data,
+                author: prev.author,
+            }));
 
         } catch (error) {
             console.error("Like error:", error);
@@ -55,17 +55,15 @@ const TweetCard = ({
 
     const retweet = async (tweetid: string) => {
         try {
+            const res = await axiosInstance.post(`/retweet/${tweetid}`, {
+                userId: user?._id,
+            });
 
-            const res = await axiosInstance.post(
-                `/retweet/${tweetid}`,
-                {
-                    userId: user?._id,
-                }
-            );
-
-            setTweetstate(res.data);
-
-            console.log("Retweet response:", res.data);
+            setTweetstate((prev: any) => ({
+                ...prev,
+                ...res.data,
+                author: prev.author,
+            }));
 
         } catch (error) {
             console.error("Retweet error:", error);
@@ -314,10 +312,9 @@ const TweetCard = ({
                                         w-4.5
                                         sm:h-5
                                         sm:w-5
-                                        ${
-                                            isRetweeted
-                                                ? "text-green-400"
-                                                : "text-gray-500 group-hover:text-green-400"
+                                        ${isRetweeted
+                                            ? "text-green-400"
+                                            : "text-gray-500 group-hover:text-green-400"
                                         }
                                     `}
                                 />
@@ -346,10 +343,9 @@ const TweetCard = ({
                                     hover:bg-red-900/20
                                     group
                                     min-w-0
-                                    ${
-                                        isLiked
-                                            ? "text-red-500"
-                                            : "text-gray-500 group-hover:text-red-400"
+                                    ${isLiked
+                                        ? "text-red-500"
+                                        : "text-gray-500 group-hover:text-red-400"
                                     }
                                 `}
                                 onClick={(e) => {
@@ -364,10 +360,9 @@ const TweetCard = ({
                                         w-4.5
                                         sm:h-5
                                         sm:w-5
-                                        ${
-                                            isLiked
-                                                ? "text-red-500 fill-current"
-                                                : "text-gray-500 group-hover:text-red-400"
+                                        ${isLiked
+                                            ? "text-red-500 fill-current"
+                                            : "text-gray-500 group-hover:text-red-400"
                                         }
                                     `}
                                 />

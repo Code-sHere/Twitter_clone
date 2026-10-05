@@ -19,6 +19,8 @@ import assets from "./models/assets.js";
 import Notification from "./models/notification.js";
 import { sendSmsOtp, checkSmsOtp, toE164 } from "./utils/sendSms.js";
 import news from "./routes/news.js";
+import rateLimit from "express-rate-limit";
+import { improveTweet } from "./Controllers/aiController.js";
 import explore from "./routes/explore.js";
 
 
@@ -382,7 +384,7 @@ app.get("/post", async (req, res) => {
     try {
         const tweets = await Tweet.find()
             .sort({ timestamp: -1 })
-            .populate("author");
+            .populate("author", "_id displayName username avatar");
 
         return res.status(200).send(tweets);
 
@@ -526,8 +528,8 @@ app.get("/assets", async (req, res) => {
     try {
         const assetList = await assets.find()
             .sort({ timestamp: -1 });
-
         return res.status(200).json(assetList);
+
 
     } catch (error) {
         console.error(
@@ -548,7 +550,7 @@ app.get("/assets/:tweetId", async (req, res) => {
         const { tweetId } = req.params;
 
         const asset = await assets.findOne({
-            tweetId,
+            assetsId: tweetId,
         });
 
         if (!asset) {
@@ -1027,7 +1029,18 @@ app.use("/api/news", news);
 
 app.use("/api/search", explore);
 
+// free tier has strict limits , so i ptotect this using ratelimiting
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minutes
+    limit: 5, //5 request per minute
+    message: { success: false, message: "Too many AI requests. Slow down." },
+});
 
+console.log("SERVER FILE LOADED v2");
+
+console.log("AI route registered");
+
+app.post("/ai/improve-tweet", limiter, improveTweet);
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
