@@ -22,7 +22,7 @@ const ForgetPassword = () => {
     // Clear old messages
     setMessage("");
     setError("");
-
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
     // Validate input
     if (!emailOrPhone.trim()) {
       setError("Please enter your email or phone number.");
@@ -33,7 +33,7 @@ const ForgetPassword = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/forget-password",
+        `${API}/forget-password`,
         {
           method: "POST",
           headers: {

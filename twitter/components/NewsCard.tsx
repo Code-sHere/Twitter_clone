@@ -25,10 +25,12 @@ export default function NewsCard() {
     const [loading, setLoading] = useState(true);
     const [hidden, setHidden] = useState(false);
 
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const { t } = useTranslation();
 
     useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/news`).then((res) => res.json()).then((json) => setArticles((json.data ?? []).slice(0, 3))).catch(() => setArticles([])).finally(() => setLoading(false));
+        fetch(`${API}/api/news`).then((res) => res.json()).then((json) => setArticles((json.data ?? []).slice(0, 3))).catch(() => setArticles([])).finally(() => setLoading(false));
     }, []);
 
     if (hidden || (!loading && articles.length === 0)) return null;

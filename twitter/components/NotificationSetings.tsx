@@ -10,6 +10,8 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
 
     const { t } = useTranslation();
 
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
     useEffect(() => {
         if (!userId) return;
@@ -22,7 +24,7 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
 
         try {
 
-            const response = await axios.get(`http://localhost:5000/settings/${userId}`);
+            const response = await axios.get(`${API}/settings/${userId}`);
 
             setEnabled(response.data.notificationEnabled);
 
@@ -50,7 +52,7 @@ const NotificationSetings = ({ userId }:{userId: string}) => {
                 }
             }
 
-            await axios.put(`http://localhost:5000/settings/${userId}`, { notificationEnabled: newValue });
+            await axios.put(`${API}/settings/${userId}`, { notificationEnabled: newValue });
             setEnabled(newValue);
         } catch (error) {
             console.log("Notification settings error", error);

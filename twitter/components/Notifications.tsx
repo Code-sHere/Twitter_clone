@@ -30,13 +30,15 @@ const Notifications = ({
 
     const { t } = useTranslation();
 
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
     const loadNotifications = async () => {
 
         try {
 
             const response = await axios.get(
-                `http://localhost:5000/notifications/${userId}`
+                `${API}/notifications/${userId}`
             );
 
             setNotifications(

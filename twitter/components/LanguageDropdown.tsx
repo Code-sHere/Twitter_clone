@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const API = "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // Language names are shown in their own language on purpose,
 // so a user can always find theirs even if the UI is in another language.

@@ -16,6 +16,8 @@ const Plans = () => {
 
     const { t } = useTranslation();
 
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     const loadRazorpay = () => {
         return new Promise((resolve) => {
             const script = document.createElement("script");
@@ -58,7 +60,7 @@ const Plans = () => {
                 return;
             }
 
-            const response = await fetch("http://localhost:5000/api/subscriptions/create", {
+            const response = await fetch(`${API}/api/subscriptions/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -96,7 +98,7 @@ const Plans = () => {
                 ): Promise<void> => {
                     try {
                         const verifyResponse = await fetch(
-                            "http://localhost:5000/api/subscriptions/verify",
+                            `${API}/api/subscriptions/verify`,
                             {
                                 method: "POST",
 
