@@ -1056,7 +1056,7 @@ app.get("/user/:username", getUserByUsername);
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
-    app.listen(port, () => {
+    app.listen(port,"0.0.0.0", () => {
         console.log(`listening on port ${port}`);
     });
 })
