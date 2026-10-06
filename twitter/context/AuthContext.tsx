@@ -46,7 +46,8 @@ interface AuthContextType {
     email: string,
     password: string,
     username: string,
-    displayName: string
+    displayName: string,
+    phone: string
   ) => Promise<void>;
 
   updateProfile: (profileData: {
@@ -60,6 +61,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
 
   isLoading: boolean;
+
+  isAuthenticating: boolean;
 
   googlesignin: () => Promise<void>;
 
@@ -100,7 +103,7 @@ export const AuthProvider: React.FC<{
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       }
-    } catch (error) {
+    } catch (error : any) {
       console.error(
         "Failed to restore user:",
         error
@@ -206,7 +209,7 @@ export const AuthProvider: React.FC<{
 
       return loggedInUser;
 
-    } catch (error) {
+    } catch (error : any) {
       console.error("OTP Verification Error:", error);
 
       throw new Error(
@@ -313,7 +316,7 @@ export const AuthProvider: React.FC<{
         if (res.data) {
           userData = res.data;
         }
-      } catch (error) {
+      } catch (error: any) {
         userData = null;
       }
 

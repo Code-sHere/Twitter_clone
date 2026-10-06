@@ -36,7 +36,10 @@ const LANGUAGES = [
     { code: "zh", label: "中文" },
 ];
 
-export default function LanguageDropdown() {
+interface LanguageDropdownProps {
+  userId: string;
+}
+export default function LanguageDropdown({ userId }: LanguageDropdownProps) {
     const { user } = useAuth();
     const { t, i18n } = useTranslation();
 

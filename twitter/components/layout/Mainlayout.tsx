@@ -11,7 +11,8 @@ import Explore from '@/components/Explore';
 
 
 const Mainlayout = ({ children }: any) => {
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
+  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState("home");
   const [selectedProfileUsername, setSelectedProfileUsername] =
     useState<string | null>(null);
@@ -47,7 +48,7 @@ const Mainlayout = ({ children }: any) => {
   };
 
 
-  const userId = user?._id;
+  const userId = user._id;
 
   if (isLoading) {
     return (
@@ -72,7 +73,7 @@ const Mainlayout = ({ children }: any) => {
       >
         {/* LEFT */}
         <header className="h-full min-w-0">
-          <Sidebar currentPage={currentPage} onNavigate={(page) => {
+          <Sidebar currentPage={currentPage} onNavigate={(page: string) => {
             setSelectedProfileUsername(null);
             setCurrentPage(page);
           }} />
