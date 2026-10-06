@@ -7,22 +7,22 @@ import { useAuth } from "@/context/AuthContext";
 
 interface FollowButtonProps {
     targetUserId: string;
-    initalIsFollowing: boolean;
+    initialIsFollowing: boolean;
     onChange?: (isFollowing: boolean, followersCount?: number) => void;
 }
 
 const FollowButton = ({
     targetUserId,
-    initalIsFollowing = false,
+    initialIsFollowing = false,
     onChange,
 }: FollowButtonProps) => {
 
     const { user } = useAuth();
-    const [isFollowing, setIsFollowing] = useState(initalIsFollowing);
+    const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
     const [loading, setLoading] = useState(false);
     const [hover, setHover] = useState(false);
 
-    useEffect(() => setIsFollowing(initalIsFollowing), [initalIsFollowing]);
+    useEffect(() => setIsFollowing(initialIsFollowing), [initialIsFollowing]);
 
     // hide on your own profile or when logged out
     if (!user || user._id === targetUserId) return null;

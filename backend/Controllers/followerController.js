@@ -23,7 +23,7 @@ export const followUser = async (req, res) => {
         const { targetId } = req.params;
         const { userId } = req.body;
 
-        if (!isValidId(userId || !isVlaidId(targetId))) {
+        if (!isValidId(userId || !isValidId(targetId))) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid user id"
@@ -231,7 +231,24 @@ export const getFollowing = buildList("following");
 
 export const getUserByUsername = async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.params.username }).select("._id username displayName avatar bio location website");
+
+        const username = String(req.params.username || "").trim();
+
+        if (!username) {
+            return res.status(400).json({
+                success: false,
+                message: "username is required"
+            })
+        }
+        const user = await User.findOne({ username },{
+            _id:1,
+            username:1,
+            displayName:1,
+            avatar:1,
+            bio:1,
+            location:1,
+            website:1,
+        }).lean();
 
         if (!user) {
             return res.status(404).json({

@@ -9,11 +9,11 @@ const TweetSchema = mongoose.Schema({
     comments : {type: Number, default: 0},
     likedBy : [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     retweetedBy : [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-    timestamp : {type: Date, default: Date.now()},
+    timestamp : {type: Date, default: Date.now},
     hashtags : {type: [String], default: [], index: true},
 })
 
-TweetSchema.index({ createdAt: -1 });
+TweetSchema.index({ timestamp: -1 });
 
 export default mongoose.model("Tweet", TweetSchema);
  

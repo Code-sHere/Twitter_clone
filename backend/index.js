@@ -22,9 +22,9 @@ import news from "./routes/news.js";
 import rateLimit from "express-rate-limit";
 import { improveTweet } from "./Controllers/aiController.js";
 import explore from "./routes/explore.js";
-
+import followers from "./models/followers.js";
 import followerRoutes from "./routes/followersRoute.js"
-import {getUserByUsername} from "./Controllers/followerController.js"
+import { getUserByUsername } from "./Controllers/followerController.js"
 
 const app = express()
 app.use(cors())
@@ -384,16 +384,23 @@ app.post("/post", createTweet);
 
 app.get("/post", async (req, res) => {
     try {
-        const tweets = await Tweet.find()
+        const { feedFor, authorId } = req.query;
+        let filter = {};
+
+        if (authorId) {
+            filter = { author: authorId };
+        } else if (feedFor) {
+            const ids = await Follow.find({ followerId: feedFor }).distinct("followingId");
+            filter = { author: { $in: [...ids, feedFor] } };
+        }
+
+        const tweets = await Tweet.find(filter)
             .sort({ timestamp: -1 })
             .populate("author", "_id displayName username avatar");
 
         return res.status(200).send(tweets);
-
     } catch (error) {
-        return res.status(400).send({
-            error: error.message
-        });
+        return res.status(400).send({ error: error.message });
     }
 });
 

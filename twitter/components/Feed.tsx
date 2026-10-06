@@ -45,7 +45,11 @@ interface CreatedTweetResponse {
     asset?: Asset | null;
 }
 
-const Feed = () => {
+interface FeedProps{
+    onOpenProfile?: (username: string) => void;
+}
+
+const Feed = ({ onOpenProfile }: FeedProps) => {
     const [tweets, setTweets] = useState<Tweet[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(false);
@@ -238,6 +242,7 @@ const Feed = () => {
                                 key={tweet._id}
                                 tweet={tweet}
                                 asset={tweetAsset}
+                                onOpenProfile={onOpenProfile}
                                 className="border-b border-gray-800"
                             />
                         );

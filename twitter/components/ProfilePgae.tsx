@@ -14,93 +14,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Card, CardContent } from './ui/card'
 import TweetCard from './TweetCard'
 import EditProfile from './EditProfile'
+import FollowButton from "./FollowButton";
+import FollowList from "./FollowList";
 import axiosInstance from '@/lib/axiosInstance'
 import NotificationSetings from './NotificationSetings'
 import { useTranslation } from 'react-i18next'
 
-interface Tweet {
-    id: string
-    author: {
-        id: string
-        username: string
-        displayName: string
-        avatar: string
-        verified?: boolean
-    }
-    content: string
-    timestamp: string
-    likes: number
-    retweets: number
-    comments: number
-    liked?: boolean
-    retweeted?: boolean
-    image?: string
+
+interface ProfilePageProps {
+    username?: string
+    onBack?: () => void
 }
 
-const tweets: Tweet[] = [
-    {
-        id: "1",
-        author: {
-            id: "1",
-            username: "elonmusk",
-            displayName: "Elon Musk",
-            avatar:
-                "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400",
-            verified: true,
-        },
-        content:
-            "Just had an amazing conversation about the future of AI. The possibilities are endless!",
-        timestamp: "2h",
-        likes: 1247,
-        retweets: 324,
-        comments: 89,
-        liked: false,
-        retweeted: false,
-    },
-    {
-        id: "2",
-        author: {
-            id: "1",
-            username: "sarahtech",
-            displayName: "Sarah Johnson",
-            avatar:
-                "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400",
-            verified: false,
-        },
-        content:
-            "Working on some exciting new features for our app. Can't wait to share what we've been building! 🚀",
-        timestamp: "4h",
-        likes: 89,
-        retweets: 23,
-        comments: 12,
-        liked: true,
-        retweeted: false,
-    },
-    {
-        id: "3",
-        author: {
-            id: "4",
-            username: "designguru",
-            displayName: "Alex Chen",
-            avatar:
-                "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400",
-            verified: true,
-        },
-        content:
-            "The new design system is finally complete! It took 6 months but the results are incredible. Clean, consistent, and accessible.",
-        timestamp: "6h",
-        likes: 456,
-        retweets: 78,
-        comments: 34,
-        liked: false,
-        retweeted: true,
-        image:
-            "https://images.pexels.com/photos/196645/pexels-photo-196645.jpeg?auto=compress&cs=tinysrgb&w=800",
-    },
-]
-
-const ProfilePgae = () => {
+const ProfilePgae = ({ username, onBack }: ProfilePageProps) => {
     const { user } = useAuth()
+
+    // when the state = null then it's show own profile
+    const [viewedUsername, setViewedUsername] = useState<string | null>(
+        username ?? null
+    );
+
+    // perviously opened profiles, so the back arrow works
+    const [history, setHistory] = useState<(string | null)[]>([]);
+
+    // "posts" = normal profile, otherwise the followers / following screen
+    const [view, setView] = useState<"posts" | "followers" | "following">("posts");
+
+    const [otherProfile, setOtherProfile] = useState<any>(null);
+    const [notFound, setNotFound] = useState(false);
+
+    const [stats, setStats] = useState({
+        followersCount: 0,
+        followingCount: 0,
+        isFollowing: false,
+    });
+
+
     const [activeTab, setActiveTab] = useState("posts")
     const [showEditModal, setShowEditModal] = useState(false)
 
@@ -108,28 +57,208 @@ const ProfilePgae = () => {
     const [tweets, setTweets] = useState<any>([]);
     const [loading, setLoading] = useState(false);
 
+    const isOwnProfile = !viewedUsername || viewedUsername === user.username;
+    const profile: any = isOwnProfile ? user : otherProfile;
+    const profileId: string | undefined = profile?._id;
+
     const { t } = useTranslation();
 
-    const fetchTweets = async () => {
-        try {
-            setLoading(true);
-            const response = await axiosInstance.get("/post");
-            setTweets(response.data);
-        } catch (error) {
-            console.log
-        } finally {
-            setLoading(false);
-        }
-    }
-
+    // when the parent passes a different username (for example from a tweet click)
     useEffect(() => {
-        fetchTweets()
-    }, [])
+        setViewedUsername(username ?? null);
+        setHistory([]);
+        setView("posts");
+        setActiveTab("posts");
+    }, [username]);
+
+    // load another user's profile
+    useEffect(() => {
+        if (isOwnProfile || !viewedUsername) {
+            setOtherProfile(null);
+            setNotFound(false);
+            return;
+        }
+
+        let cancelled = false;
+        setOtherProfile(null);
+        setNotFound(false);
+
+        axiosInstance.get(`/user/${viewedUsername}`)
+            .then((res) => {
+                if (cancelled) return;
+                setOtherProfile(res.data.user);
+            })
+            .catch((e) => {
+                console.log(e);
+                if (!cancelled) setNotFound(true);
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [viewedUsername, isOwnProfile]);
+
+    //  load follow stats + this user's tweets
+    useEffect(() => {
+        if (!profileId || !user) return;
+
+        let cancelled = false;
+
+        const load = async () => {
+            try {
+                setLoading(true);
+
+                const [statsRes, tweetsRes] = await Promise.all([
+                    axiosInstance.get(`/api/follow/${profileId}/stats`, {
+                        params: { viewerId: user._id },
+                    }),
+                    axiosInstance.get("/post", {
+                        params: { authorId: profileId },
+                    }),
+                ]);
+
+                if (cancelled) return;
+                setStats(statsRes.data);
+                setTweets(tweetsRes.data);
+            } catch (error) {
+                console.error("Load profile data failed:", error);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+
+        load();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [profileId, user?._id]);
 
     const userTweets = tweets.filter(
         (tweet: any) => tweet.author._id === user._id
     )
 
+    // open another user's profile (used by the followers / following lists)
+    const openProfile = (name: string) => {
+        if (name === viewedUsername) {
+            setView("posts");
+            return;
+        }
+        setHistory((prev) => [...prev, viewedUsername]);
+        setViewedUsername(name);
+        setView("posts");
+        setActiveTab("posts");
+    };
+
+    const handleBack = () => {
+        if (view !== "posts") {
+            setView("posts")
+            return;
+        }
+
+        if (history.length > 0) {
+            const previous = history[history.length - 1]
+            setHistory(history.slice(0, -1))
+            setViewedUsername(previous)
+            setActiveTab("posts")
+            return;
+        }
+
+        onBack?.()
+    }
+
+    if (!user) return null;
+
+    if (notFound) {
+        return (
+            <div className="min-h-screen">
+                <div className="flex items-center px-4 py-3 space-x-8">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleBack}
+                        className="p-2 rounded-full hover:bg-gray-900"
+                    >
+                        <ArrowLeft className="h-5 w-5 text-white" />
+                    </Button>
+                    <h1 className="text-xl font-bold text-white">Profile</h1>
+                </div>
+                <div className="py-16 text-center text-gray-400">
+                    <h3 className="text-2xl font-bold mb-2 text-white">
+                        This account doesn't exist
+                    </h3>
+                    <p>Try searching for another.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!profile) {
+        return <div className="p-6 text-center text-gray-400">Loading...</div>;
+    }
+
+    if (view !== "posts") {
+        return (
+            <div className="min-h-screen">
+                <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
+                    <div className="flex items-center px-4 py-3 space-x-8">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleBack}
+                            className="p-2 rounded-full hover:bg-gray-900"
+                        >
+                            <ArrowLeft className="h-5 w-5 text-white" />
+                        </Button>
+
+                        <div className="min-w-0">
+                            <h1 className="text-xl font-bold text-white truncate">
+                                {profile.displayName}
+                            </h1>
+                            <p className="text-sm text-gray-400 truncate">
+                                @{profile.username}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {(["followers", "following"] as const).map((tab) => (
+                            <button
+                                key={tab}
+                                type="button"
+                                onClick={() => setView(tab)}
+                                className="relative flex-1 py-3 hover:bg-gray-900/50 capitalize"
+                            >
+                                <span
+                                    className={
+                                        view === tab
+                                            ? "font-bold text-white"
+                                            : "font-semibold text-gray-500"
+                                    }
+                                >
+                                    {tab}
+                                </span>
+
+                                {view === tab && (
+                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-14 rounded-full bg-blue-500" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <FollowList
+                    key={`${profile._id}-${view}`}
+                    userId={profile._id}
+                    type={view}
+                    onSelectUser={openProfile}
+                />
+            </div>
+        );
+    }
+
+
+    // normal profile
     return (
         <div className="min-h-screen">
             {/* Header */}
@@ -138,6 +267,7 @@ const ProfilePgae = () => {
                     <Button
                         variant="ghost"
                         size="sm"
+                        onClick={handleBack}
                         className="p-2 rounded-full hover:bg-gray-900"
                     >
                         <ArrowLeft className="h-5 w-5 text-white" />
@@ -145,7 +275,7 @@ const ProfilePgae = () => {
 
                     <div>
                         <h1 className="text-xl font-bold text-white">
-                            {user.displayName}
+                            {profile.displayName}
                         </h1>
                         <p className="text-sm text-gray-400">
                             {t("profile.posts", { count: userTweets.length })}
@@ -155,23 +285,24 @@ const ProfilePgae = () => {
             </div>
 
             {/* Cover Photo */}
-            <div className="relative">
-                <div className="h-32 sm:h-48 bg-gradient-to-r from-blue-600 to-purple-600 relative">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70"
-                    >
-                        <Camera className="h-5 w-5 text-white" />
-                    </Button>
+            <div className="relative w-full">
+                <div className="h-32 sm:h-48 w-full bg-gradient-to-r from-blue-600 to-purple-600 relative">
+                    {isOwnProfile && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70"
+                        >
+                            <Camera className="h-5 w-5 text-white" />
+                        </Button>
+                    )}
                 </div>
 
                 {/* Profile Picture */}
-                <div className="absolute -bottom-12 sm:-bottom-12 left-4 z-20">
-                    <div className="relative group">
-                        {/* Avatar */}
-                        <Avatar
-                            className="
+                <div className="absolute top-40 sm:bottom-40 left-4 sm:left-5 z-10">
+                    {/* Avatar */}
+                    <Avatar
+                        className="
                 h-20 w-20 sm:h-24 sm:w-24
                 rounded-full
                 border-[4px] border-black
@@ -181,14 +312,14 @@ const ProfilePgae = () => {
                 ring-0
                 focus:outline-none
             ">
-                            <AvatarImage
-                                src={user.avatar}
-                                alt={user.displayName}
-                                className="h-full w-full object-cover"
-                            />
+                        <AvatarImage
+                            src={profile.avatar}
+                            alt={profile.displayName}
+                            className="h-full w-full object-cover"
+                        />
 
-                            <AvatarFallback
-                                className="h-full w-full
+                        <AvatarFallback
+                            className="h-full w-full
                     rounded-full
                     bg-gray-800
                     text-white
@@ -196,19 +327,20 @@ const ProfilePgae = () => {
                     font-bold
                     flex items-center justify-center
                 "
-                            >
-                                {user.displayName?.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
+                        >
+                            {profile.displayName?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
 
-                        {/* Camera Button */}
+                    {/* Camera Button */}
+                    {isOwnProfile && (
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
                             className="
                 absolute
-                bottom-1
+                top-15
                 right-1
                 h-8 sm:h-9
                 w-8 sm:w-9
@@ -229,17 +361,33 @@ const ProfilePgae = () => {
                         >
                             <Camera className="h-4 w-4" />
                         </Button>
-                    </div>
+                    )}
                 </div>
 
+                {/* Edit Profile (own) or Follow (other users) */}
                 <div className="flex justify-end p-4">
-                    <Button
-                        variant="outline"
-                        className="border-gray-600 text-white bg-gray-950 font-semibold rounded-full px-4 sm:px-6"
-                        onClick={() => setShowEditModal(true)}
-                    >
-                        {t("profile.editProfile")}
-                    </Button>
+                    {isOwnProfile ? (
+                        <Button
+                            variant="outline"
+                            className="border-gray-600 text-white bg-gray-950 font-semibold rounded-full px-4 sm:px-6"
+                            onClick={() => setShowEditModal(true)}
+                        >
+                            {t("profile.editProfile")}
+                        </Button>
+                    ) : (
+                        <FollowButton
+                            targetUserId={profile._id}
+                            initialIsFollowing={stats.isFollowing}
+                            onChange={(isFollowing, followersCount) =>
+                                setStats((prev) => ({
+                                    ...prev,
+                                    isFollowing,
+                                    followersCount:
+                                        followersCount ?? prev.followersCount,
+                                }))
+                            }
+                        />
+                    )}
                 </div>
 
                 {/* Profile Information */}
@@ -248,11 +396,11 @@ const ProfilePgae = () => {
                     <div className="flex items-start justify-between">
                         <div className="min-w-0">
                             <h1 className="text-xl sm:text-2xl font-bold text-white truncate">
-                                {user.displayName}
+                                {profile.displayName}
                             </h1>
 
                             <p className="text-sm text-gray-400 mt-1 truncate">
-                                @{user.username}
+                                @{profile.username}
                             </p>
                         </div>
 
@@ -266,9 +414,9 @@ const ProfilePgae = () => {
                     </div>
 
                     {/* Bio */}
-                    {user.bio && (
+                    {profile.bio && (
                         <p className="text-white mt-4 mb-4 leading-relaxed break-words">
-                            {user.bio}
+                            {profile.bio}
                         </p>
                     )}
 
@@ -276,28 +424,58 @@ const ProfilePgae = () => {
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-400 text-sm">
                         <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4 shrink-0" />
-                            <span>{user.location ? user.location : "Earth"}</span>
+                            <span>{profile.location ? profile.location : "Earth"}</span>
                         </div>
 
                         <div className="flex items-center gap-1">
                             <LinkIcon className="h-4 w-4 shrink-0" />
                             <span className="text-blue-400 truncate max-w-[160px]">
-                                {user.website ? user.website : "www.example.com"}
+                                {profile.website ? profile.website : "www.example.com"}
                             </span>
                         </div>
 
-                        <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4 shrink-0" />
-                            <span>Joined {user.joinedDate && new Date(user.joinedDate).toLocaleDateString("en-us", { month: "long", year: "numeric" })}</span>
-                        </div>
+                        {profile.joinedDate && (
+                            <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4 shrink-0" />
+                                <span>
+                                    Joined{" "}
+                                    {new Date(profile.joinedDate).toLocaleDateString(
+                                        "en-us",
+                                        { month: "long", year: "numeric" }
+                                    )}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    {/* Following / Followers counts */}
+                    <div className="flex gap-5 mt-3 text-sm">
+                        <button
+                            type="button"
+                            onClick={() => setView("following")}
+                            className="hover:underline"
+                        >
+                            <b className="text-white">{stats.followingCount}</b>{" "}
+                            <span className="text-gray-500">Following</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setView("followers")}
+                            className="hover:underline"
+                        >
+                            <b className="text-white">{stats.followersCount}</b>{" "}
+                            <span className="text-gray-500">Followers</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div className="px-4 py-4 border-b border-gray-800">
 
-                <NotificationSetings userId={user._id} />
-
-            </div>
+            {/* Notification settings: only on my own profile */}
+            {isOwnProfile && (
+                <div className="px-4 py-4 border-b border-gray-800">
+                    <NotificationSetings userId={user._id} />
+                </div>
+            )}
 
             {/* Tabs */}
             <Tabs
@@ -305,41 +483,46 @@ const ProfilePgae = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
             >
-                    <TabsList className="flex w-full overflow-x-auto no-scrollbar bg-transparent border-b border-gray-800 rounded-none h-auto justify-start">
-                        {["posts", "replies", "highlights", "articles", "media"].map((tab) => (
-                            <TabsTrigger
-                                key={tab}
-                                value={tab}
-                                className="shrink-0 whitespace-nowrap data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 px-4 py-3 sm:py-4 text-sm sm:text-base font-semibold"
-                            >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                <TabsList className="flex w-full overflow-x-auto no-scrollbar bg-transparent border-b border-gray-800 rounded-none h-auto justify-start">
+                    {["posts", "replies", "highlights", "articles", "media"].map((tab) => (
+                        <TabsTrigger
+                            key={tab}
+                            value={tab}
+                            className="shrink-0 whitespace-nowrap data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 px-4 py-3 sm:py-4 text-sm sm:text-base font-semibold"
+                        >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
 
                 {/* Posts */}
                 <TabsContent value="posts" className="mt-0">
                     <div className="divide-y divide-gray-800">
                         {loading ? (
+                            <p className="py-12 text-center text-gray-400">
+                                Loading...
+                            </p>
+                        ) : tweets.length === 0 ? (
                             <Card className="bg-black border-none">
                                 <CardContent className="py-12 text-center">
                                     <div className="text-gray-400">
                                         <h3 className="text-2xl font-bold mb-2">
-                                            You haven't posted yet
+                                            {isOwnProfile
+                                                ? "You haven't posted yet"
+                                                : `@${profile.username} hasn't posted yet`}
                                         </h3>
 
                                         <p>
-                                            When you post, it will show up here.
+                                            {isOwnProfile
+                                                ? "When you post, it will show up here."
+                                                : "When they post, it will show up here."}
                                         </p>
                                     </div>
                                 </CardContent>
                             </Card>
                         ) : (
-                            userTweets.map((tweet: any) => (
-                                <TweetCard
-                                    key={tweet._id}
-                                    tweet={tweet}
-                                />
+                            tweets.map((tweet: any) => (
+                                <TweetCard key={tweet._id} tweet={tweet} />
                             ))
                         )}
                     </div>
@@ -351,12 +534,12 @@ const ProfilePgae = () => {
                         <CardContent className="py-12 text-center">
                             <div className="text-gray-400">
                                 <h3 className="text-2xl font-bold mb-2">
-                                    You haven't replied yet
+                                    {isOwnProfile
+                                        ? "You haven't replied yet"
+                                        : "No replies yet"}
                                 </h3>
 
-                                <p>
-                                    When you reply to a post, it will show up here.
-                                </p>
+                                <p>When a reply is posted, it will show up here.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -372,7 +555,8 @@ const ProfilePgae = () => {
                                 </h3>
 
                                 <p>
-                                    When you post photos or videos, they will show up here.
+                                    When photos or videos are posted, they will show up
+                                    here.
                                 </p>
                             </div>
                         </CardContent>
@@ -385,12 +569,10 @@ const ProfilePgae = () => {
                         <CardContent className="py-12 text-center">
                             <div className="text-gray-400">
                                 <h3 className="text-2xl font-bold mb-2">
-                                    You haven't written any articles
+                                    No articles yet
                                 </h3>
 
-                                <p>
-                                    When you write articles, they will show up here.
-                                </p>
+                                <p>When articles are written, they will show up here.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -406,17 +588,21 @@ const ProfilePgae = () => {
                                 </h3>
 
                                 <p>
-                                    When you post photos or videos, they will show up here.
+                                    When photos or videos are posted, they will show up
+                                    here.
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>
-            <EditProfile
-                isopen={showEditModal}
-                onclose={() => setShowEditModal(false)}
-            />
+
+            {isOwnProfile && (
+                <EditProfile
+                    isopen={showEditModal}
+                    onclose={() => setShowEditModal(false)}
+                />
+            )}
         </div >
     )
 }

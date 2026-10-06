@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-
+import Link from "next/link";
 import {
     Heart,
     MessageCircle,
@@ -21,12 +21,14 @@ interface TweetCardProps {
     tweet: any;
     asset?: any;
     className?: string;
+    onOpenProfile?: (username: string) => void;
 }
 
 const TweetCard = ({
     tweet,
     asset,
     className = "",
+    onOpenProfile,
 }: TweetCardProps) => {
 
     console.log("assets in tweet card");
@@ -138,9 +140,21 @@ const TweetCard = ({
                         {/* User info */}
                         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 mb-2 min-w-0">
 
-                            <span className="font-bold text-white truncate max-w-[45%] sm:max-w-none">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    const username = tweetstate.author?.username;
+
+                                    if (username && onOpenProfile) {
+                                        onOpenProfile(username);
+                                    }
+                                }}
+                                className="font-bold text-white hover:underline truncate max-w-[45%] sm:max-w-none text-left"
+                            >
                                 {tweetstate.author?.displayName}
-                            </span>
+                            </button>
 
                             {tweetstate.author?.verified && (
                                 <div className="bg-blue-500 rounded-full p-0.5 shrink-0">
@@ -155,9 +169,21 @@ const TweetCard = ({
                                 </div>
                             )}
 
-                            <span className="text-gray-500 truncate max-w-[32%] sm:max-w-none">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    const username = tweetstate.author?.username;
+
+                                    if (username && onOpenProfile) {
+                                        onOpenProfile(username);
+                                    }
+                                }}
+                                className="text-gray-500 hover:underline truncate max-w-[32%] sm:max-w-none"
+                            >
                                 @{tweetstate.author?.username}
-                            </span>
+                            </button>
 
                             <span className="text-gray-500 shrink-0">
                                 ·
