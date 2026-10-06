@@ -23,6 +23,8 @@ import rateLimit from "express-rate-limit";
 import { improveTweet } from "./Controllers/aiController.js";
 import explore from "./routes/explore.js";
 
+import followerRoutes from "./routes/followersRoute.js"
+import {getUserByUsername} from "./Controllers/followerController.js"
 
 const app = express()
 app.use(cors())
@@ -1041,6 +1043,9 @@ console.log("SERVER FILE LOADED v2");
 console.log("AI route registered");
 
 app.post("/ai/improve-tweet", limiter, improveTweet);
+
+app.use("/api/follow", followerRoutes);
+app.get("/user/:username", getUserByUsername);
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
