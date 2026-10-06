@@ -10,7 +10,7 @@ import forgetPassword from "./Controllers/forgetpassword.js"
 import bcrypt from "bcrypt";
 import { UAParser } from "ua-parser-js";
 import otpSchema from "./models/otpSchema.js"
-import LoginHistory from "./models/loginHistory.js";
+import LoginDetail from "./models/logindetail.js"
 import crypto from "crypto";
 import cloudinary from "./config/cloudinary.js";
 import upload from "./middleware/upload.js";
@@ -208,7 +208,7 @@ app.post("/login", async (req, res) => {
 
         if (!isPasswordMatch) {
 
-            await LoginHistory.create({
+            await LoginDetail.create({
                 ...loginData,
                 status: "failed",
                 reason: "Invalid password"
@@ -241,7 +241,7 @@ app.post("/login", async (req, res) => {
             const endTime = 13 * 60; // 1:00 PM in minutes
 
             if (currentMinutes < startTime || currentMinutes >= endTime) {
-                await LoginHistory.create({
+                await LoginDetail.create({
                     ...loginData,
                     status: "blocked",
                     reason: "Login allowed only between 10:00 AM and 1:00 PM for mobile devices"
@@ -260,7 +260,7 @@ app.post("/login", async (req, res) => {
 
             const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-            const loginHistory = await LoginHistory.create({
+            const LoginDetail = await LoginDetail.create({
                 ...loginData,
                 status: "success",
                 reason: "Chrome login required otp"
@@ -274,7 +274,7 @@ app.post("/login", async (req, res) => {
                 userId: user._id,
                 otp,
                 expiresAt,
-                loginHistoryId: loginHistory._id
+                LoginDetailId: LoginDetail._id
             });
 
             await sendOtp(
@@ -294,7 +294,7 @@ app.post("/login", async (req, res) => {
 
         if (browser === "Edge") {
 
-            await LoginHistory.create({
+            await LoginDetail.create({
                 ...loginData,
                 status: "success",
                 reason: "Edge login"
@@ -690,7 +690,7 @@ app.post("/language/request", async (req, res) => {
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000),
                 purpose: "language",
                 verified: false,
-                loginHistoryId: null
+                LoginDetailId: null
             });
 
             await sendOtp(user.email, user.displayName, otp);
@@ -805,8 +805,8 @@ app.post("/verift-otp", async (req, res) => {
         }
 
         // ---- Login OTP ----
-        if (otpRecord.loginHistoryId) {
-            await LoginHistory.findByIdAndUpdate(otpRecord.loginHistoryId, {
+        if (otpRecord.LoginDetailId) {
+            await LoginDetail.findByIdAndUpdate(otpRecord.LoginDetailId, {
                 status: "success",
                 reason: "Otp verified"
             });
