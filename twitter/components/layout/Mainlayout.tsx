@@ -47,9 +47,6 @@ const Mainlayout = ({ children }: any) => {
     );
   };
 
-
-  const userId = user._id;
-
   if (isLoading) {
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
@@ -61,6 +58,8 @@ const Mainlayout = ({ children }: any) => {
   if (!user) {
     return <>{children}</>
   }
+
+  const userId = user._id;
 
   return (
     <div className="h-screen w-full overflow-hidden bg-black text-white">
