@@ -5,6 +5,7 @@ export async function sendEmail(to, subject, html) {
     throw new Error('BREVO_API_KEY ya SENDER_EMAIL env variable set nahi hai');
   }
 
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000); // 15 sec timeout
 
@@ -59,3 +60,43 @@ export const loginEmail = (name) => ({
   html: wrap(`<h2>Hi ${name || 'there'}!</h2>
     <p>Aapke account mein abhi login hua hai. Agar ye aap nahi the, to password change kar lo.</p>`),
 });
+
+export const sendPasswordEmail = async ({
+  email,
+  name,
+  newPassword,
+}) => {
+  const html = `
+        <h2>New Password Generated 🔐</h2>
+
+        <p>Hello ${name || "there"},</p>
+
+        <p>Your new password is:</p>
+
+        <div style="
+            background:#f1f1f1;
+            padding:15px;
+            border-radius:6px;
+            font-size:18px;
+            font-weight:bold;
+        ">
+            ${newPassword}
+        </div>
+
+        <p>
+            Please login using this password and change it
+            immediately from your profile/settings.
+        </p>
+
+        <p>
+            Regards,<br>
+            <strong>Twiller Team</strong>
+        </p>
+    `;
+
+  return await sendEmail(
+    email,
+    `New Password - ${name || "User"}`,
+    html
+  );
+};

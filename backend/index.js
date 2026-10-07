@@ -2,7 +2,7 @@ import "./env.js";
 import express from "express"
 import cors from "cors"
 import mongoose from "mongoose"
-import { sendEmail, loginEmail } from '../utils/sendEmail.js';
+import { sendEmail, loginEmail } from './utils/sendEmail.js';
 import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
@@ -282,7 +282,6 @@ app.post("/login", async (req, res) => {
 
             await sendOtp(
                 user.email,
-                user.displayName,
                 otp
             );
 
@@ -455,7 +454,6 @@ app.post("/upload-audio", upload.single("audio"), async (req, res) => {
 
             await sendOtp(
                 user.email,
-                user.displayName,
                 otp
             )
 
@@ -701,7 +699,7 @@ app.post("/language/request", async (req, res) => {
                 LoginDetailId: null
             });
 
-            await sendOtp(user.email, user.displayName, otp);
+            await sendOtp(user.email, otp);
 
             return res.status(200).json({
                 success: true,

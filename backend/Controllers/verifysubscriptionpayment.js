@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import Subscription from "../models/Subscription.js";
-import { sendPaymentEmail } from "./emailsender.js";
 import User from "../models/user.js";
 
 export const verifySubscriptionPayment = async (req, res) => {

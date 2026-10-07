@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import generatePassword from "../utils/passwordGeneration.js";
-import { sendPasswordEmail } from "./newpasswordemail.js";
 
 
 const forgetPassword = async (req, res) => {

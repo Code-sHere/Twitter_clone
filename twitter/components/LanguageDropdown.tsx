@@ -231,7 +231,6 @@ export default function LanguageDropdown({ userId }: LanguageDropdownProps) {
                             inputMode="numeric"
                             placeholder={t("language.enterOtp")}
                             value={otp}
-                            maxLength={6}
                             onChange={(e) =>
                                 setOtp(e.target.value.replace(/\D/g, ""))
                             }
@@ -239,7 +238,7 @@ export default function LanguageDropdown({ userId }: LanguageDropdownProps) {
 
                         <Button
                             className="w-full"
-                            disabled={otpLoading || otp.length !== 6}
+                            disabled={otpLoading}
                             onClick={verifyOtp}
                         >
                             {otpLoading
