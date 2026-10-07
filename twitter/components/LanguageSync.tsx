@@ -9,7 +9,7 @@ export default function LanguageSync() {
     const {i18n} = useTranslation();
 
     useEffect(()=>{
-        const lang = (user as any)?.language || localStorage.getItem("lang") || "hi";
+        const lang = (user as any)?.language || localStorage.getItem("lang") || "en";
         i18n.changeLanguage(lang);
     },[user?._id]);
 

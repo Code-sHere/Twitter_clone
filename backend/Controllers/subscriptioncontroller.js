@@ -12,15 +12,15 @@ const razorpayInstance = new Razorpay({
 export const createSubscription = async (req, res) => {
     try {
 
-        const now = new Date();
-
-        const indiaTime = new Date(
-            now.toLocaleString("en-US", {
-                timeZone: "Asia/Kolkata",
-            })
-        );
-
-        const hour = indiaTime.getHours();
+        if (process.env.NODE_ENV === "production") {
+            const hour = Number(
+                new Intl.DateTimeFormat("en-US", {
+                    timeZone: "Asia/Kolkata",
+                    hour: "numeric",
+                    hour12: false,
+                }).format(new Date())
+            );
+        }
 
         if (hour !== 10) {
             return res.status(403).json({
@@ -30,6 +30,7 @@ export const createSubscription = async (req, res) => {
         }
 
         const { plan, email } = req.body;
+        console.log("BODY:", req.body, "PLAN KEYS:", Object.keys(PLANS));
 
         // Check plan
         const selectedPlan = PLANS[plan];

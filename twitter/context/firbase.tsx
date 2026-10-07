@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAGnTsp6HGoA_xILvaOgy_CI1LpNwqGElM",
-  authDomain: "twiller-88474.firebaseapp.com",
-  projectId: "twiller-88474",
-  storageBucket: "twiller-88474.firebasestorage.app",
-  messagingSenderId: "941122837205",
-  appId: "1:941122837205:web:9d4f5981abb382e1d5605c"
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTHDOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECTID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGEBUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSAGINGSENDERID,
+  appId: process.env.NEXT_PUBLIC_APPID
 };
 
 

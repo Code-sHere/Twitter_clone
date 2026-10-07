@@ -1,45 +1,117 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import "../env.js";
-import User from "../models/user.js";
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD,
-    }
-})
+const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
 export const sendPaymentEmail = async ({
-  email,
-  name,
-  planName,
-  amount,
-  paymentId,
-  subscriptionId,
+    email,
+    name,
+    planName,
+    amount,
+    paymentId,
+    subscriptionId,
 }) => {
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: `Payment Successful - ${planName} Plan`,
-    html: `
-      <h2>Payment Successful 🎉</h2>
+    try {
+        const { data, error } = await resend.emails.send({
+            from: "Twiller <onboarding@resend.dev>",
 
-      <p>Hello ${name},</p>
+            to: [email],
 
-      <p>Your subscription payment was successful.</p>
+            subject: `Payment Successful - ${planName} Plan`,
 
-      <h3>Payment Details</h3>
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Payment Successful</title>
+                </head>
 
-      <p><strong>Plan:</strong> ${planName}</p>
-      <p><strong>Amount:</strong> ₹${amount}</p>
-      <p><strong>Payment ID:</strong> ${paymentId}</p>
-      <p><strong>Subscription ID:</strong> ${subscriptionId}</p>
-      <p><strong>Status:</strong> Successful</p>
+                <body style="
+                    font-family: Arial, sans-serif;
+                    background-color: #f5f5f5;
+                    padding: 30px;
+                ">
 
-      <br/>
+                    <div style="
+                        max-width: 600px;
+                        margin: auto;
+                        background: white;
+                        padding: 30px;
+                        border-radius: 10px;
+                    ">
 
-      <p>Thank you for subscribing!</p>
-    `,
-  });
+                        <h2>Payment Successful 🎉</h2>
+
+                        <p>Hello ${name},</p>
+
+                        <p>
+                            Your subscription payment was successful.
+                        </p>
+
+                        <h3>Payment Details</h3>
+
+                        <p>
+                            <strong>Plan:</strong>
+                            ${planName}
+                        </p>
+
+                        <p>
+                            <strong>Amount:</strong>
+                            ₹${amount}
+                        </p>
+
+                        <p>
+                            <strong>Payment ID:</strong>
+                            ${paymentId}
+                        </p>
+
+                        <p>
+                            <strong>Subscription ID:</strong>
+                            ${subscriptionId}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            Successful
+                        </p>
+
+                        <br>
+
+                        <p>
+                            Thank you for subscribing to Twiller!
+                        </p>
+
+                        <p>
+                            Regards,<br>
+                            <strong>Twiller Team</strong>
+                        </p>
+
+                    </div>
+
+                </body>
+                </html>
+            `,
+        });
+
+        if (error) {
+            console.error("Payment email error:", error);
+            throw new Error(error.message);
+        }
+
+        console.log(
+            "Payment email sent successfully:",
+            data.id
+        );
+
+        return data;
+
+    } catch (error) {
+        console.error(
+            "Payment email sending failed:",
+            error.message
+        );
+
+        throw error;
+    }
 };
