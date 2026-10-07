@@ -2,6 +2,7 @@ import Razorpay from "razorpay";
 import User from "../models/user.js";
 import Subscription from "../models/Subscription.js";
 import PLANS from "../config/plans.js";
+import { sendEmail, subscriptionEmail } from '../utils/sendEmail.js';
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_API_KEY,
@@ -12,15 +13,13 @@ const razorpayInstance = new Razorpay({
 export const createSubscription = async (req, res) => {
     try {
 
-        if (process.env.NODE_ENV === "production") {
-            const hour = Number(
-                new Intl.DateTimeFormat("en-US", {
-                    timeZone: "Asia/Kolkata",
-                    hour: "numeric",
-                    hour12: false,
-                }).format(new Date())
-            );
-        }
+        const hour = Number(
+            new Date().toLocaleString('en-US', {
+                hour: 'numeric',
+                hour12: false,
+                timeZone: 'Asia/Kolkata',
+            })
+        );
 
         if (hour !== 10) {
             return res.status(403).json({
@@ -84,6 +83,14 @@ export const createSubscription = async (req, res) => {
             tweetUsed: 0,
             status: "created",
         });
+
+        try {
+            const { subject, html } = subscriptionEmail(plan);
+            await sendEmail(user.email, subject, html);
+        } catch (err) {
+            console.error('Subscription email failed:', err.message);
+
+        }
 
         return res.status(201).json({
             success: true,

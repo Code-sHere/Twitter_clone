@@ -2,6 +2,7 @@ import "./env.js";
 import express from "express"
 import cors from "cors"
 import mongoose from "mongoose"
+import { sendEmail, loginEmail } from '../utils/sendEmail.js';
 import User from "./models/user.js"
 import Tweet from "./models/tweet.js"
 import subscriptionRoutes from "./routes/subscriptionRoutes.js"
@@ -30,6 +31,8 @@ const app = express()
 app.use(cors())
 app.use(express.json(
 ))
+
+app.set("trust proxy", 1);
 
 
 
@@ -318,6 +321,9 @@ app.post("/login", async (req, res) => {
             })
         }
 
+        sendEmail(user.email, ...Object.values(loginEmail(user.name)))
+            .catch((e) => console.error('Login email failed:', e.message));
+
 
         return res.status(200).json({
             success: true,
@@ -334,7 +340,9 @@ app.post("/login", async (req, res) => {
                 isTemporaryPassword:
                     user.isTemporaryPassword
             }
-        })
+        });
+
+
 
     } catch (error) {
         console.error("LOGIN ERROR:", error);
@@ -1056,7 +1064,7 @@ app.get("/user/:username", getUserByUsername);
 
 mongoose.connect(url).then(() => {
     console.log("connected to db");
-    app.listen(port,"0.0.0.0", () => {
+    app.listen(port, "0.0.0.0", () => {
         console.log(`listening on port ${port}`);
     });
 })
