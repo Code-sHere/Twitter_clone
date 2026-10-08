@@ -45,6 +45,8 @@ const TweetComposer = ({
 
     const [isImproving, setIsImproving] = useState(false);
 
+    const API=process.env.NEXT_PUBLIC_BACKEND_URL 
+
 
     const maxlength = 200;
 
@@ -178,7 +180,7 @@ const TweetComposer = ({
             formdataaudio.append("otpVerified", "false");
 
             const res = await axios.post(
-                "http://localhost:5000/upload-audio",
+                `${API}/upload-audio`,
                 formdataaudio
             );
 
@@ -215,7 +217,7 @@ const TweetComposer = ({
             setOtpLoading(true);
 
             const verifyResponse = await axios.post(
-                "http://localhost:5000/verift-otp", {
+                `${API}/verift-otp`, {
                 userId: user._id,
                 otp: otp
             }
@@ -235,7 +237,7 @@ const TweetComposer = ({
             formdataaudio.append("otpVerified", "true");
 
             const uploadResponse = await axios.post(
-                "http://localhost:5000/upload-audio",
+                    `${API}/upload-audio`,
                 formdataaudio, {
                 headers: {
                     "Content-Type": "multipart/form-data"
