@@ -1,97 +1,171 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/lib/axiosInstance";
-import FollowButton from "./FollowButton";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
+import FollowButton from "@/components/FollowButton";
 
-type FollowUser = {
+interface FollowUser {
     _id: string;
-    username?: string;
+    username: string;
     displayName?: string;
     avatar?: string;
     bio?: string;
-    isFollowing?: boolean;
-};
+    isFollowing: boolean;
+}
 
-const FollowList = ({
-    userId,
-    type,
-    onSelectUser,
-}: {
+interface FollowListProps {
     userId: string;
     type: "followers" | "following";
     onSelectUser?: (username: string) => void;
-}) => {
+}
 
+export default function FollowList({
+    userId,
+    type,
+    onSelectUser,
+}: FollowListProps) {
     const { user } = useAuth();
-    const [page, setPage] = useState(1);
-    const [users, setUsers] = useState<any[]>([]);
-    const [hasMore, setHasMore] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState<FollowUser[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    const load = async (pageToLoad: number) => {
+    const loadUsers = useCallback(async () => {
+        if (!userId || !user?._id) {
+            setUsers([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        setError("");
 
         try {
-            setLoading(true);
-            const res = await axiosInstance.get(`/api/follow/${userId}/${type}`, {
-                params: { viewerId: user?._id, page: pageToLoad, limit: 20 },
-            });
-            setUsers((prev) => pageToLoad === 1 ? res.data.users : [...prev, ...res.data.users]
-            );
+            const endpoint = "/api/follow/" + userId + "/" + type;
 
-            setHasMore(res.data.hasMore);
-            setPage(pageToLoad);
-        } catch (error) {
-            console.error(error);
+            const response = await axiosInstance.get(endpoint, {
+                params: {
+                    viewerId: user._id,
+                },
+            });
+
+            setUsers(response.data.users ?? []);
+        } catch (err: any) {
+            console.error("Failed to load follow list:", err.response?.data ?? err);
+
+            setError(
+                err.response?.data?.message ?? "Could not load users."
+            );
         } finally {
             setLoading(false);
         }
-    }
+    }, [userId, user?._id, type]);
 
     useEffect(() => {
-        if(!user?._id) return;
+        loadUsers();
+    }, [loadUsers]);
 
-        load(1);
-    }, [userId, type, user?._id]);
+    const updateFollowState = (
+        targetUserId: string,
+        isFollowing: boolean
+    ) => {
+        setUsers((current) =>
+            current.map((person) =>
+                person._id === targetUserId
+                    ? { ...person, isFollowing }
+                    : person
+            )
+        );
+    };
 
-    if (!loading && users.length === 0) {
-        return <p className="p-6 text-center text-gray-500">No user Yet.</p>
+    if (loading) {
+        return (
+            <p className="py-8 text-center text-gray-400">
+                Loading users...
+            </p>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-6 text-center">
+                <p className="text-red-400">{error}</p>
+                <button
+                    onClick={loadUsers}
+                    className="mt-3 rounded-full border border-gray-600 px-4 py-2"
+                >
+                    Try again
+                </button>
+            </div>
+        );
+    }
+
+    if (users.length === 0) {
+        return (
+            <p className="py-10 text-center text-gray-500">
+                {type === "following"
+                    ? "Not following anyone yet."
+                    : "No followers yet."}
+            </p>
+        );
     }
 
     return (
         <div>
-            {users.map((u) => (
-                <div key={u._id}
-                    className="flex items-center gap-3 px-4 py-3 border-b border-gray-800">
-                    <Avatar className="h-11 w-11 shrink-0">
-                        <AvatarImage src={u.avatar} alt={u.displayName} />
-                        <AvatarFallback>{u.displayName?.[0]?.toUpperCase()}</AvatarFallback>
-                    </Avatar>
-
-                    <button type="button" onClick={()=>onSelectUser?.(u.username)} className="flex-1 min-w-0 text-left">
-                        <p className="font-bold text-white truncate">{u.displayName}</p>
-                        <p className="text-gray-500 truncate">@{u.username}</p>
-                        {u.bio && <p className="text-gray-300 text-sm truncate">{u.bio}</p>}
+            {users.map((person) => (
+                <article
+                    key={person._id}
+                    className="flex items-center gap-3 border-b border-gray-800 px-4 py-4 hover:bg-white/[0.03]"
+                >
+                    <button
+                        type="button"
+                        onClick={() => onSelectUser?.(person.username)}
+                        className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-800 font-bold"
+                    >
+                        {person.avatar ? (
+                            <img
+                                src={person.avatar}
+                                alt=""
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            (person.displayName || person.username)
+                                .charAt(0)
+                                .toUpperCase()
+                        )}
                     </button>
 
-                    <FollowButton targetUserId={u._id} initialIsFollowing={u.isFollowing} />
+                    <button
+                        type="button"
+                        onClick={() => onSelectUser?.(person.username)}
+                        className="min-w-0 flex-1 text-left"
+                    >
+                        <span className="block truncate font-bold">
+                            {person.displayName || person.username}
+                        </span>
+                        <span className="block truncate text-sm text-gray-500">
+                            @{person.username}
+                        </span>
+                        {person.bio && (
+                            <span className="mt-1 block line-clamp-2 text-sm text-gray-300">
+                                {person.bio}
+                            </span>
+                        )}
+                    </button>
 
-                </div>
+                    {person._id !== user?._id && (
+                        <div className="shrink-0">
+                            <FollowButton
+                                targetUserId={person._id}
+                                initialIsFollowing={person.isFollowing}
+                                onFollowChange={(isFollowing) =>
+                                    updateFollowState(person._id, isFollowing)
+                                }
+                            />
+                        </div>
+                    )}
+                </article>
             ))}
-            {loading && <p className="p-4 text-center text-gray-500">Loading...</p>}
-
-            {hasMore && !loading && (
-                <div className="p-4 text-center">
-                    <Button variant="ghost" onClick={() => load(page + 1)}>
-                        Load more
-                    </Button>
-                </div>
-            )}
         </div>
     );
-};
-
-export default FollowList;
+}

@@ -1,14 +1,26 @@
+
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/lib/axiosInstance";
 import { Button } from "./ui/button";
-import { useAuth } from "@/context/AuthContext";
 
 interface FollowButtonProps {
     targetUserId: string;
-    initialIsFollowing: boolean;
-    onChange?: (isFollowing: boolean, followersCount?: number) => void;
+    initialIsFollowing?: boolean;
+    onChange?: (
+        isFollowing: boolean,
+        followersCount?: number
+    ) => void;
+}
+
+interface FollowResponse {
+    success: boolean;
+    isFollowing: boolean;
+    followersCount: number;
+    followingCount: number;
+    message?: string;
 }
 
 const FollowButton = ({
@@ -16,32 +28,65 @@ const FollowButton = ({
     initialIsFollowing = false,
     onChange,
 }: FollowButtonProps) => {
-
     const { user } = useAuth();
-    const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+
+    const [isFollowing, setIsFollowing] = useState(
+        initialIsFollowing
+    );
     const [loading, setLoading] = useState(false);
     const [hover, setHover] = useState(false);
 
-    useEffect(() => setIsFollowing(initialIsFollowing), [initialIsFollowing]);
+    useEffect(() => {
+        setIsFollowing(initialIsFollowing);
+    }, [initialIsFollowing]);
 
-    // hide on your own profile or when logged out
-    if (!user || user._id === targetUserId) return null;
+    if (!user || !targetUserId || user._id === targetUserId) {
+        return null;
+    }
 
-    const toggle = async (e: React.MouseEvent) => {
+    const toggleFollow = async (
+        e: React.MouseEvent<HTMLButtonElement>
+    ) => {
         e.stopPropagation();
 
         if (loading) return;
 
-        const next = !isFollowing;
+        const previousState = isFollowing;
+        const nextState = !previousState;
 
-        setIsFollowing(next);
+        setIsFollowing(nextState);
         setLoading(true);
 
         try {
-            const res = await axiosInstance.post(`/api/follow/${targetUserId}${next ? "" : "/unfollow"}`, { userID: user._id });
-        } catch (error) {
-            setIsFollowing(!next);
-            console.log(error);
+            const endpoint = nextState
+                ? `/api/follow/${targetUserId}`
+                : `/api/follow/${targetUserId}/unfollow`;
+
+            const response = await axiosInstance.post<FollowResponse>(
+                endpoint,
+                {
+                    userId: user._id,
+                }
+            );
+
+            const data = response.data;
+
+            setIsFollowing(data.isFollowing);
+
+            onChange?.(
+                data.isFollowing,
+                data.followersCount
+            );
+        } catch (error: any) {
+            setIsFollowing(previousState);
+
+            console.error("Follow request failed:", {
+                status: error.response?.status,
+                message: error.response?.data?.message,
+                response: error.response?.data,
+                targetUserId,
+                currentUserId: user?._id,
+            });
         } finally {
             setLoading(false);
         }
@@ -50,19 +95,26 @@ const FollowButton = ({
     return (
         <Button
             type="button"
-            onClick={toggle}
+            onClick={toggleFollow}
             disabled={loading}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
+            aria-label={isFollowing ? "Unfollow user" : "Follow user"}
             className={
                 isFollowing
-                    ? "rounded-full px-4 h-9 font-semibold bg-transparent border border-gray-600 text-white hover:border-red-600 hover:text-red-500 hover:bg-red-950/20"
-                    : "rounded-full px-4 h-9 font-semibold bg-white text-black hover:bg-gray-200"
+                    ? "h-9 rounded-full border border-gray-600 bg-transparent px-4 font-semibold text-white hover:border-red-600 hover:bg-red-950/20 hover:text-red-500"
+                    : "h-9 rounded-full bg-white px-4 font-semibold text-black hover:bg-gray-200"
             }
         >
-            {isFollowing ? (hover ? "Unfollow" : "Following") : "Follow"}
+            {loading
+                ? "Please wait..."
+                : isFollowing
+                    ? hover
+                        ? "Unfollow"
+                        : "Following"
+                    : "Follow"}
         </Button>
     );
-}
+};
 
 export default FollowButton;

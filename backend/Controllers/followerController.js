@@ -4,6 +4,11 @@ import Followers from "../models/followers.js";
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
+const USER_FIELDS = "_id username displayName avatar bio";
+
+const escapeRegex = (value) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const getCounts = async (userId) => {
     const [followersCount, followingCount] = await Promise.all([
         Followers.countDocuments({ followingId: userId }),
@@ -23,7 +28,7 @@ export const followUser = async (req, res) => {
         const { targetId } = req.params;
         const { userId } = req.body;
 
-        if (!isValidId(userId || !isValidId(targetId))) {
+        if (!isValidId(userId) || !isValidId(targetId)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid user id"
@@ -58,6 +63,7 @@ export const followUser = async (req, res) => {
                     message: "You are already following this user"
                 })
             }
+            throw error;
         }
 
         const count = await getCounts(targetId);
@@ -96,11 +102,11 @@ export const unfollowUser = async (req, res) => {
             followingId: targetId
         })
 
-        const count = await getCounts(targetId);
+        const counts = await getCounts(targetId);
         return res.status(200).json({
             success: true,
             isFollowing: false,
-            ...count
+            ...counts
         });
 
     } catch (error) {
@@ -193,16 +199,18 @@ const buildList = (type) => async (req, res) => {
         if (viewerId && isValidId(viewerId) && users.length > 0) {
             const mine = await Followers.find({
                 followerId: viewerId,
-                followingId: { $in: users.map((user) => user._id) },
-            }).select("followingId");
+                followingId: { $in: users.map((u) => u._id) },
+            }).select("followingId").lean();
 
-            followedSet = new Set(mine.map((m) => m.followingId));
+            followedSet = new Set(
+                mine.map((m) => String(m.followingId))
+            );
         }
 
-        const result = users.map((user) => ({
-            ...user.toObject(),
-            isFollowing: followedSet.has(String(user._id)),
-        }))
+        const result = users.map((u) => ({
+            ...u.toObject(),
+            isFollowing: followedSet.has(String(u._id)),
+        }));
 
         const total = await Followers.countDocuments(match);
 
@@ -227,6 +235,85 @@ const buildList = (type) => async (req, res) => {
 export const getFollowers = buildList("followers");
 export const getFollowing = buildList("following");
 
+// get 50 latest users that the viewer not follow yet
+
+export const getSuggestions = async (req, res) => {
+    try {
+        const { viewerId } = req.query;
+
+        if (!isValidId(viewerId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid user id",
+            });
+        }
+
+        const followingIds = await Followers.find({ followerId: viewerId }).distinct("followingId");
+
+        const users = await User.find({ _id: { $nin: [...followingIds, viewerId] } })
+            .sort({ _id: -1 }) //latest user
+            .limit(50)
+            .select("_id username displayName avatar")
+            .lean();
+
+        return res.status(200).json({
+            success: true,
+            users: users.map((u) => ({ ...u, isFollowing: false })),
+        });
+    } catch (error) {
+        console.log("Suggestions error", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+// search users
+export const searchUsers = async (req, res) => {
+    try {
+        const q = String(req.query.q || "").trim();
+        const { viewerId } = req.query;
+
+        if (!q) {
+            return res.status(200).json({ success: true, users: [] });
+        }
+
+        const rx = new RegExp(escapeRegex(q), "i");
+        const filter = { $or: [{ username: rx }, { displayName: rx }] };
+
+        if (viewerId && isValidId(viewerId)) {
+            filter._id = { $ne: viewerId }; // hide yourself
+        }
+
+        const users = await User.find(filter).limit(20).select(USER_FIELDS).lean();
+
+        let followed = new Set();
+        if (viewerId && isValidId(viewerId) && users.length > 0) {
+            const mine = await Followers.find({
+                followerId: viewerId,
+                followingId: { $in: users.map((u) => u._id) },
+            })
+                .select("followingId")
+                .lean();
+
+            followed = new Set(mine.map((m) => String(m.followingId)));
+        }
+
+        return res.status(200).json({
+            success: true,
+            users: users.map((u) => ({ ...u, isFollowing: followed.has(String(u._id)) })),
+        });
+    } catch (error) {
+        console.log("Search users error", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal server error",
+        });
+    }
+};
+
 // get User/:username
 
 export const getUserByUsername = async (req, res) => {
@@ -240,14 +327,14 @@ export const getUserByUsername = async (req, res) => {
                 message: "username is required"
             })
         }
-        const user = await User.findOne({ username },{
-            _id:1,
-            username:1,
-            displayName:1,
-            avatar:1,
-            bio:1,
-            location:1,
-            website:1,
+        const user = await User.findOne({ username }, {
+            _id: 1,
+            username: 1,
+            displayName: 1,
+            avatar: 1,
+            bio: 1,
+            location: 1,
+            website: 1,
         }).lean();
 
         if (!user) {

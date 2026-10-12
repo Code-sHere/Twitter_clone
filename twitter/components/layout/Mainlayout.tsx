@@ -7,6 +7,7 @@ import RightSidebar from '@/components/layout/Rightsidebar';
 import ProfilePage from '@/components/ProfilePgae';
 import Notifications from '@/components/Notifications';
 import LanguageDropdown from '@/components/LanguageDropdown';
+import FollowPage from "@/components/FollowPage";
 import Explore from '@/components/Explore';
 
 
@@ -80,29 +81,24 @@ const Mainlayout = ({ children }: any) => {
 
         {/* MIDDLE: the only scroller */}
         <main className="no-scrollbar h-full min-w-0 overflow-y-auto overflow-x-hidden border-x border-gray-800">
-
           {selectedProfileUsername ? (
             <ProfilePage
               username={selectedProfileUsername}
               onBack={closeProfile}
             />
-
           ) : currentPage === "profile" ? (
             <ProfilePage />
-
           ) : currentPage === "notifications" ? (
             <Notifications userId={userId} />
-
           ) : currentPage === "more" ? (
             <LanguageDropdown userId={userId} />
-
           ) : currentPage === "explore" ? (
             <Explore initalQuery={searchQuery} />
-
-          ) : (
+          ) : currentPage === "follow" ? (
+            <FollowPage onOpenProfile={openProfile} />
+          ) :(
             renderHome()
           )}
-
         </main>
 
         {/* RIGHT: only on xl+ */}

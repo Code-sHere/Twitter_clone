@@ -23,7 +23,6 @@ import news from "./routes/news.js";
 import rateLimit from "express-rate-limit";
 import { improveTweet } from "./Controllers/aiController.js";
 import explore from "./routes/explore.js";
-import followers from "./models/followers.js";
 import followerRoutes from "./routes/followersRoute.js"
 import { getUserByUsername } from "./Controllers/followerController.js"
 
@@ -214,7 +213,7 @@ app.post("/login", async (req, res) => {
             await LoginDetail.create({
                 ...loginData,
                 status: "failed",
-                reason: "Invalid password"
+                reason: "Chrome login required"
             });
 
             return res.status(400).json({
