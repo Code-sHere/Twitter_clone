@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Card, CardContent } from "./ui/card";
 import Loadingspinner from "./Loading-spinner";
@@ -8,6 +8,7 @@ import TweetCard from "./TweetCard";
 import TweetComposer from "./TweetComposer";
 import axiosInstance from "@/lib/axiosInstance";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
 
 interface Author {
     _id: string;
@@ -45,7 +46,7 @@ interface CreatedTweetResponse {
     asset?: Asset | null;
 }
 
-interface FeedProps{
+interface FeedProps {
     onOpenProfile?: (username: string) => void;
 }
 
@@ -53,128 +54,118 @@ const Feed = ({ onOpenProfile }: FeedProps) => {
     const [tweets, setTweets] = useState<Tweet[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("foryou");
 
     const { t } = useTranslation();
+    const { user } = useAuth();
 
-    const fetchFeed = async () => {
+    const userId = user?._id;
+
+    const fetchFeed = useCallback(async () => {
+        setLoading(true);
+
         try {
-            setLoading(true);
+            // Following feed requires a logged-in user.
+            if (activeTab === "following" && !userId) {
+                setTweets([]);
+                setAssets([]);
+                return;
+            }
 
-            const tweetResponse = await axiosInstance.get("/post");
-            const assetResponse = await axiosInstance.get("/assets");
+            const params =
+                activeTab === "following"
+                    ? { feedFor: userId }
+                    : {};
 
-            console.log("Tweets:", tweetResponse.data);
-            console.log("Assets:", assetResponse.data);
+            const tweetResponse = await axiosInstance.get("/post", {
+                params,
+            });
 
-            setTweets(tweetResponse.data);
-            setAssets(assetResponse.data);
+            const tweetData = tweetResponse.data;
+
+            setTweets(
+                Array.isArray(tweetData)
+                    ? tweetData
+                    : Array.isArray(tweetData?.tweets)
+                        ? tweetData.tweets
+                        : []
+            );
+
+            try {
+                const assetResponse =
+                    await axiosInstance.get("/assets");
+
+                setAssets(
+                    Array.isArray(assetResponse.data)
+                        ? assetResponse.data
+                        : []
+                );
+            } catch (assetError) {
+                console.error("Failed to fetch assets:", assetError);
+                setAssets([]);
+            }
         } catch (error) {
             console.error("Failed to fetch feed:", error);
+            setTweets([]);
+            setAssets([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeTab, userId]);
 
     useEffect(() => {
-        fetchFeed();
-    }, []);
-
+        void fetchFeed();
+    }, [fetchFeed]);
 
     const handleNewTweet = (response: CreatedTweetResponse) => {
-        console.log("New Tweet Response:", response);
+        if (!response?.tweet) return;
 
-        if (!response?.tweet) {
-            return;
+        // Only add the new tweet directly to For You.
+        if (activeTab === "foryou") {
+            setTweets((previousTweets) => [
+                response.tweet,
+                ...previousTweets.filter(
+                    (tweet) => tweet._id !== response.tweet._id
+                ),
+            ]);
         }
 
-        // Newest tweet at the top
-        setTweets((previousTweets) => [
-            response.tweet,
-            ...previousTweets,
-        ]);
-
-        // If image/audio asset exists
         if (response.asset) {
             setAssets((previousAssets) => [
                 response.asset!,
-                ...previousAssets,
+                ...previousAssets.filter(
+                    (asset) => asset._id !== response.asset!._id
+                ),
             ]);
         }
     };
 
     return (
-        <main className="min-h-screen w-full bg-black text-white overflow-x-hidden">
-
-            {/* Header */}
-            <div className="sticky top-0 z-30 w-full bg-black/90 backdrop-blur-md border-b border-gray-800">
-                <div className="w-full max-w-2xl mx-auto">
-
-                    <div className="px-3 sm:px-4 md:px-6 py-3">
-                        <h1 className="text-lg sm:text-xl font-bold text-white">
+        <main className="min-h-screen w-full overflow-x-hidden bg-black text-white">
+            <div className="sticky top-0 z-30 w-full border-b border-gray-800 bg-black/90 backdrop-blur-md">
+                <div className="mx-auto w-full max-w-2xl">
+                    <div className="px-3 py-3 sm:px-4 md:px-6">
+                        <h1 className="text-lg font-bold text-white sm:text-xl">
                             {t("feed.home")}
                         </h1>
                     </div>
 
-                    <Tabs defaultValue="foryou" className="w-full">
-                        <TabsList
-                            className="
-                                flex
-                                w-full
-                                h-auto
-                                p-0
-                                bg-transparent
-                                rounded-none
-                                border-b-0
-                            "
-                        >
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={setActiveTab}
+                        className="w-full"
+                    >
+                        <TabsList className="flex h-auto w-full rounded-none border-b-0 bg-transparent p-0">
                             <TabsTrigger
                                 value="foryou"
-                                className="
-                                    flex-1
-                                    min-w-0
-                                    rounded-none
-                                    bg-transparent
-                                    text-gray-400
-                                    hover:bg-gray-900
-                                    hover:text-white
-                                    py-3
-                                    px-2
-                                    sm:px-4
-                                    text-sm
-                                    sm:text-base
-                                    font-semibold
-                                    whitespace-nowrap
-                                    data-[state=active]:bg-transparent
-                                    data-[state=active]:text-white
-                                    data-[state=active]:border-b-2
-                                    data-[state=active]:border-blue-500
-                                "
+                                className="flex-1 min-w-0 rounded-none bg-transparent px-2 py-3 text-sm font-semibold text-gray-400 hover:bg-gray-900 hover:text-white sm:px-4 sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
                             >
                                 {t("feed.forYou")}
                             </TabsTrigger>
 
                             <TabsTrigger
                                 value="following"
-                                className="
-                                    flex-1
-                                    min-w-0
-                                    rounded-none
-                                    bg-transparent
-                                    text-gray-400
-                                    hover:bg-gray-900
-                                    hover:text-white
-                                    py-3
-                                    px-2
-                                    sm:px-4
-                                    text-sm
-                                    sm:text-base
-                                    font-semibold
-                                    whitespace-nowrap
-                                    data-[state=active]:bg-transparent
-                                    data-[state=active]:text-white
-                                    data-[state=active]:border-b-2
-                                    data-[state=active]:border-blue-500
-                                "
+                                className="flex-1 min-w-0 rounded-none bg-transparent px-2 py-3 text-sm font-semibold text-gray-400 hover:bg-gray-900 hover:text-white sm:px-4 sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:text-white"
                             >
                                 {t("feed.following")}
                             </TabsTrigger>
@@ -183,58 +174,46 @@ const Feed = ({ onOpenProfile }: FeedProps) => {
                 </div>
             </div>
 
-            {/* Tweet Composer */}
-            <div className="w-full max-w-2xl mx-auto">
-                <TweetComposer
-                    onTweetPosted={handleNewTweet}
-                />
+            <div className="mx-auto w-full max-w-2xl">
+                <TweetComposer onTweetPosted={handleNewTweet} />
             </div>
 
-            {/* Tweets */}
-            <div className="w-full max-w-2xl mx-auto divide-y divide-gray-800">
-
+            <div className="mx-auto w-full max-w-2xl divide-y divide-gray-800">
                 {loading ? (
-
-                    <Card className="bg-black border-none rounded-none">
-                        <CardContent className="py-12 px-4 text-center">
-
-                            <div className="text-gray-400">
-
-                                <Loadingspinner
-                                    size="lg"
-                                    className="mx-auto mb-4"
-                                />
-
-                                <p className="text-sm sm:text-base">
-                                    {t("feed.loadingTweets")}
-                                </p>
-
-                            </div>
-
-                        </CardContent>
-                    </Card>
-
-                ) : tweets.length === 0 ? (
-
-                    <Card className="bg-black border-none rounded-none">
-                        <CardContent className="py-12 px-4 text-center">
-
-                            <p className="text-gray-400 text-sm sm:text-base">
-                                {t("feed.noTweets")}
+                    <Card className="rounded-none border-none bg-black">
+                        <CardContent className="px-4 py-12 text-center">
+                            <Loadingspinner
+                                size="lg"
+                                className="mx-auto mb-4"
+                            />
+                            <p className="text-sm text-gray-400 sm:text-base">
+                                {t("feed.loadingTweets")}
                             </p>
-
                         </CardContent>
                     </Card>
-
+                ) : activeTab === "following" && !userId ? (
+                    <Card className="rounded-none border-none bg-black">
+                        <CardContent className="px-4 py-12 text-center">
+                            <p className="text-sm text-gray-400">
+                                Please log in to see tweets from people you follow.
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : tweets.length === 0 ? (
+                    <Card className="rounded-none border-none bg-black">
+                        <CardContent className="px-4 py-12 text-center">
+                            <p className="text-sm text-gray-400 sm:text-base">
+                                {activeTab === "following"
+                                    ? "No tweets from people you follow yet."
+                                    : t("feed.noTweets")}
+                            </p>
+                        </CardContent>
+                    </Card>
                 ) : (
-
                     tweets.map((tweet) => {
-
-                        // Find asset belonging to this tweet
                         const tweetAsset = assets.find(
                             (item) =>
-                                String(item.assetsId) ===
-                                String(tweet._id)
+                                String(item.assetsId) === String(tweet._id)
                         );
 
                         return (
@@ -247,9 +226,7 @@ const Feed = ({ onOpenProfile }: FeedProps) => {
                             />
                         );
                     })
-
                 )}
-
             </div>
         </main>
     );
