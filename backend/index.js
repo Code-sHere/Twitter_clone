@@ -26,6 +26,7 @@ import explore from "./routes/explore.js";
 import followerRoutes from "./routes/followersRoute.js"
 import { getUserByUsername } from "./Controllers/followerController.js"
 import logout from "./Controllers/logout.js";
+import Followers from "./models/followers.js";
 
 
 const app = express()
@@ -389,26 +390,59 @@ app.patch("/userupdate/:email", async (req, res) => {
 app.post("/post", createTweet);
 
 // get post
-
 app.get("/post", async (req, res) => {
     try {
         const { feedFor, authorId } = req.query;
+
         let filter = {};
 
+        // Show a specific user's tweets (profile feed)
         if (authorId) {
+            if (!mongoose.Types.ObjectId.isValid(authorId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid author ID",
+                });
+            }
+
             filter = { author: authorId };
-        } else if (feedFor) {
-            const ids = await Follow.find({ followerId: feedFor }).distinct("followingId");
-            filter = { author: { $in: [...ids, feedFor] } };
         }
 
+        // Show only tweets from users the viewer follows
+        else if (feedFor) {
+            if (!mongoose.Types.ObjectId.isValid(feedFor)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid feed user ID",
+                });
+            }
+
+            const followingIds = await Followers.find({
+                followerId: feedFor,
+            }).distinct("followingId");
+
+            // Only followed accounts; do not include feedFor itself
+            filter = {
+                author: { $in: followingIds },
+            };
+        }
+
+        // No feedFor or authorId: show all tweets
         const tweets = await Tweet.find(filter)
             .sort({ timestamp: -1 })
-            .populate("author", "_id displayName username avatar");
+            .populate(
+                "author",
+                "_id displayName username avatar"
+            );
 
-        return res.status(200).send(tweets);
+        return res.status(200).json(tweets);
     } catch (error) {
-        return res.status(400).send({ error: error.message });
+        console.error("Get posts error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch tweets",
+        });
     }
 });
 
