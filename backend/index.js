@@ -155,13 +155,6 @@ app.post("/login", async (req, res) => {
         const deviceType = result.device.type || "desktop";
         const ipAddress = req.ip || req.socket.remoteAddress || "Unknown";
 
-        console.log({
-            browser,
-            operatingSystem,
-            deviceType,
-            ipAddress
-        });
-
         const {
             identifier,
             password
@@ -663,11 +656,6 @@ app.post("/retweet/:tweetid", async (req, res) => {
 //subscription api
 app.use("/api/subscriptions", subscriptionRoutes);
 
-
-console.log(
-    "Razorpay Key:",
-    process.env.RAZORPAY_API_KEY
-);
 
 // forget password api
 app.post("/forget-password", forgetPassword);

@@ -29,7 +29,6 @@ export const createSubscription = async (req, res) => {
         }
 
         const { plan, email } = req.body;
-        console.log("BODY:", req.body, "PLAN KEYS:", Object.keys(PLANS));
 
         // Check plan
         const selectedPlan = PLANS[plan];
@@ -58,8 +57,6 @@ export const createSubscription = async (req, res) => {
                 message: "User not found",
             });
         }
-
-        console.log("User found:", user._id);
 
         // Create Razorpay subscription
         const razorpaySubscription =

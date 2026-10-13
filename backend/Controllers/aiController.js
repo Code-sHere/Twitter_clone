@@ -49,7 +49,6 @@ export const improveTweet = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Improve Tweet Error:", error);
 
         const status = error?.status;
 

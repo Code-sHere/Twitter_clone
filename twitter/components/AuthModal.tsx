@@ -96,8 +96,6 @@ const AuthModal = ({
 
                 const result = await login(formData.email, formData.password);
 
-                console.log(result);
-
                 if (result?.requiresOtp) {
                     console.log("1️⃣ OTP RESULT:", result);
                     setOtpMode(true);

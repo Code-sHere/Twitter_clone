@@ -9,6 +9,7 @@ import Notifications from '@/components/Notifications';
 import LanguageDropdown from '@/components/LanguageDropdown';
 import FollowPage from "@/components/FollowPage";
 import Explore from '@/components/Explore';
+import Feed from "@/components/Feed";
 
 
 const Mainlayout = ({ children }: any) => {
@@ -97,7 +98,7 @@ const Mainlayout = ({ children }: any) => {
           ) : currentPage === "follow" ? (
             <FollowPage onOpenProfile={openProfile} />
           ) :(
-            renderHome()
+            <Feed onOpenProfile={openProfile} />
           )}
         </main>
 

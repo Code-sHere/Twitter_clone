@@ -85,6 +85,25 @@ const TweetCard = ({
         return num.toString();
     };
 
+
+    const handleOpenUserProfile = () => {
+
+        const username = tweetstate.author?.username;
+
+        if (!username) {
+            console.error("Username is missing from tweet.author");
+            return;
+        }
+
+        if (typeof onOpenProfile !== "function") {
+            console.error("onOpenProfile callback was not passed from parent");
+            return;
+        }
+
+        onOpenProfile(username);
+    };
+
+
     const isLiked =
         tweetstate.likedBy?.some(
             (id: any) =>
@@ -117,23 +136,29 @@ const TweetCard = ({
                 <div className="flex gap-2.5 sm:gap-3 min-w-0">
 
                     {/* Avatar */}
-                    <Avatar className="h-9 w-9 sm:h-12 sm:w-12 shrink-0">
+                    <button
+                        type="button"
+                        onClick={handleOpenUserProfile}
+                        arial-label={`view ${tweetstate.author?.displayName}'s profile`}
+                    >
+                        <Avatar className="h-9 w-9 sm:h-12 sm:w-12 shrink-0">
 
-                        <AvatarImage
-                            src={tweetstate.author?.avatar || ""}
-                            alt={
-                                tweetstate.author?.displayName ||
-                                "User"
-                            }
-                        />
+                            <AvatarImage
+                                src={tweetstate.author?.avatar || ""}
+                                alt={
+                                    tweetstate.author?.displayName ||
+                                    "User"
+                                }
+                            />
 
-                        <AvatarFallback>
-                            {tweetstate.author?.displayName
-                                ?.charAt(0)
-                                ?.toUpperCase() || "U"}
-                        </AvatarFallback>
+                            <AvatarFallback>
+                                {tweetstate.author?.displayName
+                                    ?.charAt(0)
+                                    ?.toUpperCase() || "U"}
+                            </AvatarFallback>
 
-                    </Avatar>
+                        </Avatar>
+                    </button>
 
                     <div className="flex-1 min-w-0">
 
@@ -142,15 +167,7 @@ const TweetCard = ({
 
                             <button
                                 type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-
-                                    const username = tweetstate.author?.username;
-
-                                    if (username && onOpenProfile) {
-                                        onOpenProfile(username);
-                                    }
-                                }}
+                                onClick={handleOpenUserProfile}
                                 className="font-bold text-white hover:underline truncate max-w-[45%] sm:max-w-none text-left"
                             >
                                 {tweetstate.author?.displayName}
@@ -171,15 +188,7 @@ const TweetCard = ({
 
                             <button
                                 type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-
-                                    const username = tweetstate.author?.username;
-
-                                    if (username && onOpenProfile) {
-                                        onOpenProfile(username);
-                                    }
-                                }}
+                                onClick={handleOpenUserProfile}
                                 className="text-gray-500 hover:underline truncate max-w-[32%] sm:max-w-none"
                             >
                                 @{tweetstate.author?.username}

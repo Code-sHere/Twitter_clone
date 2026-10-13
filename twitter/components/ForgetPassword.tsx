@@ -313,7 +313,7 @@ const ForgetPassword = () => {
               {/* Login Button */}
               <button
                 type="button"
-                onClick={() => router.push("/login")}
+                onClick={() => router.push("/")}
                 className="
                   mt-7
                   w-full

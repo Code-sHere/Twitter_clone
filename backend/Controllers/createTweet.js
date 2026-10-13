@@ -17,8 +17,6 @@ export const createTweet = async (req, res) => {
     try {
         const { author, content, image, audio } = req.body;
 
-        console.log("re.body", req.body);
-
         if (!author) {
             return res.status(400).json({
                 success: false,
@@ -69,9 +67,6 @@ export const createTweet = async (req, res) => {
 
         // Reset counter if last reset was before today
         if (!subscription.lastResetDate || subscription.lastResetDate < startOfToday) {
-            console.log(
-                `Resetting tweetUsed for ${subscription.UserId} — last reset was ${subscription.lastResetDate}`
-            );
             subscription.tweetUsed = 0;
             subscription.lastResetDate = startOfToday;
             await subscription.save();
@@ -97,7 +92,6 @@ export const createTweet = async (req, res) => {
 
         await tweet.populate("author", "_id displayName username avatar");
 
-        console.log("TWEET", tweet);
 
         if (cleanContent) {
             const keywords = ["cricket", "science"];
@@ -107,14 +101,12 @@ export const createTweet = async (req, res) => {
             const matchedKeyword = keywords.find(keyword => lowerContent.includes(keyword));
 
             if (matchedKeyword) {
-                console.log("KEYWORD MATCHED", matchedKeyword);
 
                 // find users who enables notifications 
                 const users = await User.find({
                     notificationEnabled: true
                 }).select("_id");
 
-                console.log("USERS", users);
 
                 // save notification
                 const notification = users.map(user => ({
@@ -167,7 +159,6 @@ export const createTweet = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Create Tweet Error:", error);
         return res.status(500).json({
             success: false,
             message: "Failed to create tweet",

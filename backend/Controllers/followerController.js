@@ -223,7 +223,6 @@ const buildList = (type) => async (req, res) => {
         })
 
     } catch (error) {
-        console.log("Build list error", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -261,7 +260,7 @@ export const getSuggestions = async (req, res) => {
             users: users.map((u) => ({ ...u, isFollowing: false })),
         });
     } catch (error) {
-        console.log("Suggestions error", error);
+        
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -306,7 +305,7 @@ export const searchUsers = async (req, res) => {
             users: users.map((u) => ({ ...u, isFollowing: followed.has(String(u._id)) })),
         });
     } catch (error) {
-        console.log("Search users error", error);
+        
         return res.status(500).json({
             success: false,
             message: error.message || "Internal server error",
@@ -349,7 +348,7 @@ export const getUserByUsername = async (req, res) => {
             user
         })
     } catch (error) {
-        console.log("Get user by username error", error);
+        
         return res.status(500).json({
             success: false,
             message: "Internal server error",
