@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Home,
   Search,
@@ -10,10 +10,12 @@ import {
   User,
   MoreHorizontal,
   Feather,
+  LogOut,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/axiosInstance";
 
 interface SidebarProps {
   currentPage: string;
@@ -22,8 +24,11 @@ interface SidebarProps {
 
 const Sidebar = ({ currentPage, onNavigate }: SidebarProps) => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
+
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const navigation = [
     { name: t("nav.home", "Home"), icon: Home, page: "home" },
@@ -44,12 +49,35 @@ const Sidebar = ({ currentPage, onNavigate }: SidebarProps) => {
   const username = user?.username ?? "user";
 
   const handleNavigation = (page: string) => {
+    setShowAccountMenu(false);
+
     if (page === "premium") {
       router.push("/plans");
       return;
     }
 
     onNavigate?.(page);
+  };
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
+    try {
+      // Your backend already registers POST /logout.
+      await axiosInstance.post("/logout");
+
+      // Clear user/authentication state in your existing AuthContext.
+      await logout();
+
+      setShowAccountMenu(false);
+      router.replace("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      setLoggingOut(false);
+      alert("Unable to log out. Please try again.");
+    }
   };
 
   return (
@@ -101,6 +129,7 @@ const Sidebar = ({ currentPage, onNavigate }: SidebarProps) => {
         {/* Post button */}
         <button
           type="button"
+          onClick={() => handleNavigation("post")}
           className="mt-4 flex h-12 w-12 items-center justify-center self-center rounded-full bg-white text-black hover:bg-gray-200 xl:w-[90%] xl:self-start"
         >
           <Feather className="h-5 w-5 xl:hidden" />
@@ -110,22 +139,58 @@ const Sidebar = ({ currentPage, onNavigate }: SidebarProps) => {
         </button>
       </div>
 
-      {/* Account */}
-      <button
-        type="button"
-        className="mb-2 flex items-center gap-3 rounded-full p-2 hover:bg-gray-900"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-600 font-semibold">
-          {displayName[0]?.toUpperCase()}
-        </div>
+      {/* Account menu and Logout — all in this file */}
+      <div className="relative mb-2 w-full">
+        {showAccountMenu && (
+          <div
+            role="menu"
+            className="absolute bottom-full left-0 z-50 mb-3 w-64 max-w-[85vw] rounded-2xl border border-gray-700 bg-black p-2 shadow-xl"
+          >
+            <div className="border-b border-gray-800 px-3 py-3">
+              <p className="truncate font-bold text-white">
+                {displayName}
+              </p>
+              <p className="truncate text-sm text-gray-500">
+                @{username}
+              </p>
+            </div>
 
-        <div className="hidden min-w-0 flex-1 text-left xl:block">
-          <p className="truncate text-sm font-bold">{displayName}</p>
-          <p className="truncate text-sm text-gray-500">@{username}</p>
-        </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-semibold text-red-400 hover:bg-gray-900 disabled:opacity-50"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>{loggingOut ? "Logging out..." : "Logout"}</span>
+            </button>
+          </div>
+        )}
 
-        <MoreHorizontal className="hidden h-4 w-4 xl:block" />
-      </button>
+        <button
+          type="button"
+          aria-label="Account menu"
+          aria-expanded={showAccountMenu}
+          onClick={() => setShowAccountMenu((prev) => !prev)}
+          className="flex w-full items-center gap-3 rounded-full p-2 hover:bg-gray-900"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-600 font-semibold text-white">
+            {displayName[0]?.toUpperCase()}
+          </div>
+
+          <div className="hidden min-w-0 flex-1 text-left xl:block">
+            <p className="truncate text-sm font-bold text-white">
+              {displayName}
+            </p>
+            <p className="truncate text-sm text-gray-500">
+              @{username}
+            </p>
+          </div>
+
+          <MoreHorizontal className="hidden h-4 w-4 xl:block" />
+        </button>
+      </div>
     </div>
   );
 };

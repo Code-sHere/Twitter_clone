@@ -158,7 +158,7 @@ export default function FollowList({
                             <FollowButton
                                 targetUserId={person._id}
                                 initialIsFollowing={person.isFollowing}
-                                onFollowChange={(isFollowing) =>
+                                onChange={(isFollowing) =>
                                     updateFollowState(person._id, isFollowing)
                                 }
                             />

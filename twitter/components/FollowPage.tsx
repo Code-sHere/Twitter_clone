@@ -197,7 +197,7 @@ export default function FollowPage({
                                 <FollowButton
                                     targetUserId={person._id}
                                     initialIsFollowing={person.isFollowing}
-                                    onFollowChange={(isFollowing) => {
+                                    onChange={(isFollowing) => {
                                         // Update the user in your list after follow/unfollow
                                         setUsers((previousUsers) =>
                                             previousUsers.map((item) =>

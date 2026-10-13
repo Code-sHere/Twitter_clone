@@ -25,6 +25,8 @@ import { improveTweet } from "./Controllers/aiController.js";
 import explore from "./routes/explore.js";
 import followerRoutes from "./routes/followersRoute.js"
 import { getUserByUsername } from "./Controllers/followerController.js"
+import logout from "./Controllers/logout.js";
+
 
 const app = express()
 app.use(cors())
@@ -1050,6 +1052,7 @@ const limiter = rateLimit({
     message: { success: false, message: "Too many AI requests. Slow down." },
 });
 
+app.post("/logout", logout);
 console.log("SERVER FILE LOADED v2");
 
 console.log("AI route registered");
