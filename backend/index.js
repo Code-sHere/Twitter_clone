@@ -201,7 +201,6 @@ app.post("/login", async (req, res) => {
         }
 
         //compare password
-
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
         if (!isPasswordMatch) {
@@ -209,7 +208,7 @@ app.post("/login", async (req, res) => {
             await LoginDetail.create({
                 ...loginData,
                 status: "failed",
-                reason: "Chrome login required"
+                reason: "Chrome login required otp"
             });
 
             return res.status(400).json({
@@ -258,7 +257,7 @@ app.post("/login", async (req, res) => {
 
             const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-            const LoginDetail = await LoginDetail.create({
+            const LoginDetailRecord = await LoginDetail.create({
                 ...loginData,
                 status: "success",
                 reason: "Chrome login required otp"
@@ -272,7 +271,7 @@ app.post("/login", async (req, res) => {
                 userId: user._id,
                 otp,
                 expiresAt,
-                LoginDetailId: LoginDetail._id
+                LoginDetailId: LoginDetailRecord._id
             });
 
             await sendOtp(

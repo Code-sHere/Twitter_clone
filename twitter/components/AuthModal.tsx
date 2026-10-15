@@ -130,7 +130,7 @@ const AuthModal = ({
             console.error("Authentication error:", error);
 
             setErrors({
-                general: `${t("auth.errors.generic")}`,
+                general: `${t("auth.errors.authFailed")}`,
             });
         }
     };
