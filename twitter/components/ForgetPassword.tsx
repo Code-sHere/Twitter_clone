@@ -122,7 +122,7 @@ const ForgetPassword = () => {
 
             {/* Heading */}
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              {t("forgetPassword.title")}
+              ForgetPassword
             </h1>
 
             {/* Description */}
@@ -152,7 +152,7 @@ const ForgetPassword = () => {
                   htmlFor="emailOrPhone"
                   className="mb-2 block text-sm font-medium text-slate-200"
                 >
-                  {t("forgetPassword.emailOrPhone")}
+                  ForgetPassword
                 </label>
 
                 <input
@@ -336,7 +336,7 @@ const ForgetPassword = () => {
                   focus:ring-offset-slate-900
                 "
               >
-                {t("forgetPassword.backToLogin")}
+                backToLogin
               </button>
 
             </div>
@@ -350,7 +350,7 @@ const ForgetPassword = () => {
 
               <button
                 type="button"
-                onClick={() => router.push("/login")}
+                onClick={() => router.push("/")}
                 disabled={loading}
                 className="
                   text-sm
@@ -362,7 +362,7 @@ const ForgetPassword = () => {
                   disabled:opacity-50
                 "
               >
-                ← {t("forgetPassword.backToLogin")}
+                ← backToLogin
               </button>
 
             </div>

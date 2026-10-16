@@ -281,10 +281,10 @@ const AuthModal = ({
 
                         <CardTitle className="text-xl sm:text-2xl font-bold text-white">
                             {otpMode
-                                ? (t("auth.verifyLoginTitle"))
+                                ? (t("verifyLogin"))
                                 : mode === "login"
-                                    ? (t("auth.signInTitle"))
-                                    : (t("auth.createAccountTitle"))}
+                                    ? (t("signIn"))
+                                    : (t("createAccount"))}
                         </CardTitle>
                     </div>
                 </CardHeader>
@@ -308,14 +308,14 @@ const AuthModal = ({
                                         htmlFor="otp"
                                         className="text-white"
                                     >
-                                        {t("auth.verificationCode")}
+                                        {t("verificationCode")}
                                     </Label>
 
                                     <Input
                                         id="otp"
                                         type="text"
                                         inputMode="numeric"
-                                        placeholder={t("auth.otpPlaceholder")}
+                                        placeholder={t("otp")}
                                         value={otp}
                                         onChange={(e) => {
                                             const value = e.target.value
@@ -348,7 +348,7 @@ const AuthModal = ({
                                 </div>
 
                                 <p className="text-sm text-gray-400 text-center">
-                                    {t("auth.otpSent")}
+                                    {t("otpSent")}
                                 </p>
 
                                 <Button
@@ -371,7 +371,7 @@ const AuthModal = ({
                                             <span>Verifying...</span>
                                         </div>
                                     ) : (
-                                        t("auth.verifyOtp")
+                                        t("verifyOtp")
                                     )}
                                 </Button>
                             </>
@@ -395,7 +395,7 @@ const AuthModal = ({
                                                 <Input
                                                     id="displayName"
                                                     type="text"
-                                                    placeholder={t("auth.displayNamePlaceholder")}
+                                                    placeholder={t("displayName")}
                                                     value={formData.displayName}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -440,7 +440,7 @@ const AuthModal = ({
                                                 <Input
                                                     id="username"
                                                     type="text"
-                                                    placeholder={t("auth.usernamePlaceholder")}
+                                                    placeholder={t("username")}
                                                     value={formData.username}
                                                     onChange={(e) =>
                                                         handleInputChange(
@@ -485,7 +485,7 @@ const AuthModal = ({
                                                     id="phone"
                                                     type="tel"
                                                     inputMode="numeric"
-                                                    placeholder={t("auth.phonePlaceholder")}
+                                                    placeholder={t("phone")}
                                                     value={formData.phone}
                                                     maxLength={10}
                                                     onChange={(e) => {
@@ -534,7 +534,7 @@ const AuthModal = ({
                                         <Input
                                             id="email"
                                             type="email"
-                                            placeholder={t("auth.emailPlaceholder")}
+                                            placeholder={t("email")}
                                             value={formData.email}
                                             onChange={(e) =>
                                                 handleInputChange(
@@ -581,7 +581,7 @@ const AuthModal = ({
                                                     ? "text"
                                                     : "password"
                                             }
-                                            placeholder={t("auth.passwordPlaceholder")}
+                                            placeholder={t("password")}
                                             value={formData.password}
                                             onChange={(e) =>
                                                 handleInputChange(

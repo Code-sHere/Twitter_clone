@@ -453,7 +453,7 @@ const EditProfile = ({
                                         placeholder-gray-400
                                         focus:border-blue-500
                                     "
-                                    placeholder={t("auth.displayNamePlaceholder")}
+                                    placeholder={t("auth.displayName")}
                                     maxLength={50}
                                     disabled={isLoading}
                                 />
@@ -505,7 +505,7 @@ const EditProfile = ({
                                         resize-none
                                         min-h-[100px]
                                     "
-                                    placeholder={t("auth.bioPlaceholder")}
+                                    placeholder={t("auth.bio")}
                                     maxLength={160}
                                     disabled={isLoading}
                                 />
@@ -558,7 +558,7 @@ const EditProfile = ({
                                             placeholder-gray-400
                                             focus:border-blue-500
                                         "
-                                        placeholder={t("auth.locationPlaceholder")}
+                                        placeholder={t("auth.location")}
                                         maxLength={30}
                                         disabled={isLoading}
                                     />
@@ -616,7 +616,7 @@ const EditProfile = ({
                                             placeholder-gray-400
                                             focus:border-blue-500
                                         "
-                                        placeholder={t("auth.websitePlaceholder")}
+                                        placeholder={t("auth.website")}
                                         maxLength={100}
                                         disabled={isLoading}
                                     />
