@@ -45,7 +45,7 @@ const TweetComposer = ({
 
     const [isImproving, setIsImproving] = useState(false);
 
-    const API=process.env.NEXT_PUBLIC_BACKEND_URL 
+    const API = process.env.NEXT_PUBLIC_BACKEND_URL
 
 
     const maxlength = 200;
@@ -60,7 +60,31 @@ const TweetComposer = ({
 
     const canPost = hasContent || hasImage || hasAudio;
 
-    if (!user) return null;
+    if (!user) {
+        return (
+            <Card className="w-full rounded-none border-x-0 border-t-0 border-gray-800 bg-black">
+                <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+                    <h3 className="text-lg font-bold text-white">
+                        Join the conversation
+                    </h3>
+
+                    <p className="text-sm text-gray-400">
+                        Log in to post tweets, share images, and upload audio.
+                    </p>
+
+                    <Button
+                        type="button"
+                        onClick={() => {
+                            alert("Please log in or sign up to create a tweet.");
+                        }}
+                        className="rounded-full bg-blue-500 px-6 font-semibold text-white hover:bg-blue-600"
+                    >
+                        Log in to post
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -237,7 +261,7 @@ const TweetComposer = ({
             formdataaudio.append("otpVerified", "true");
 
             const uploadResponse = await axios.post(
-                    `${API}/upload-audio`,
+                `${API}/upload-audio`,
                 formdataaudio, {
                 headers: {
                     "Content-Type": "multipart/form-data"

@@ -34,14 +34,22 @@ const TweetCard = ({
     console.log("assets in tweet card");
     const { user } = useAuth();
 
+    const requireLogin = () => {
+        if (user) return true;
+
+        alert("Please log in to interact with tweets.");
+        return false;
+    };
     const [tweetstate, setTweetstate] = useState(tweet);
 
     const { t } = useTranslation();
 
     const likeTweet = async (tweetid: string) => {
+        if (!requireLogin()) return;
+
         try {
             const res = await axiosInstance.post(`/like/${tweetid}`, {
-                userId: user?._id,
+                userId: user!._id,
             });
 
             setTweetstate((prev: any) => ({
@@ -49,16 +57,17 @@ const TweetCard = ({
                 ...res.data,
                 author: prev.author,
             }));
-
         } catch (error) {
             console.error("Like error:", error);
         }
     };
 
     const retweet = async (tweetid: string) => {
+        if (!requireLogin()) return;
+
         try {
             const res = await axiosInstance.post(`/retweet/${tweetid}`, {
-                userId: user?._id,
+                userId: user!._id,
             });
 
             setTweetstate((prev: any) => ({
@@ -66,7 +75,6 @@ const TweetCard = ({
                 ...res.data,
                 author: prev.author,
             }));
-
         } catch (error) {
             console.error("Retweet error:", error);
         }
