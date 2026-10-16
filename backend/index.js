@@ -1080,6 +1080,9 @@ console.log("AI route registered");
 
 app.post("/ai/improve-tweet", limiter, improveTweet);
 
+// Express mein simple health route
+app.get('/health', (req, res) => res.send('ok'));
+
 app.use("/api/follow", followerRoutes);
 app.get("/user/:username", getUserByUsername);
 
