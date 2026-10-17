@@ -1,7 +1,7 @@
-
 "use client";
 
 import React, { useState } from "react";
+
 import { useAuth } from "@/context/AuthContext";
 import Loadingspinner from "@/components/Loading-spinner";
 import Sidebar from "@/components/layout/Sidebar";
@@ -12,6 +12,8 @@ import LanguageDropdown from "@/components/LanguageDropdown";
 import FollowPage from "@/components/FollowPage";
 import Explore from "@/components/Explore";
 import Feed from "@/components/Feed";
+import LandingPage from "@/components/LandingPage";
+import { ArrowLeft } from "lucide-react"
 
 const Mainlayout = ({ children }: any) => {
     const { isLoading, user } = useAuth();
@@ -20,24 +22,31 @@ const Mainlayout = ({ children }: any) => {
     const [selectedProfileUsername, setSelectedProfileUsername] =
         useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [showLandingPage, setShowLandingPage] = useState(false);
 
-    const goSearch = (query: string) => {
-        setSearchQuery(query);
-        setSelectedProfileUsername(null);
-        setCurrentPage("explore");
+    // Open the full landing page, including Google and account options.
+    const goToLogin = () => {
+        setShowLandingPage(true);
     };
 
     const requireLogin = () => {
         if (user) return true;
 
-        alert("Please log in to access this feature.");
+        goToLogin();
         return false;
     };
 
+    // Guests can search without logging in.
+    const goSearch = (query: string) => {
+        setSearchQuery(query);
+        setSelectedProfileUsername(null);
+        setCurrentPage("explore");
+        setShowLandingPage(false);
+    };
+
     const openProfile = (username: string) => {
-        // Profiles are login-only for now.
-        if (!requireLogin()) return;
         if (!username) return;
+        if (!requireLogin()) return;
 
         setSelectedProfileUsername(username);
     };
@@ -46,18 +55,16 @@ const Mainlayout = ({ children }: any) => {
         setSelectedProfileUsername(null);
     };
 
+    // Only Home and Explore are public navigation pages.
     const handleNavigate = (page: string) => {
-        const protectedPages = [
-            "profile",
-            "notifications",
-            "more",
-            "follow",
-        ];
+        const publicPages = ["home", "explore"];
 
-        if (protectedPages.includes(page) && !requireLogin()) {
+        if (!user && !publicPages.includes(page)) {
+            requireLogin();
             return;
         }
 
+        setShowLandingPage(false);
         setSelectedProfileUsername(null);
         setCurrentPage(page);
     };
@@ -69,13 +76,26 @@ const Mainlayout = ({ children }: any) => {
             </div>
         );
     }
+    
+    if (!user && showLandingPage) {
+        return (
+            <div className="min-h-screen bg-black text-white">
+                <LandingPage />
+                <button
+                    type="button"
+                    onClick={() => setShowLandingPage(false)}
+                    className="fixed left-4 top-4 z-40 rounded-full border border-gray-700 bg-black px-4 py-2 text-sm text-white hover:bg-gray-900"
+                >
+                    <ArrowLeft /> Back
+                </button>
+            </div>
+        );
+    }
 
-    const showLoginMessage = !user && [
-        "profile",
-        "notifications",
-        "more",
-        "follow",
-    ].includes(currentPage);
+    // Guests are allowed to browse Home and Explore.
+    // Other in-layout features show a login prompt.
+    const showLoginMessage =
+        !user && !["home", "explore"].includes(currentPage);
 
     return (
         <div className="h-screen w-full overflow-hidden bg-black text-white">
@@ -98,12 +118,34 @@ const Mainlayout = ({ children }: any) => {
                 <main className="no-scrollbar h-full min-w-0 overflow-y-auto overflow-x-hidden border-x border-gray-800">
                     {showLoginMessage ? (
                         <div className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-                            <h2 className="text-xl font-bold text-white">
+                            <h2 className="text-2xl font-bold text-white">
                                 Login required
                             </h2>
-                            <p className="mt-2 text-sm text-gray-400">
-                                Please log in to access this feature.
+
+                            <p className="mt-3 max-w-sm text-sm leading-6 text-gray-400">
+                                Log in to access this feature. You can
+                                continue browsing tweets and searching
+                                without logging in.
                             </p>
+
+                            <button
+                                type="button"
+                                onClick={goToLogin}
+                                className="mt-6 rounded-full bg-[#3EE6A8] px-8 py-3 font-semibold text-black transition hover:bg-[#2bd99a]"
+                            >
+                                Log in
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedProfileUsername(null);
+                                    setCurrentPage("home");
+                                }}
+                                className="mt-3 rounded-full border border-gray-700 px-8 py-2.5 text-sm text-white transition hover:bg-gray-900"
+                            >
+                                Back to Home
+                            </button>
                         </div>
                     ) : selectedProfileUsername ? (
                         <ProfilePage
@@ -111,21 +153,52 @@ const Mainlayout = ({ children }: any) => {
                             onBack={closeProfile}
                         />
                     ) : currentPage === "profile" ? (
-                        <ProfilePage />
+                        user ? <ProfilePage /> : null
                     ) : currentPage === "notifications" ? (
-                        <Notifications userId={user!._id} />
+                        user ? (
+                            <Notifications userId={user._id} />
+                        ) : null
                     ) : currentPage === "more" ? (
-                        <LanguageDropdown userId={user!._id} />
+                        user ? (
+                            <LanguageDropdown userId={user._id} />
+                        ) : null
                     ) : currentPage === "explore" ? (
                         <Explore initalQuery={searchQuery} />
                     ) : currentPage === "follow" ? (
-                        <FollowPage onOpenProfile={openProfile} />
-                    ) : (
+                        user ? (
+                            <FollowPage onOpenProfile={openProfile} />
+                        ) : null
+                    ) : currentPage === "home" ? (
                         <Feed onOpenProfile={openProfile} />
+                    ) : (
+                        user ? (
+                            React.isValidElement(children) ? (
+                                React.cloneElement(
+                                    children as React.ReactElement<any>,
+                                    { onOpenProfile: openProfile }
+                                )
+                            ) : (
+                                children
+                            )
+                        ) : (
+                            <div className="p-6 text-center">
+                                <p className="text-gray-400">
+                                    Please log in to access this feature.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={goToLogin}
+                                    className="mt-4 rounded-full bg-[#3EE6A8] px-6 py-2 font-semibold text-black"
+                                >
+                                    Log in
+                                </button>
+                            </div>
+                        )
                     )}
                 </main>
 
-                {/* RIGHT SIDEBAR: SEARCH AND OTHER EXISTING WIDGETS */}
+                {/* RIGHT SIDEBAR: SEARCH */}
                 <aside className="no-scrollbar hidden h-full min-w-0 overflow-y-auto pl-6 xl:block">
                     <RightSidebar onSearch={goSearch} />
                 </aside>
